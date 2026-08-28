@@ -8,4 +8,4 @@ The live status page uses the Supabase Edge Function `status-api` and never call
 - `.github/workflows/status-monitor.yml` triggers a fresh probe every 10 minutes using the public GitHub repository runner.
 - The deployed Edge Function receives its privileged Supabase runtime variables from Supabase; no secret key is committed to GitHub, Vercel, or the browser.
 
-Firebase Functions code remains in `functions/` as the paid-Firebase deployment path, but it is not required by the free Vercel + Supabase path. `api/status.js` remains as a Vercel-compatible server implementation for future use, but the public page uses the Edge Function directly.
+Firebase Functions code remains in `functions/` as the paid-Firebase deployment path, but it is not required by the free Vercel + Supabase path. The legacy Vercel route `api/status.js` now proxies the same Edge Function, so older `/api/status` links continue to work without a paid server secret.
