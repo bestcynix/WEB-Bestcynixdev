@@ -6,7 +6,9 @@
 (function () {
   'use strict';
 
-  const API_URL = '/api/status';
+  const API_URL = window.location.hostname.endsWith('vercel.app')
+    ? '/api/status'
+    : 'https://web-bestcynixdev.vercel.app/api/status';
   let currentMode = '10m';
   let statusPayload = null;
 

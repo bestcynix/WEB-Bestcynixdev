@@ -1,0 +1,9 @@
+{
+  "outputDirectory": "public",
+  "cleanUrls": true,
+  "functions": {
+    "api/status.js": {
+      "maxDuration": 10
+    }
+  }
+}
