@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+  <title>ข้อมูลสิทธิและความคุ้มครองตามกฎหมาย PDPA • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-710F6F2YG5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-710F6F2YG5');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.85);
+      --accent: #32ffc9;
+      --accent-blue: #0284c7;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      line-height: 1.7;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(50, 255, 201, 0.15), transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(2, 132, 199, 0.22), transparent 45%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      width: min(940px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 2.5rem 0;
+      flex: 1;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .brand-link img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+    .btn-back {
+      padding: 0.5rem 1.2rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+    .btn-back:hover {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+    .doc-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .doc-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(50, 255, 201, 0.15);
+      border: 1px solid rgba(50, 255, 201, 0.4);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+    h1 {
+      font-size: 2.1rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .doc-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    h2 {
+      color: var(--accent);
+      font-size: 1.35rem;
+      margin: 1.8rem 0 0.8rem;
+    }
+    p, li {
+      color: #d1e5f8;
+      font-size: 0.96rem;
+      margin-bottom: 0.8rem;
+    }
+
+    /* Rights Grid */
+    .rights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .right-card {
+      background: rgba(14, 34, 58, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem;
+      transition: all 0.25s ease;
+    }
+    .right-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      background: rgba(16, 40, 68, 0.8);
+    }
+    .right-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+    .right-card-icon {
+      font-size: 1.3rem;
+    }
+    .right-card h3 {
+      font-size: 1rem;
+      color: #fff;
+      margin: 0;
+    }
+    .right-card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .quick-links-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .quick-link-chip {
+      padding: 0.4rem 0.9rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .quick-link-chip:hover {
+      background: rgba(50, 255, 201, 0.12);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      background: rgba(4, 11, 20, 0.8);
+    }
+  </style>
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+</head>
+<body>
+  <div class="container">
+    <nav class="top-nav">
+      <a href="/" class="brand-link">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
+        <span>BestCyniX Dev</span>
+      </a>
+      <a href="/" class="btn-back">← กลับสู่หน้าหลัก</a>
+    </nav>
+
+    <article class="doc-card">
+      <header class="doc-header">
+        <span class="doc-badge">Thailand PDPA Compliance</span>
+        <h1>⚖️ สิทธิและความคุ้มครองตามกฎหมาย PDPA</h1>
+        <div class="doc-meta">พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (Personal Data Protection Act B.E. 2562)</div>
+      </header>
+
+      <section>
+        <h2>1. ภาพรวมของกฎหมาย PDPA</h2>
+        <p>พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) เป็นกฎหมายของประเทศไทยที่กำหนดหลักเกณฑ์ กลไก และมาตรการกำกับดูแลเกี่ยวกับการให้ความคุ้มครองข้อมูลส่วนบุคคล เพื่อป้องกันไม่ให้มีการละเมิดสิทธิความเป็นส่วนตัวของเจ้าของข้อมูล และกำหนดสิทธิให้ประชาชนสามารถควบคุมการใช้ข้อมูลของตนเองได้อย่างแท้จริง</p>
+      </section>
+
+      <section>
+        <h2>2. สิทธิ 8 ประการของเจ้าของข้อมูลส่วนบุคคล (8 Data Subject Rights)</h2>
+        <p>ท่านในฐานะเจ้าของข้อมูลส่วนบุคคล ได้รับความคุ้มครองและสามารถใช้สิทธิตามกฎหมาย PDPA ได้ดังนี้:</p>
+
+        <div class="rights-grid">
+          <div class="right-card">
+            <div class="right-card-header">
+              <span class="right-card-icon">👁️</span>
+              <h3>1. สิทธิขอเข้าถึงและรับสำเนา (Right to Access)</h3>
+            </div>
+            <p>มีสิทธิขอเข้าถึงและรับสำเนาข้อมูลส่วนบุคคลของท่านที่อยู่ในความดูแลของเรา</p>
+          </div>
+
+          <div class="right-card">
+            <div class="right-card-header">
+              <span class="right-card-icon">✏️</span>
+              <h3>2. สิทธิขอแก้ไขข้อมูล (Right to Rectification)</h3>
+            </div>
+            <p>มีสิทธิขอแก้ไข ปรับปรุงข้อมูลส่วนตัวให้ถูกต้อง เป็นปัจจุบัน สมบูรณ์ และไม่ก่อให้เกิดความเข้าใจผิด</p>
+          </div>
+
+          <div class="right-card">
+            <div class="right-card-header">
+              <span class="right-card-icon">🗑️</span>
+              <h3>3. สิทธิขอลบหรือทำลาย (Right to Erasure)</h3>
+            </div>
+            <p>มีสิทธิขอลบ ทำลาย หรือทำให้ข้อมูลไม่สามารถระบุตัวบุคคลได้ (กดลบบัญชีถาวรได้ในหน้าโปรไฟล์)</p>
+          </div>
+
+          <div class="right-card">
+            <div class="right-card-header">
+              <span class="right-card-icon">⏸️</span>
+              <h3>4. สิทธิขอระงับการใช้ (Right to Restriction)</h3>
+            </div>
+            <p>มีสิทธิขอให้ระงับการประมวลผลข้อมูลส่วนบุคคลชั่วคราวในกรณีที่อยู่ระหว่างการตรวจสอบ</p>
+          </div>
+
+          <div class="right-card">
+            <div class="right-card-header">
+              <span class="right-card-icon">📦</span>
+              <h3>5. สิทธิขอโอนย้ายข้อมูล (Right to Data Portability)</h3>
+            </div>
+            <p>มีสิทธิขอรับข้อมูลส่วนบุคคลของตนเองในรูปแบบที่สามารถอ่านหรือใช้งานได้ทั่วไป</p>
+          </div>
+
+          <div class="right-card">
+            <div class="right-card-header">
+              <span class="right-card-icon">🚫</span>
+              <h3>6. สิทธิในการคัดค้าน (Right to Object)</h3>
+            </div>
+            <p>มีสิทธิคัดค้านการเก็บรวบรวม ใช้ หรือเปิดเผยข้อมูลส่วนบุคคลที่เกี่ยวกับตนเอง</p>
+          </div>
+
+          <div class="right-card">
+            <div class="right-card-header">
+              <span class="right-card-icon">↩️</span>
+              <h3>7. สิทธิขอเพิกถอนความยินยอม (Right to Withdraw Consent)</h3>
+            </div>
+            <p>มีสิทธิถอนความยินยอมในการประมวลผลข้อมูลส่วนบุคคลที่เคยให้ไว้ได้ตลอดเวลา</p>
+          </div>
+
+          <div class="right-card">
+            <div class="right-card-header">
+              <span class="right-card-icon">📢</span>
+              <h3>8. สิทธิในการร้องเรียน (Right to Complain)</h3>
+            </div>
+            <p>มีสิทธิยื่นเรื่องร้องเรียนต่อคณะกรรมการผู้เชี่ยวชาญตามกฎหมาย PDPA หากพบการละเมิด</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>3. มาตรการรักษาความปลอดภัยของข้อมูล</h2>
+        <p>BestCyniX Dev ใช้มาตรการรักษาความปลอดภัยทั้งทางเทคนิคและการบริหารจัดการ (Technical and Organizational Measures) ที่ได้มาตรฐานสากล ได้แก่:</p>
+        <ul style="padding-left: 1.4rem; margin-bottom: 1.2rem;">
+          <li>การเข้ารหัสข้อมูลขณะส่งผ่านเครือข่ายด้วยโปรโตคอล TLS/HTTPS 256-bit</li>
+          <li>การจัดเก็บบัญชีผู้ใช้และรหัสผ่านด้วยระบบแฮชและเข้ารหัสระดับสูงของ Google Firebase Authentication</li>
+          <li>การกำหนดสิทธิ์การเข้าถึงฐานข้อมูลผ่าน Cloud Firestore Security Rules อย่างเข้มงวด</li>
+          <li>ระบบลบบัญชีและทำลายข้อมูลผู้ใช้แบบถาวร (Two-Factor Deletion Confirmation)</li>
+        </ul>
+      </section>
+
+      <div class="quick-links-bar">
+        <a href="privacy" class="quick-link-chip">🛡️ นโยบายความเป็นส่วนตัว (Privacy Policy)</a>
+        <a href="terms" class="quick-link-chip">📜 ข้อตกลงการใช้งาน (Terms of Service)</a>
+        <a href="cookies" class="quick-link-chip">🍪 การตั้งค่าคุกกี้ (Cookie Settings)</a>
+        <a href="http-errors" class="quick-link-chip">📖 สารบัญ HTTP Status Codes</a>
+        <a href="sitemap.xml" class="quick-link-chip" target="_blank">🗺️ Sitemap.xml</a>
+        <a href="/" class="quick-link-chip">🏠 หน้าหลัก BestCyniX Dev</a>
+      </div>
+    </article>
+  </div>
+
+  <footer>
+    <p>© 2021 - 2026 BestCyniX Dev • Skyline V1 Creator • ข้อมูลคุ้มครองตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
+  </footer>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+</body>
+</html>

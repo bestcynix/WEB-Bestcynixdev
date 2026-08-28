@@ -1,0 +1,29 @@
+User-agent: *
+Allow: /
+Allow: /project
+Allow: /deals
+Allow: /shopeedeals
+Allow: /lazadadeals
+Allow: /alliance
+Allow: /gowabideals
+Allow: /agodadeals
+Allow: /pricezadeals
+Allow: /status
+Allow: /join-team
+Allow: /docs
+Allow: /login
+Allow: /register
+Allow: /forgot-password
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+Allow: /pdpa
+Allow: /http-errors
+Allow: /sitemap.xml
+Allow: /assets/
+
+Disallow: /admin-*
+Disallow: /profile
+
+# Sitemaps
+Sitemap: https://bestcynixdev.web.app/sitemap.xml

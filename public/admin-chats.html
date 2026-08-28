@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>จัดการข้อความแชทลูกค้า (Customer Live Chat Manager) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.9);
+      --accent: #32ffc9;
+      --accent-purple: #a855f7;
+      --accent-blue: #0284c7;
+      --accent-amber: #f59e0b;
+      --accent-red: #ff5574;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Auth Guard Fullscreen Overlay */
+    .auth-guard-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: #040a14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    .auth-guard-overlay.verified {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .guard-spinner {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 3.5px solid rgba(50, 255, 201, 0.15);
+      border-top-color: var(--accent);
+      animation: guardSpin 0.75s linear infinite;
+    }
+    @keyframes guardSpin {
+      to { transform: rotate(360deg); }
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .top-nav {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 0.9rem 1.8rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(6, 16, 28, 0.95);
+      flex-shrink: 0;
+      gap: 0.8rem;
+      flex-wrap: nowrap !important;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .brand-link img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+    .nav-right-cluster {
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.6rem !important;
+      flex-wrap: nowrap !important;
+      margin-left: auto;
+    }
+    .desktop-nav-links {
+      display: flex !important;
+      gap: 0.5rem !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+    }
+    @media (max-width: 1024px) {
+      .desktop-nav-links {
+        display: none !important;
+      }
+      .nav-toggle {
+        display: flex !important;
+      }
+      .top-nav {
+        padding: 0.8rem 1rem;
+      }
+    }
+    @media (min-width: 1025px) {
+      .desktop-nav-links {
+        display: flex !important;
+      }
+      .nav-toggle {
+        display: none !important;
+      }
+    }
+    .btn-nav-action {
+      padding: 0.35rem 0.85rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #e6f3ff;
+      text-decoration: none;
+      font-size: 0.84rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .btn-nav-action:hover, .btn-nav-action.active {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+
+    /* Main Chat Workspace Layout */
+    .chat-workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      overflow: hidden;
+    }
+    @media (max-width: 850px) {
+      .chat-workspace { grid-template-columns: 1fr; }
+      .chat-workspace.viewing-conv .chats-sidebar { display: none; }
+      .chat-workspace:not(.viewing-conv) .conv-pane { display: none; }
+    }
+
+    /* Sidebar: Chat List */
+    .chats-sidebar {
+      border-right: 1px solid var(--border);
+      background: rgba(7, 18, 32, 0.8);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.55rem 0.9rem;
+      background: rgba(3, 10, 18, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      color: #fff;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.86rem;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .filter-pills {
+      display: flex;
+      gap: 0.35rem;
+      overflow-x: auto;
+      padding-bottom: 0.2rem;
+    }
+    .filter-pill {
+      padding: 0.25rem 0.65rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .filter-pill.active {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+    .chat-items-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .chat-item-card {
+      padding: 0.85rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.2s;
+    }
+    .chat-item-card:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: var(--border);
+    }
+    .chat-item-card.active {
+      background: rgba(50, 255, 201, 0.12);
+      border-color: var(--accent);
+    }
+    .chat-item-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: #091728;
+      flex-shrink: 0;
+    }
+    .chat-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .chat-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.2rem;
+    }
+    .chat-item-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-item-time {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .chat-item-snippet {
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .status-dot-unanswered {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #eab308;
+      box-shadow: 0 0 8px #eab308;
+      flex-shrink: 0;
+    }
+
+    /* Right: Conversation Pane */
+    .conv-pane {
+      display: flex;
+      flex-direction: column;
+      background: #06111e;
+      overflow: hidden;
+    }
+    .conv-header {
+      padding: 0.85rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 20, 36, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .conv-user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .conv-user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+    .conv-user-details h3 {
+      font-size: 1rem;
+      color: #fff;
+    }
+    .conv-user-details p {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .conv-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .btn-tool {
+      padding: 0.35rem 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #e6f3ff;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: "Prompt", sans-serif;
+    }
+    .btn-tool:hover {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+    .tag-select {
+      padding: 0.35rem 0.65rem;
+      background: rgba(4, 12, 22, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    /* Message Stream */
+    .conv-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .msg-bubble-wrap {
+      display: flex;
+      flex-direction: column;
+      max-width: 75%;
+      position: relative;
+    }
+    .msg-bubble-wrap.from-user {
+      align-self: flex-start;
+    }
+    .msg-bubble-wrap.from-dev {
+      align-self: flex-end;
+    }
+    .quote-box {
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px 8px 0 0;
+      background: rgba(0, 0, 0, 0.35);
+      border-left: 3px solid var(--accent);
+      font-size: 0.78rem;
+      color: #bae6fd;
+      margin-bottom: 2px;
+    }
+    .msg-bubble-main {
+      padding: 0.75rem 1rem;
+      border-radius: 16px;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      position: relative;
+      word-break: break-word;
+    }
+    .from-user .msg-bubble-main {
+      background: #0e2746;
+      color: #e6f3ff;
+      border-bottom-left-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .from-dev .msg-bubble-main {
+      background: linear-gradient(135deg, #0284c7, #0f766e);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.25);
+    }
+    .msg-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+      padding: 0 0.3rem;
+    }
+    .btn-quote-reply {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.76rem;
+      margin-left: auto;
+      opacity: 0.7;
+    }
+    .btn-quote-reply:hover { color: var(--accent); opacity: 1; }
+    .msg-img-attachment {
+      max-width: 240px;
+      max-height: 200px;
+      border-radius: 10px;
+      margin-top: 0.4rem;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Bottom Reply Area */
+    .conv-reply-area {
+      padding: 0.9rem 1.4rem;
+      background: rgba(8, 20, 36, 0.95);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      flex-shrink: 0;
+    }
+    .reply-quote-preview {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 0.8rem;
+      background: rgba(50, 255, 201, 0.12);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #e6f3ff;
+    }
+    .emoji-quick-bar {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .btn-emoji {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.15rem 0.4rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-emoji:hover {
+      background: rgba(50, 255, 201, 0.2);
+      transform: scale(1.15);
+    }
+    .reply-input-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .reply-text-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: rgba(3, 10, 18, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      color: #fff;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+    }
+    .reply-text-input:focus { border-color: var(--accent); }
+    .btn-send-reply {
+      padding: 0.75rem 1.4rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+      color: #050b14;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-send-reply:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(50, 255, 201, 0.4);
+    }
+    .empty-conv-state {
+      margin: auto;
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Guard Fullscreen Overlay -->
+  <div id="authGuardOverlay" class="auth-guard-overlay">
+    <div class="guard-spinner"></div>
+    <div style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: var(--accent); font-size: 1.1rem; letter-spacing: 0.5px;">
+      🛡️ VERIFYING DEV ACCESS PERMISSIONS...
+    </div>
+    <small style="color: var(--muted); font-size: 0.82rem;">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบความปลอดภัยสูงสุด กรุณารอสักครู่</small>
+  </div>
+
+  <nav class="top-nav">
+    <a href="admin-dashboard" class="brand-link">
+      <img src="assets/photo/bcxlogo2.png" alt="Logo" />
+      <span>BESTCYNIX LIVE CHAT</span>
+    </a>
+
+    <!-- Right Cluster: Desktop Nav + Bell + Hamburger -->
+    <div class="nav-right-cluster">
+      <div class="desktop-nav-links">
+        <button type="button" class="btn-nav-action" id="btnToggleNotifications" style="background: rgba(50, 255, 201, 0.12); border-color: var(--accent); color: var(--accent); cursor: pointer;">🔊 เสียงแจ้งเตือน</button>
+        <a href="admin-dashboard" class="btn-nav-action">⚡ แดชบอร์ด</a>
+        <a href="admin-content" class="btn-nav-action">📁 CMS</a>
+        <a href="admin-users" class="btn-nav-action">👥 ผู้ใช้</a>
+        <a href="admin-join-team" class="btn-nav-action">🚀 รับสมัคร</a>
+        <a href="/" class="btn-nav-action">🏠 หน้าหลัก</a>
+      </div>
+
+      <!-- Mobile Hamburger Toggle Button -->
+      <button class="nav-toggle" id="adminNavToggle" aria-expanded="false" aria-label="เปิดเมนูนำทาง">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Backdrop Overlay -->
+  <div class="mobile-drawer-overlay" id="adminDrawerOverlay"></div>
+
+  <!-- Mobile Cyber Drawer Menu -->
+  <div class="mobile-nav-drawer" id="adminNavDrawer">
+    <div class="mobile-drawer-header">
+      <span style="font-size: 0.82rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Dev Navigation Menu</span>
+      <button type="button" class="btn-close-drawer" id="adminBtnCloseDrawer">✕</button>
+    </div>
+    <div class="mobile-drawer-items">
+      <a href="/" class="mobile-drawer-link">
+        <span class="drawer-icon">🏠</span>
+        <div class="drawer-text">
+          <strong>หน้าหลักเว็บไซต์ (Home)</strong>
+          <small>bestcynixdev.web.app</small>
+        </div>
+      </a>
+      <a href="admin-dashboard" class="mobile-drawer-link">
+        <span class="drawer-icon">⚡</span>
+        <div class="drawer-text">
+          <strong>Dev Dashboard</strong>
+          <small>ศูนย์บริหารจัดการหลัก & สถิติ</small>
+        </div>
+      </a>
+      <a href="admin-chats" class="mobile-drawer-link active">
+        <span class="drawer-icon">💬</span>
+        <div class="drawer-text">
+          <strong>จัดการแชทลูกค้า (Live Chat)</strong>
+          <small>ตอบข้อความแบบ Real-Time</small>
+        </div>
+      </a>
+      <a href="admin-join-team" class="mobile-drawer-link">
+        <span class="drawer-icon">🚀</span>
+        <div class="drawer-text">
+          <strong>จัดการระบบรับสมัคร (Join Team)</strong>
+          <small>ตำแหน่ง, โควต้า และใบสมัคร</small>
+        </div>
+      </a>
+      <a href="admin-content" class="mobile-drawer-link">
+        <span class="drawer-icon">📁</span>
+        <div class="drawer-text">
+          <strong>จัดการเนื้อหาเว็บ (CMS)</strong>
+          <small>โปรเจกต์, Roadmap และสปอยล์</small>
+        </div>
+      </a>
+      <a href="admin-users" class="mobile-drawer-link">
+        <span class="drawer-icon">👥</span>
+        <div class="drawer-text">
+          <strong>จัดการผู้ใช้งาน (Users)</strong>
+          <small>รายชื่อสมาชิกและสิทธิ์ Admin</small>
+        </div>
+      </a>
+      <a href="profile" class="mobile-drawer-link">
+        <span class="drawer-icon">👤</span>
+        <div class="drawer-text">
+          <strong>โปรไฟล์และการตั้งค่าบัญชี</strong>
+          <small>ข้อมูลส่วนตัว & รหัสผ่าน</small>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="chat-workspace" id="chatWorkspace">
+    <!-- Left Sidebar: Conversations List -->
+    <div class="chats-sidebar">
+      <div class="sidebar-header">
+        <input type="text" class="search-input" id="searchChatInput" placeholder="🔍 ค้นหาชื่อลูกค้า, อีเมล, หรือ UID..." />
+        <div class="filter-pills">
+          <button type="button" class="filter-pill active" data-filter="all">ทั้งหมด (<span id="countTotal">0</span>)</button>
+          <button type="button" class="filter-pill" data-filter="unanswered">รอตอบ (<span id="countUnanswered">0</span>)</button>
+          <button type="button" class="filter-pill" data-filter="answered">ตอบแล้ว</button>
+        </div>
+      </div>
+      <div class="chat-items-list" id="chatItemsList">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+
+    <!-- Right Pane: Active Conversation -->
+    <div class="conv-pane" id="convPane">
+      <div class="empty-conv-state" id="emptyConvState">
+        <div style="font-size: 3rem; margin-bottom: 0.8rem;">💬</div>
+        <h3>เลือกห้องแชทลูกค้าจากแถบด้านซ้าย</h3>
+        <p style="font-size: 0.88rem; margin-top: 0.3rem;">เพื่อเริ่มการสนทนาและตอบกลับคำถามของลูกค้า</p>
+      </div>
+
+      <!-- Active Chat Container -->
+      <div id="activeConvContainer" style="display: none; height: 100%; flex-direction: column;">
+        <div class="conv-header">
+          <div class="conv-user-info">
+            <button type="button" class="btn-tool" id="btnBackToSidebar" style="display: none;">← กลับ</button>
+            <img src="assets/photo/bcxlogo2.png" alt="Avatar" class="conv-user-avatar" id="activeUserAvatar" />
+            <div class="conv-user-details">
+              <h3 id="activeUserName">Customer Name</h3>
+              <p id="activeUserEmail">user@email.com</p>
+            </div>
+          </div>
+          <div class="conv-controls">
+            <button type="button" class="btn-tool" id="btnCopyCustomerUid">📋 คัดลอก UID</button>
+            <select class="tag-select" id="tagSelect">
+              <option value="ทั่วไป">🏷️ ทั่วไป</option>
+              <option value="ด่วน">🔥 ด่วนมาก</option>
+              <option value="บอท">🤖 SkyLineBOT</option>
+              <option value="เว็บไซต์">🌐 เว็บไซต์</option>
+              <option value="บั๊ก">🐛 แจ้งบั๊ก</option>
+            </select>
+            <button type="button" class="btn-tool" id="btnMarkAnswered" style="background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.5); color: #4ade80;">✓ ทำเครื่องหมายว่าตอบแล้ว</button>
+          </div>
+        </div>
+
+        <div class="conv-messages" id="convMessagesArea">
+          <!-- Dynamic Message Bubbles -->
+        </div>
+
+        <div class="conv-reply-area">
+          <!-- Quote Reply Preview -->
+          <div class="reply-quote-preview" id="quotePreview">
+            <div>
+              <span style="font-size: 0.72rem; color: var(--accent);">↩️ ตอบกลับอ้างอิง:</span>
+              <span id="quoteTextSnippet" style="margin-left: 0.4rem;">...</span>
+            </div>
+            <button type="button" style="background: transparent; border: none; color: var(--muted); cursor: pointer;" id="btnCancelQuote">✕</button>
+          </div>
+
+          <!-- Quick Emoji Toolbar -->
+          <div class="emoji-quick-bar">
+            <button type="button" class="btn-emoji" data-emoji="😀">😀</button>
+            <button type="button" class="btn-emoji" data-emoji="👍">👍</button>
+            <button type="button" class="btn-emoji" data-emoji="🔥">🔥</button>
+            <button type="button" class="btn-emoji" data-emoji="✨">✨</button>
+            <button type="button" class="btn-emoji" data-emoji="🚀">🚀</button>
+            <button type="button" class="btn-emoji" data-emoji="❤️">❤️</button>
+            <button type="button" class="btn-emoji" data-emoji="🎉">🎉</button>
+            <button type="button" class="btn-emoji" data-emoji="💯">💯</button>
+          </div>
+
+          <div class="reply-input-row">
+            <input type="file" id="replyFileInput" accept="image/*" style="display: none;" />
+            <button type="button" class="btn-tool" id="btnAttachImg" title="แนบรูปภาพ">📷</button>
+            <input type="text" class="reply-text-input" id="replyTextInput" placeholder="พิมพ์ข้อความตอบกลับลูกค้า... (กด Enter เพื่อส่ง)" />
+            <button type="button" class="btn-send-reply" id="btnSendReply">➤ ส่งข้อความ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      databaseURL: "https://bestcynixdev-default-rtdb.asia-southeast1.firebasedatabase.app",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5",
+      projectNumber: "172682556745"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    let currentUser = null;
+    let allChats = [];
+    let activeChatId = null;
+    let activeChatData = null;
+    let activeMsgUnsub = null;
+    let currentFilter = "all";
+    let activeQuote = null;
+    let selectedFile = null;
+
+    const escapeHTML = (str) => {
+      if (!str) return "";
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    };
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.replace("login");
+        return;
+      }
+      currentUser = user;
+
+      // Verify Admin instantly if matches admin emails
+      let isAdmin = (user.email === "bestcynix@gmail.com" || user.email === "admin@email.com");
+      if (isAdmin) {
+        document.getElementById("authGuardOverlay")?.classList.add("verified");
+        initChatListeners();
+        initNotificationSystem();
+      } else {
+        try {
+          const docSnap = await db.collection("users").doc(user.uid).get();
+          if (docSnap.exists && docSnap.data().role === "admin") {
+            isAdmin = true;
+            document.getElementById("authGuardOverlay")?.classList.add("verified");
+            initChatListeners();
+            initNotificationSystem();
+          } else {
+            showCyberToast("⛔ สงวนสิทธิ์เฉพาะบัญชีทีมพัฒนา BestCyniX Dev เท่านั้น", "", "error");
+            setTimeout(() => { window.location.replace("/"); }, 1500);
+          }
+        } catch (e) {
+          window.location.replace("/");
+        }
+      }
+    });
+
+    // Web Audio Synthesizer & Web Notification Engine
+    let audioCtx = null;
+    const playNotificationSound = () => {
+      if (localStorage.getItem('bcx_sound_enabled') === 'false') return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const now = audioCtx.currentTime;
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(587.33, now); // D5
+        osc1.frequency.exponentialRampToValueAtTime(880.00, now + 0.15); // A5
+
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(880.00, now + 0.15);
+        osc2.frequency.exponentialRampToValueAtTime(1174.66, now + 0.35); // D6
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc1.start(now);
+        osc1.stop(now + 0.2);
+        osc2.start(now + 0.15);
+        osc2.stop(now + 0.45);
+      } catch (e) {}
+    };
+
+    const triggerPushNotification = (senderName, messageText) => {
+      playNotificationSound();
+      document.title = `(🔔 ข้อความใหม่) 💬 ${senderName} • BestCyniX Admin`;
+
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          const notif = new Notification(`💬 ข้อความใหม่จาก ${senderName}`, {
+            body: messageText || 'ส่งข้อความเข้ามาในระบบ Live Chat',
+            icon: 'assets/photo/bcxlogo2.png'
+          });
+          notif.onclick = () => {
+            window.focus();
+            notif.close();
+          };
+        } catch (e) {}
+      }
+    };
+
+    window.addEventListener('focus', () => {
+      document.title = 'จัดการแชทลูกค้า (Live Chat Manager) • BestCyniX Dev';
+    });
+
+    const initNotificationSystem = () => {
+      const btn = document.getElementById('btnToggleNotifications');
+      if (!btn) return;
+
+      const updateBtnText = () => {
+        const soundOn = localStorage.getItem('bcx_sound_enabled') !== 'false';
+        const pushGranted = 'Notification' in window && Notification.permission === 'granted';
+        if (soundOn) {
+          btn.innerHTML = `🔊 เสียง: เปิด ${pushGranted ? '🔔' : ''}`;
+          btn.style.borderColor = 'var(--accent)';
+          btn.style.color = 'var(--accent)';
+        } else {
+          btn.innerHTML = `🔇 เสียง: ปิด ${pushGranted ? '🔔' : ''}`;
+          btn.style.borderColor = 'rgba(255,255,255,0.2)';
+          btn.style.color = 'var(--muted)';
+        }
+      };
+      updateBtnText();
+
+      btn.addEventListener('click', async () => {
+        // 1. Toggle Sound State
+        const soundOn = localStorage.getItem('bcx_sound_enabled') !== 'false';
+        const nextSound = !soundOn;
+        localStorage.setItem('bcx_sound_enabled', nextSound ? 'true' : 'false');
+
+        // 2. If turning ON and Push not yet requested, request it
+        if (nextSound && 'Notification' in window && Notification.permission !== 'granted') {
+          try {
+            await Notification.requestPermission();
+          } catch (e) {}
+        }
+
+        updateBtnText();
+        if (nextSound) {
+          playNotificationSound();
+          showToast('เปิดเสียงแจ้งเตือนแล้ว 🔊', 'success');
+        } else {
+          showToast('ปิดเสียงแจ้งเตือนแล้ว 🔇', 'info');
+        }
+      });
+    };
+
+    let isInitialLoad = true;
+    const initChatListeners = () => {
+      const listEl = document.getElementById("chatItemsList");
+      if (listEl && allChats.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--muted); font-size:0.85rem;">⏳ กำลังโหลดรายการแชทแบบเรียลไทม์...</div>';
+      }
+
+      const handleSnapshot = (snapshot) => {
+        allChats = [];
+        let unansweredCount = 0;
+
+        snapshot.docChanges().forEach((change) => {
+          if (!isInitialLoad && (change.type === 'added' || change.type === 'modified')) {
+            const data = change.doc.data();
+            if (data.status === 'unanswered') {
+              triggerPushNotification(data.userName || 'ผู้เยี่ยมชม', data.lastMessage);
+            }
+          }
+        });
+        isInitialLoad = false;
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          data.id = doc.id;
+          allChats.push(data);
+          if (data.status === "unanswered") unansweredCount++;
+        });
+
+        // Client-side sort fallback
+        allChats.sort((a, b) => {
+          const tA = a.updatedAt?.toDate ? a.updatedAt.toDate().getTime() : (a.updatedAt ? new Date(a.updatedAt).getTime() : (a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0));
+          const tB = b.updatedAt?.toDate ? b.updatedAt.toDate().getTime() : (b.updatedAt ? new Date(b.updatedAt).getTime() : (b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0));
+          return tB - tA;
+        });
+
+        document.getElementById("countTotal").textContent = allChats.length;
+        document.getElementById("countUnanswered").textContent = unansweredCount;
+        renderChatList();
+      };
+
+      db.collection("chats").orderBy("updatedAt", "desc").limit(80).onSnapshot(handleSnapshot, (err) => {
+        console.warn("Retrying chat query with fallback without orderBy:", err);
+        db.collection("chats").limit(80).onSnapshot(handleSnapshot, (fallbackErr) => {
+          console.error("Firestore chat query failed:", fallbackErr);
+          if (listEl) listEl.innerHTML = '<div style="text-align:center; padding:2rem; color:#f87171;">ไม่สามารถเชื่อมต่อห้องแชทได้</div>';
+        });
+      });
+    };
+
+    const renderChatList = () => {
+      const listEl = document.getElementById("chatItemsList");
+      const search = document.getElementById("searchChatInput")?.value.toLowerCase().trim() || "";
+      if (!listEl) return;
+      listEl.innerHTML = "";
+
+      let filtered = allChats.filter((c) => {
+        const matchSearch = !search || (c.userName && c.userName.toLowerCase().includes(search)) || (c.userEmail && c.userEmail.toLowerCase().includes(search)) || c.id.toLowerCase().includes(search);
+        const matchFilter = currentFilter === "all" || (currentFilter === "unanswered" && c.status === "unanswered") || (currentFilter === "answered" && c.status === "answered");
+        return matchSearch && matchFilter;
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--muted); font-size:0.85rem;">ไม่พบห้องแชท</div>';
+        return;
+      }
+
+      filtered.forEach((chat) => {
+        const item = document.createElement("div");
+        item.className = `chat-item-card ${activeChatId === chat.id ? "active" : ""}`;
+        const timeStr = chat.updatedAt ? new Date(chat.updatedAt.toDate ? chat.updatedAt.toDate() : chat.updatedAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) : "";
+
+        item.innerHTML = `
+          <img src="${chat.userPhoto || 'assets/photo/bcxlogo2.png'}" alt="Avatar" class="chat-item-avatar" />
+          <div class="chat-item-info">
+            <div class="chat-item-top">
+              <span class="chat-item-name">${escapeHTML(chat.userName || 'ผู้เยี่ยมชม')}</span>
+              <span class="chat-item-time">${timeStr}</span>
+            </div>
+            <p class="chat-item-snippet">${escapeHTML(chat.lastMessage || 'ไม่มีข้อความ')}</p>
+          </div>
+          ${chat.status === "unanswered" ? '<span class="status-dot-unanswered" title="รอการตอบกลับ"></span>' : ''}
+        `;
+
+        item.addEventListener("click", () => selectChat(chat));
+        listEl.appendChild(item);
+      });
+    };
+
+    const selectChat = (chat) => {
+      activeChatId = chat.id;
+      activeChatData = chat;
+
+      document.getElementById("emptyConvState").style.display = "none";
+      const activeCont = document.getElementById("activeConvContainer");
+      activeCont.style.display = "flex";
+
+      document.getElementById("activeUserName").textContent = chat.userName || "ผู้เยี่ยมชม";
+      document.getElementById("activeUserEmail").textContent = chat.userEmail || chat.id;
+      document.getElementById("activeUserAvatar").src = chat.userPhoto || "assets/photo/bcxlogo2.png";
+      if (document.getElementById("tagSelect")) document.getElementById("tagSelect").value = chat.tag || "ทั่วไป";
+
+      renderChatList();
+      listenMessages(chat.id);
+    };
+
+    const listenMessages = (chatId) => {
+      if (activeMsgUnsub) activeMsgUnsub();
+      const messagesArea = document.getElementById("convMessagesArea");
+      if (messagesArea) {
+        messagesArea.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--muted); font-size:0.85rem;">⏳ กำลังโหลดประวัติข้อความ...</div>';
+      }
+
+      const handleMsgSnap = (snapshot) => {
+        if (!messagesArea) return;
+        messagesArea.innerHTML = "";
+
+        const msgs = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          data.id = doc.id;
+          msgs.push(data);
+        });
+
+        msgs.sort((a, b) => {
+          const tA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+          const tB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+          return tA - tB;
+        });
+
+        msgs.forEach((data) => {
+          const isDev = data.senderRole === "dev";
+          const wrap = document.createElement("div");
+          wrap.className = `msg-bubble-wrap ${isDev ? "from-dev" : "from-user"}`;
+
+          let quoteHtml = "";
+          if (data.replyTo) {
+            quoteHtml = `<div class="quote-box">↩️ ${escapeHTML(data.replyTo.text || '')}</div>`;
+          }
+
+          let imgHtml = "";
+          if (data.imageUrl) {
+            imgHtml = `<img src="${encodeURI(data.imageUrl)}" alt="Attached" class="msg-img-attachment" />`;
+          }
+
+          const timeStr = data.createdAt ? new Date(data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) : "...";
+
+          wrap.innerHTML = `
+            ${quoteHtml}
+            <div class="msg-bubble-main">
+              ${escapeHTML(data.text || '')}
+              ${imgHtml}
+            </div>
+            <div class="msg-meta-row">
+              <span>${escapeHTML(data.senderName || (isDev ? 'Dev Team' : 'User'))}</span> • <span>${timeStr}</span>
+              <button type="button" class="btn-quote-reply">↩️ ตอบกลับ</button>
+            </div>
+          `;
+
+          wrap.querySelector(".btn-quote-reply")?.addEventListener("click", () => {
+            setQuoteReply(data.text || "รูปภาพแนบ");
+          });
+
+          messagesArea.appendChild(wrap);
+        });
+
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+      };
+
+      activeMsgUnsub = db.collection("chats").doc(chatId).collection("messages")
+        .orderBy("createdAt", "asc")
+        .limit(150)
+        .onSnapshot(handleMsgSnap, () => {
+          db.collection("chats").doc(chatId).collection("messages")
+            .limit(150)
+            .onSnapshot(handleMsgSnap, (err) => console.warn("Messages fallback error:", err));
+        });
+    };
+
+    const setQuoteReply = (text) => {
+      activeQuote = text;
+      document.getElementById("quoteTextSnippet").textContent = text.length > 50 ? text.substring(0, 50) + "..." : text;
+      document.getElementById("quotePreview").style.display = "flex";
+      document.getElementById("replyTextInput")?.focus();
+    };
+
+    document.getElementById("btnCancelQuote")?.addEventListener("click", () => {
+      activeQuote = null;
+      document.getElementById("quotePreview").style.display = "none";
+    });
+
+    // Copy Customer UID
+    document.getElementById("btnCopyCustomerUid")?.addEventListener("click", () => {
+      if (activeChatId) {
+        navigator.clipboard.writeText(activeChatId).then(() => {
+          showCyberToast("📋 คัดลอก UID เรียบร้อยแล้ว", activeChatId, "success");
+        });
+      }
+    });
+
+    // Change Tag
+    document.getElementById("tagSelect")?.addEventListener("change", async (e) => {
+      if (!activeChatId) return;
+      await db.collection("chats").doc(activeChatId).set({ tag: e.target.value }, { merge: true });
+    });
+
+    // Mark Answered
+    document.getElementById("btnMarkAnswered")?.addEventListener("click", async () => {
+      if (!activeChatId) return;
+      await db.collection("chats").doc(activeChatId).set({ status: "answered" }, { merge: true });
+      showCyberToast("✓ ทำเครื่องหมายว่าตอบแล้วเรียบร้อย", "", "success");
+    });
+
+    // Emoji clicks
+    document.querySelectorAll(".btn-emoji").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const inp = document.getElementById("replyTextInput");
+        if (inp) {
+          inp.value += btn.dataset.emoji;
+          inp.focus();
+        }
+      });
+    });
+
+    // Attach File
+    document.getElementById("btnAttachImg")?.addEventListener("click", () => {
+      document.getElementById("replyFileInput")?.click();
+    });
+    document.getElementById("replyFileInput")?.addEventListener("change", (e) => {
+      selectedFile = e.target.files[0] || null;
+      if (selectedFile) {
+        document.getElementById("replyTextInput").placeholder = `📷 แนบไฟล์: ${selectedFile.name}`;
+      }
+    });
+
+    // Send Reply
+    const sendReply = async () => {
+      const input = document.getElementById("replyTextInput");
+      const text = input?.value.trim() || "";
+      if (!text && !selectedFile) return;
+      if (!activeChatId || !currentUser) return;
+
+      const btn = document.getElementById("btnSendReply");
+      btn.disabled = true;
+
+      try {
+        let imageUrl = null;
+        if (selectedFile && storage) {
+          const fileRef = storage.ref(`chat-attachments/${activeChatId}/${Date.now()}_${selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`);
+          await fileRef.put(selectedFile);
+          imageUrl = await fileRef.getDownloadURL();
+        }
+
+        const msgData = {
+          text: text,
+          imageUrl: imageUrl,
+          senderId: currentUser.uid,
+          senderName: "BestCyniX Dev",
+          senderRole: "dev",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (activeQuote) {
+          msgData.replyTo = { text: activeQuote };
+        }
+
+        await db.collection("chats").doc(activeChatId).collection("messages").add(msgData);
+
+        await db.collection("chats").doc(activeChatId).set({
+          lastMessage: text || "📷 ส่งรูปภาพ",
+          lastSenderRole: "dev",
+          status: "answered",
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        input.value = "";
+        input.placeholder = "พิมพ์ข้อความตอบกลับลูกค้า... (กด Enter เพื่อส่ง)";
+        selectedFile = null;
+        activeQuote = null;
+        document.getElementById("quotePreview").style.display = "none";
+      } catch (err) {
+        showCyberToast("ส่งข้อความไม่สำเร็จ", err.message, "error");
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    document.getElementById("btnSendReply")?.addEventListener("click", sendReply);
+    document.getElementById("replyTextInput")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendReply();
+      }
+    });
+
+    // Search and Filter Pills
+    document.getElementById("searchChatInput")?.addEventListener("input", renderChatList);
+    document.querySelectorAll(".filter-pill").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter-pill").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilter = btn.dataset.filter;
+        renderChatList();
+      });
+    });
+  </script>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+</body>
+</html>

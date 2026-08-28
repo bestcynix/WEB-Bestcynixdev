@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>ระบบจัดการเนื้อหาหน้าเว็บ (CMS Content Manager) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/cms-loader.js?v=20260826_21"></script>
+
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.9);
+      --accent: #32ffc9;
+      --accent-purple: #a855f7;
+      --accent-blue: #0284c7;
+      --accent-amber: #f59e0b;
+      --accent-red: #ff5574;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Auth Guard Fullscreen Overlay */
+    .auth-guard-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: #040a14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    .auth-guard-overlay.verified {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .guard-spinner {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 3.5px solid rgba(50, 255, 201, 0.15);
+      border-top-color: var(--accent);
+      animation: guardSpin 0.75s linear infinite;
+    }
+    @keyframes guardSpin {
+      to { transform: rotate(360deg); }
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(168, 85, 247, 0.18), transparent 45%),
+        radial-gradient(circle at 90% 90%, rgba(50, 255, 201, 0.14), transparent 45%);
+    }
+    .container {
+      width: min(1200px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 1.5rem 0 3rem;
+      flex: 1;
+    }
+    .top-nav {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: nowrap !important;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .brand-link img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+    .nav-right-cluster {
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.6rem !important;
+      flex-wrap: nowrap !important;
+      margin-left: auto;
+    }
+    .desktop-nav-links {
+      display: flex !important;
+      gap: 0.5rem !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+    }
+    @media (max-width: 1024px) {
+      .desktop-nav-links {
+        display: none !important;
+      }
+      .nav-toggle {
+        display: flex !important;
+      }
+    }
+    @media (min-width: 1025px) {
+      .desktop-nav-links {
+        display: flex !important;
+      }
+      .nav-toggle {
+        display: none !important;
+      }
+    }
+    .btn-nav-action {
+      padding: 0.4rem 0.9rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #e6f3ff;
+      text-decoration: none;
+      font-size: 0.84rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .btn-nav-action:hover, .btn-nav-action.active {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+
+    /* CMS Tabs */
+    .cms-tabs {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .cms-tab-btn {
+      padding: 0.65rem 1.3rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-family: "Prompt", sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .cms-tab-btn:hover, .cms-tab-btn.active {
+      background: linear-gradient(135deg, rgba(50, 255, 201, 0.2), rgba(2, 132, 199, 0.25));
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(50, 255, 201, 0.25);
+    }
+
+    /* Section Cards */
+    .cms-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .panel-title h2 { font-size: 1.3rem; color: #fff; }
+    .panel-title p { font-size: 0.86rem; color: var(--muted); }
+
+    .btn-add-item {
+      padding: 0.55rem 1.2rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+      color: #050b14;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.88rem;
+    }
+
+    /* Projects CMS Table */
+    .cms-table-wrap {
+      overflow-x: auto;
+    }
+    .cms-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    .cms-table th {
+      background: rgba(4, 12, 22, 0.95);
+      padding: 0.85rem 1rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .cms-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      vertical-align: middle;
+    }
+    .cms-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    .pill-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .pill-active { background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; }
+    .pill-closed { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; }
+    .pill-spoiler { background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #d8b4fe; }
+
+    .btn-action-icon {
+      padding: 0.35rem 0.65rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-action-icon:hover {
+      background: var(--accent);
+      color: #050b14;
+      border-color: var(--accent);
+    }
+    .btn-action-icon.del:hover {
+      background: var(--accent-red);
+      color: #fff;
+      border-color: var(--accent-red);
+    }
+
+    /* Modal */
+    .cms-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .cms-modal.active { display: flex; }
+    .cms-modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      width: min(650px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.85rem; color: #d1e5f8; }
+    .form-input {
+      padding: 0.65rem 0.9rem;
+      background: rgba(3, 10, 18, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      color: #fff;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.86rem;
+      color: #d1e5f8;
+      cursor: pointer;
+    }
+    .checkbox-row input { accent-color: var(--accent); }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Guard Fullscreen Overlay -->
+  <div id="authGuardOverlay" class="auth-guard-overlay">
+    <div class="guard-spinner"></div>
+    <div style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: var(--accent); font-size: 1.1rem; letter-spacing: 0.5px;">
+      🛡️ VERIFYING DEV ACCESS PERMISSIONS...
+    </div>
+    <small style="color: var(--muted); font-size: 0.82rem;">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบความปลอดภัยสูงสุด กรุณารอสักครู่</small>
+  </div>
+
+  <div class="container">
+    <nav class="top-nav">
+      <a href="admin-dashboard" class="brand-link">
+        <img src="assets/photo/bcxlogo2.png" alt="Logo" />
+        <span>BESTCYNIX CMS MANAGER</span>
+      </a>
+
+      <!-- Right Cluster: Desktop Nav + Bell + Hamburger -->
+      <div class="nav-right-cluster">
+        <div class="desktop-nav-links">
+          <a href="admin-dashboard" class="btn-nav-action">⚡ แดชบอร์ด</a>
+          <a href="admin-chats" class="btn-nav-action">💬 แชทลูกค้า</a>
+          <a href="admin-users" class="btn-nav-action">👥 จัดการผู้ใช้</a>
+          <a href="admin-join-team" class="btn-nav-action">🚀 รับสมัคร</a>
+          <a href="/" class="btn-nav-action">🏠 หน้าหลัก</a>
+        </div>
+
+        <!-- Mobile Hamburger Toggle Button -->
+        <button class="nav-toggle" id="adminNavToggle" aria-expanded="false" aria-label="เปิดเมนูนำทาง">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Backdrop Overlay -->
+    <div class="mobile-drawer-overlay" id="adminDrawerOverlay"></div>
+
+    <!-- Mobile Cyber Drawer Menu -->
+    <div class="mobile-nav-drawer" id="adminNavDrawer">
+      <div class="mobile-drawer-header">
+        <span style="font-size: 0.82rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Dev Navigation Menu</span>
+        <button type="button" class="btn-close-drawer" id="adminBtnCloseDrawer">✕</button>
+      </div>
+      <div class="mobile-drawer-items">
+        <a href="/" class="mobile-drawer-link">
+          <span class="drawer-icon">🏠</span>
+          <div class="drawer-text">
+            <strong>หน้าหลักเว็บไซต์ (Home)</strong>
+            <small>bestcynixdev.web.app</small>
+          </div>
+        </a>
+        <a href="admin-dashboard" class="mobile-drawer-link">
+          <span class="drawer-icon">⚡</span>
+          <div class="drawer-text">
+            <strong>Dev Dashboard</strong>
+            <small>ศูนย์บริหารจัดการหลัก & สถิติ</small>
+          </div>
+        </a>
+        <a href="admin-join-team" class="mobile-drawer-link">
+          <span class="drawer-icon">🚀</span>
+          <div class="drawer-text">
+            <strong>จัดการระบบรับสมัคร (Join Team)</strong>
+            <small>ตำแหน่ง, โควต้า และใบสมัคร</small>
+          </div>
+        </a>
+        <a href="admin-content" class="mobile-drawer-link active">
+          <span class="drawer-icon">📁</span>
+          <div class="drawer-text">
+            <strong>จัดการเนื้อหาเว็บ (CMS)</strong>
+            <small>โปรเจกต์, Roadmap และสปอยล์</small>
+          </div>
+        </a>
+        <a href="admin-chats" class="mobile-drawer-link">
+          <span class="drawer-icon">💬</span>
+          <div class="drawer-text">
+            <strong>จัดการแชทลูกค้า (Live Chat)</strong>
+            <small>ตอบข้อความแบบ Real-Time</small>
+          </div>
+        </a>
+        <a href="admin-users" class="mobile-drawer-link">
+          <span class="drawer-icon">👥</span>
+          <div class="drawer-text">
+            <strong>จัดการผู้ใช้งาน (Users)</strong>
+            <small>รายชื่อสมาชิกและสิทธิ์ Admin</small>
+          </div>
+        </a>
+        <a href="profile" class="mobile-drawer-link">
+          <span class="drawer-icon">👤</span>
+          <div class="drawer-text">
+            <strong>โปรไฟล์และการตั้งค่าบัญชี</strong>
+            <small>ข้อมูลส่วนตัว & รหัสผ่าน</small>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- CMS Navigation Tabs -->
+    <div class="cms-tabs">
+      <button type="button" class="cms-tab-btn active" data-tab="projects">📁 จัดการโปรเจกต์ (Projects)</button>
+      <button type="button" class="cms-tab-btn" data-tab="future">🚀 แผนในอนาคต (Roadmap)</button>
+      <button type="button" class="cms-tab-btn" data-tab="social">📱 โซเชียลมีเดีย & ติดต่อ</button>
+      <button type="button" class="cms-tab-btn" data-tab="stack">💻 Stackที่ใช้งาน</button>
+    </div>
+
+    <!-- 1. Panel: Projects Manager -->
+    <div class="cms-panel" id="panelProjects">
+      <div class="panel-header">
+        <div class="panel-title">
+          <h2>📁 จัดการโปรเจกต์เด่น (Projects CMS)</h2>
+          <p>เพิ่ม แก้ไข ลบ จัดลำดับ 6 โปรเจกต์เด่น สิทธิ์ DEV Only สปอยล์ และตัวนับถอยหลังเปิดตัว</p>
+        </div>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+          <button type="button" class="btn-add-item" id="btnOpenAddProjectModal">+ เพิ่มโปรเจกต์ใหม่</button>
+          <button type="button" class="btn-add-item" id="btnSaveAllProjectsOrder" style="background: linear-gradient(135deg, #10b981, #059669);">💾 บันทึกลำดับทั้งหมด</button>
+        </div>
+      </div>
+
+      <!-- Realtime Search & Status Filter Bar -->
+      <div style="display: flex; gap: 0.8rem; margin-bottom: 1.4rem; flex-wrap: wrap;">
+        <input type="text" id="projTableSearch" class="form-input" placeholder="🔍 ค้นหาโปรเจกต์ตามชื่อ, รายละเอียด หรือสแต็ก..." style="flex: 1; min-width: 240px;" />
+        <select id="projTableStatusFilter" class="form-input" style="width: auto; min-width: 180px;">
+          <option value="all">ทั้งหมด (ทุกสถานะ)</option>
+          <option value="active">🟢 เปิดใช้งานอยู่ (Active)</option>
+          <option value="closed">🔴 ปิดตัวแล้ว (Closed)</option>
+          <option value="spoiler">🔒 สปอยล์ / ความลับ (Spoiler)</option>
+        </select>
+      </div>
+
+      <div class="cms-table-wrap">
+        <table class="cms-table">
+          <thead>
+            <tr>
+              <th style="width: 130px; text-align: center;">ลำดับ</th>
+              <th>ชื่อโปรเจกต์</th>
+              <th>ช่วงเวลา</th>
+              <th>สถานะ</th>
+              <th>ปักหมุดเด่น</th>
+              <th>สิทธิ์เข้าถึง</th>
+              <th>สปอยล์</th>
+              <th style="min-width: 180px;">การกระทำ</th>
+            </tr>
+          </thead>
+          <tbody id="projectsTableBody">
+            <!-- Dynamic Projects Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. Panel: Future Plans -->
+    <div class="cms-panel" id="panelFuture" style="display: none;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <h2>🚀 จัดการแผนในอนาคต (Future Plans Roadmap)</h2>
+          <p>เพิ่ม แก้ไข จัดลำดับ และเปิด-ปิดการแสดงผลแผนงานในอนาคต</p>
+        </div>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+          <button type="button" class="btn-add-item" id="btnOpenAddFutureModal">+ เพิ่มแผนงานใหม่</button>
+          <button type="button" class="btn-add-item" id="btnSaveAllFutureOrder" style="background: linear-gradient(135deg, #10b981, #059669);">💾 บันทึกแผนงานทั้งหมด</button>
+        </div>
+      </div>
+      <div class="cms-table-wrap">
+        <table class="cms-table">
+          <thead>
+            <tr>
+              <th style="width: 130px; text-align: center;">ลำดับ</th>
+              <th>หัวข้อแผนงาน</th>
+              <th>แท็ก</th>
+              <th>รายละเอียด</th>
+              <th>สถานะแสดงผล</th>
+              <th style="min-width: 180px;">การกระทำ</th>
+            </tr>
+          </thead>
+          <tbody id="futureTableBody">
+            <!-- Dynamic Future Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. Panel: Social & Contact -->
+    <div class="cms-panel" id="panelSocial" style="display: none;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <h2>📱 จัดการช่องทางติดต่อ & โซเชียลมีเดีย</h2>
+          <p>เพิ่ม แก้ไข จัดลำดับ และเปิด/ปิด การแสดงผลแต่ละช่องทางบนหน้าหลัก (ดึงไอคอนตามแพลตฟอร์มอัตโนมัติ)</p>
+        </div>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+          <button type="button" class="btn-add-item" id="btnAddNewSocialChannel">+ เพิ่มช่องทางติดต่อใหม่</button>
+          <button type="button" class="btn-add-item" id="btnSaveSocialSettings" style="background: linear-gradient(135deg, #10b981, #059669);">💾 บันทึกช่องทางทั้งหมด</button>
+        </div>
+      </div>
+      <div id="socialChannelsContainer" style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1rem;">
+        <!-- Dynamic Social Cards -->
+      </div>
+    </div>
+
+    <!-- 4. Panel: Tech Stack -->
+    <div class="cms-panel" id="panelStack" style="display: none;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <h2>💻 จัดการ Stackที่ใช้งาน (Tech Stack CMS)</h2>
+          <p>จัดการสแต็กเทคโนโลยีตามหมวดหมู่ พร้อมไอคอนแบรนด์แท้ ค้นหาและกดลบได้รายตัว</p>
+        </div>
+        <button type="button" class="btn-add-item" id="btnSaveStackSettings" style="background: linear-gradient(135deg, #10b981, #059669);">💾 บันทึก Stack ทั้งหมด</button>
+      </div>
+      <div id="techStackManagerContainer" style="display: flex; flex-direction: column; gap: 1.3rem; margin-top: 1rem;">
+        <!-- Dynamic Tech Stack Categories -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Edit Modal -->
+  <div class="cms-modal" id="projectModal">
+    <div class="cms-modal-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 0.8rem; margin-bottom: 1.2rem;">
+        <h3 style="color: #fff; font-size: 1.2rem;" id="projectModalTitle">✏️ แก้ไขโปรเจกต์</h3>
+        <button type="button" class="btn-action-icon" id="btnCloseProjectModal" title="ปิดหน้าต่าง" style="font-size: 1rem; padding: 0.25rem 0.6rem;">✕</button>
+      </div>
+
+      <form id="projectEditForm">
+        <input type="hidden" id="projId" />
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>ชื่อโปรเจกต์ (Project Title)</label>
+            <input type="text" id="projTitle" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label>ช่วงเวลา (Period)</label>
+            <input type="text" id="projPeriod" class="form-input" placeholder="2026 - ปัจจุบัน" required />
+          </div>
+          <div class="form-group">
+            <label>สถานะ (Status)</label>
+            <select id="projStatus" class="form-input">
+              <option value="active">🟢 เปิดใช้งานอยู่ (Active)</option>
+              <option value="closed">🔴 ปิดตัวแล้ว (Closed)</option>
+              <option value="spoiler">🔒 สปอยล์ / ความลับ (Spoiler)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>สิทธิ์การเข้าถึง (Access Level)</label>
+            <select id="projAccess" class="form-input">
+              <option value="public">🌐 สาธารณะ (ทุกคนเข้าดูได้)</option>
+              <option value="dev_only">🛡️ เฉพาะ DEV เท่านั้น (Dev Only)</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>URL ของโปรเจกต์ (Project URL)</label>
+            <input type="text" id="projUrl" class="form-input" placeholder="https://..." required />
+          </div>
+
+          <!-- Cover Banner with URL & File Upload -->
+          <div class="form-group full">
+            <label>🖼️ รูปภาพหน้าปกโปรเจกต์ (Cover Banner Image URL)</label>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input type="text" id="projCoverImage" class="form-input" placeholder="https://... หรือ assets/photo/..." style="flex: 1;" />
+              <input type="file" id="fileCoverUpload" accept="image/*" style="display: none;" />
+              <button type="button" class="btn-nav-action" id="btnTriggerCoverUpload" style="cursor: pointer; white-space: nowrap;">📁 อัปโหลดรูป</button>
+            </div>
+            <div id="coverPreviewWrap" style="margin-top: 0.5rem; display: none;">
+              <img id="coverPreviewImg" src="" alt="Cover Preview" style="max-height: 100px; border-radius: 10px; border: 1px solid var(--accent); object-fit: cover;" />
+            </div>
+          </div>
+
+          <!-- Screenshots Gallery with Dynamic Reordering & Deletion -->
+          <div class="form-group full">
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+              <span>📸 ภาพตัวอย่างระบบเพิ่มเติม (Screenshots Gallery)</span>
+              <span style="font-size:0.75rem; color:var(--accent);">จัดเรียงลำดับและลบได้</span>
+            </label>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input type="text" id="projGalleryInput" class="form-input" placeholder="ใส่ URL รูปภาพตัวอย่าง..." style="flex: 1;" />
+              <button type="button" class="btn-nav-action" id="btnAddGalleryUrl" style="cursor: pointer; white-space: nowrap;">+ เพิ่ม URL</button>
+              <input type="file" id="fileGalleryUpload" multiple accept="image/*" style="display: none;" />
+              <button type="button" class="btn-nav-action" id="btnTriggerGalleryUpload" style="cursor: pointer; white-space: nowrap;">📁 อัปโหลดรูป</button>
+            </div>
+            <!-- Dynamic Gallery List -->
+            <div id="galleryItemsContainer" style="margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.45rem; max-height: 220px; overflow-y: auto; padding-right: 0.2rem;"></div>
+            <input type="hidden" id="projGallery" />
+          </div>
+
+          <div class="form-group full">
+            <label class="checkbox-row">
+              <input type="checkbox" id="projFeatured" />
+              <span>⭐ ปักหมุดเป็น 1 ใน 6 โปรเจกต์เด่นบนหน้าหลัก</span>
+            </label>
+          </div>
+          <div class="form-group full">
+            <label class="checkbox-row">
+              <input type="checkbox" id="projSpoiler" />
+              <span>🔒 เปิดโหมดสปอยล์ (Spoiler Blur Teaser) สำหรับงานที่ยังไม่เปิดตัว</span>
+            </label>
+          </div>
+          <div class="form-group full">
+            <label>วันและเวลาเปิดตัวสำหรับตัวนับถอยหลัง (Release Countdown Timer - ไม่ระบุก็ได้)</label>
+            <input type="datetime-local" id="projReleaseDate" class="form-input" />
+          </div>
+          <div class="form-group full">
+            <label>คำอธิบายย่อ (Short Description)</label>
+            <textarea id="projDesc" class="form-input" rows="2" required></textarea>
+          </div>
+          <div class="form-group full">
+            <label>ข้อมูลเชิงลึก (Full Details)</label>
+            <textarea id="projDetails" class="form-input" rows="3"></textarea>
+          </div>
+
+          <!-- Tech Stack Multi-Select & Custom Tag Input -->
+          <div class="form-group full">
+            <label>⚡ สแต็กเทคโนโลยี (คลิกเลือกได้หลายตัว หรือพิมพ์เพิ่มเอง)</label>
+            
+            <!-- Selected Tags Container -->
+            <div id="selectedStackChips" style="display: flex; flex-wrap: wrap; gap: 0.4rem; min-height: 40px; padding: 0.45rem 0.6rem; background: rgba(5,11,22,0.85); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; margin-bottom: 0.6rem; align-items: center;">
+              <!-- Selected tags chips -->
+            </div>
+
+            <!-- Custom Tag Input -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.6rem;">
+              <input type="text" id="customStackInput" class="form-input" placeholder="พิมพ์สแต็กอื่น ๆ เช่น Electron, Flutter, WebRTC..." style="flex: 1;" />
+              <button type="button" id="btnAddCustomStack" class="btn-nav-action" style="white-space: nowrap; cursor: pointer;">+ เพิ่มสแต็ก</button>
+            </div>
+
+            <!-- Preset Quick Clickable Pills -->
+            <div style="font-size: 0.76rem; color: var(--muted); margin-bottom: 0.35rem;">คลิกเพื่อเลือก/ยกเลิก สแต็กยอดนิยม:</div>
+            <div id="presetStackPills" style="display: flex; flex-wrap: wrap; gap: 0.35rem; max-height: 120px; overflow-y: auto; padding-right: 0.2rem;"></div>
+
+            <input type="hidden" id="projStack" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action-icon" id="btnCancelProj">✕ ยกเลิก</button>
+          <button type="submit" class="btn-add-item" id="btnSaveProj">💾 บันทึกโปรเจกต์</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Future Plan Edit Modal -->
+  <div class="cms-modal" id="futureModal">
+    <div class="cms-modal-card" style="max-width: 540px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 0.8rem; margin-bottom: 1.2rem;">
+        <h3 style="color: #fff; font-size: 1.2rem;" id="futureModalTitle">🚀 แผนงานในอนาคต (Roadmap)</h3>
+        <button type="button" class="btn-action-icon" id="btnCloseFutureModal" title="ปิดหน้าต่าง">✕</button>
+      </div>
+      <form id="futurePlanForm">
+        <input type="hidden" id="futurePlanId" />
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>หัวข้อแผนงาน (Title)</label>
+          <input type="text" id="futureTitle" class="form-input" required placeholder="เช่น Roblox Server, Minecraft Server..." />
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>แท็กสถานะ (Tag Badge)</label>
+          <input type="text" id="futureTag" class="form-input" required placeholder="เช่น Roadmap 2026, In Planning, Future Concept" />
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>รายละเอียดแผนงาน (Description)</label>
+          <textarea id="futureDesc" class="form-input" rows="3" required placeholder="อธิบายเป้าหมายหรือฟีเจอร์ที่วางแผนไว้..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.2rem;">
+          <label class="checkbox-row">
+            <input type="checkbox" id="futureActive" checked />
+            <span>🟢 แสดงผลบนหน้าหลักเว็บไซต์</span>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action-icon" id="btnCancelFuture">✕ ยกเลิก</button>
+          <button type="submit" class="btn-add-item" id="btnSaveFuture">💾 บันทึกแผนงานนี้</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Social Channel Edit Modal -->
+  <div class="cms-modal" id="socialModal">
+    <div class="cms-modal-card" style="max-width: 540px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 0.8rem; margin-bottom: 1.2rem;">
+        <h3 style="color: #fff; font-size: 1.2rem;" id="socialModalTitle">📱 เพิ่ม / แก้ไขช่องทางติดต่อ</h3>
+        <button type="button" class="btn-action-icon" id="btnCloseSocialModal" title="ปิดหน้าต่าง">✕</button>
+      </div>
+      <form id="socialChannelForm">
+        <input type="hidden" id="socialChannelId" />
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>เลือกแพลตฟอร์ม (Platform)</label>
+          <select id="socialPlatformSelect" class="form-input">
+            <option value="discord">Discord (Community & Support)</option>
+            <option value="github">GitHub (Repositories)</option>
+            <option value="facebook">Facebook (Page)</option>
+            <option value="instagram">Instagram (@bestcynix.dev)</option>
+            <option value="line">LINE (Direct Chat)</option>
+            <option value="x">X / Twitter (Updates)</option>
+            <option value="youtube">YouTube (Channel)</option>
+            <option value="tiktok">TikTok</option>
+            <option value="telegram">Telegram</option>
+            <option value="email">Email</option>
+            <option value="website">เว็บไซต์อื่น ๆ (Website)</option>
+            <option value="other">อื่น ๆ (Custom Platform)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>ชื่อช่องทาง (Display Name)</label>
+          <input type="text" id="socialChannelName" class="form-input" required placeholder="เช่น Discord Community, TikTok Official..." />
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>ลิงก์ URL (URL Link)</label>
+          <input type="text" id="socialChannelUrl" class="form-input" required placeholder="https://..." />
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label>คำอธิบายย่อ (Description / Tagline)</label>
+          <input type="text" id="socialChannelDesc" class="form-input" placeholder="เช่น Community & Support Server" />
+        </div>
+        <div class="form-group" style="margin-bottom: 1.2rem;">
+          <label class="checkbox-row">
+            <input type="checkbox" id="socialChannelVisible" checked />
+            <span>🟢 แสดงผลบนหน้าหลักเว็บไซต์</span>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action-icon" id="btnCancelSocialModal">✕ ยกเลิก</button>
+          <button type="submit" class="btn-add-item" id="btnSaveSocialModal">💾 บันทึกช่องทางนี้</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      databaseURL: "https://bestcynixdev-default-rtdb.asia-southeast1.firebasedatabase.app",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5",
+      projectNumber: "172682556745"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let projectsList = [];
+    let futurePlansList = [];
+    let socialChannelsList = [];
+    let techStacksData = {
+      languages: ["Java", "JavaScript", "Python", "HTML5", "CSS3", "SQL", "MySQL", "TypeScript"],
+      frontend: ["HTML5", "CSS3", "Tailwind", "Vue", "Modern Canvas"],
+      backend: ["Node.js", "Express", "Python FastAPI", "Java Spring"],
+      databases: ["Firestore", "Firebase RTDB", "MySQL", "PostgreSQL", "Redis"],
+      cloudTools: ["Firebase Hosting", "Cloudflare", "Docker", "Git", "GCP"]
+    };
+
+    // Auth & Permission Check
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.replace("login");
+        return;
+      }
+      let isAdmin = (user.email === "bestcynix@gmail.com" || user.email === "admin@email.com");
+      if (!isAdmin) {
+        try {
+          const docSnap = await db.collection("users").doc(user.uid).get();
+          if (docSnap.exists && docSnap.data().role === "admin") isAdmin = true;
+        } catch (e) {}
+      }
+
+      if (!isAdmin) {
+        showCyberToast("⛔ สงวนสิทธิ์เฉพาะบัญชีทีมพัฒนา BestCyniX Dev เท่านั้น", "", "error");
+        setTimeout(() => { window.location.replace("/"); }, 1500);
+        return;
+      }
+
+      // Permissions verified -> Unlock UI
+      document.getElementById("authGuardOverlay")?.classList.add("verified");
+
+      loadAllCMSData();
+    });
+
+    // Tab Switcher
+    document.querySelectorAll(".cms-tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".cms-tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".cms-panel").forEach(p => p.style.display = "none");
+        btn.classList.add("active");
+        const tab = btn.dataset.tab;
+        if (tab === "projects") document.getElementById("panelProjects").style.display = "block";
+        else if (tab === "future") document.getElementById("panelFuture").style.display = "block";
+        else if (tab === "social") document.getElementById("panelSocial").style.display = "block";
+        else if (tab === "stack") document.getElementById("panelStack").style.display = "block";
+      });
+    });
+
+    // 1. Load All CMS Data
+    const loadAllCMSData = async () => {
+      // Projects
+      db.collection("site_cms").doc("projects").onSnapshot((doc) => {
+        if (doc.exists && doc.data().list) {
+          projectsList = doc.data().list;
+        } else {
+          projectsList = [
+            { id: "skylinebot-0194", title: "SkyLineBOT #0194", period: "2026 - ปัจจุบัน", status: "active", isFeatured: true, accessLevel: "public", isSpoiler: false, url: "https://skylinebot.xyz/", coverImage: "assets/photo/SkyLineBOT-0194.png", gallery: ["assets/photo/SkyLineBOT-0194.png", "assets/photo/bestcynixprodev.png"], description: "บอทรุ่นปัจจุบันที่เปิดตัวแล้วอย่างเป็นทางการ", stack: ["Node.js", "Discord.js", "AI Workflow", "Firestore", "Cloudflare"] },
+            { id: "niceshopallforme", title: "Niceshopallforme", period: "2024 - ปัจจุบัน", status: "active", isFeatured: true, accessLevel: "public", isSpoiler: false, url: "https://niceshopallforme.web.app/", coverImage: "assets/photo/NiceShopForAllWeb.png", gallery: ["assets/photo/NiceShopForAllWeb.png"], description: "เว็บไซต์สโตร์เปิดตัวใหม่", stack: ["HTML5", "CSS3", "JavaScript", "Firebase Hosting"] },
+            { id: "skylinebot-1391", title: "Skylinebot#1391", period: "2021 - 2023", status: "closed", isFeatured: true, accessLevel: "public", isSpoiler: false, url: "https://botdiscordcommands.web.app/skylinebot.html", coverImage: "assets/photo/Skylinebot-1391.png", gallery: ["assets/photo/Skylinebot-1391.png"], description: "บอท Discord ในยุคแรก", stack: ["Discord.js v12", "Node.js", "Web Commands Portal"] },
+            { id: "musicbot-5750", title: "MusicBOT#5750", period: "2021 - 2023", status: "closed", isFeatured: true, accessLevel: "public", isSpoiler: false, url: "https://botdiscordcommands.web.app/musicbot.html", coverImage: "assets/photo/MusicBOT-5750.png", gallery: ["assets/photo/MusicBOT-5750.png"], description: "บอทเพลงยุคแรก", stack: ["Lavalink", "Node.js", "Discord.js"] },
+            { id: "discord-mh-myhome", title: "Discord MH-Myhome / SkyLineEndless", period: "2021 - 2023", status: "closed", isFeatured: true, accessLevel: "public", isSpoiler: false, url: "https://in-skylineendless.web.app/", coverImage: "assets/photo/SkylineendlessServerdis2020.png", gallery: ["assets/photo/SkylineendlessServerdis2020.png", "assets/photo/SkylineendlessServerdis2020EXdis1.jpg", "assets/photo/SkylineendlessServerdis2020EXdis2.jpg", "assets/photo/SkylineendlessServerdis2020EXdis3.jpg", "assets/photo/MH_MyhomeServerdis2020.jpg", "assets/photo/MH_MyhomeServerdis2020-Update.jpg", "assets/photo/MHMyhomeServerdis2020.png"], description: "คอมมูนิตี้เซิร์ฟเวอร์", stack: ["Community Architecture", "Role Management", "Discord Portal"] },
+            { id: "server-minecraft-legacy", title: "ServerMinecraft (Legacy)", period: "2021 - 2023", status: "closed", isFeatured: true, accessLevel: "public", isSpoiler: false, url: "https://bestcynixdev.web.app/project?id=server-minecraft-legacy", coverImage: "assets/photo/ServerMinecraft2021.png", gallery: ["assets/photo/ServerMinecraft2021.png"], description: "เซิร์ฟเวอร์ Minecraft รุ่นแรก", stack: ["Java Paper/Spigot", "Server Architecture", "Custom Plugins"] },
+            { id: "roblox-server-project", title: "Roblox Server (New Era)", period: "แผนงาน 2026+", status: "spoiler", isFeatured: false, accessLevel: "dev_only", isSpoiler: true, releaseDate: "2026-12-31T18:00:00Z", url: "https://bestcynixdev.web.app/project?id=roblox-server-project", coverImage: "assets/photo/bestcynixprodev.png", gallery: ["assets/photo/bestcynixprodev.png"], description: "🔒 โปรเจกต์ลับ: ระบบเซิร์ฟเวอร์ Roblox พร้อมระบบคอมมูนิตี้และเครื่องมือจัดการที่เชื่อมกับงานเว็บ", stack: ["Lua / Luau", "Roblox Studio", "Web API", "Cloudflare"] }
+          ];
+        }
+        renderProjectsTable();
+      });
+
+      // Future Plans
+      db.collection("site_cms").doc("future_plans").onSnapshot((doc) => {
+        if (doc.exists && doc.data().list) {
+          futurePlansList = doc.data().list;
+        } else {
+          futurePlansList = [
+            { id: "plan-roblox", title: "Roblox Server", tag: "Roadmap 2026", description: "มีแผนสร้างเซิร์ฟเวอร์ Roblox", active: true },
+            { id: "plan-minecraft", title: "Minecraft Server (New Era)", tag: "In Planning", description: "เตรียมกลับมาพัฒนาเซิร์ฟเวอร์ Minecraft รุ่นใหม่", active: true },
+            { id: "plan-appgame", title: "App Game", tag: "Future Concept", description: "มีแผนพัฒนา App Game ของตัวเอง", active: true }
+          ];
+        }
+        renderFutureTable();
+      });
+
+      // Social Links
+      db.collection("site_cms").doc("social_contact").onSnapshot((doc) => {
+        if (doc.exists && doc.data().channels) {
+          const ch = doc.data().channels;
+          if (Array.isArray(ch)) {
+            socialChannelsList = ch;
+          } else {
+            socialChannelsList = Object.keys(ch).map(k => ({
+              id: k,
+              platform: k,
+              name: ch[k].name || k,
+              url: ch[k].url || "",
+              desc: ch[k].desc || "",
+              visible: ch[k].visible !== false
+            }));
+          }
+        } else {
+          socialChannelsList = [
+            { id: "discord", platform: "discord", name: "Discord", url: "https://discord.gg/", desc: "Community & Support Server", visible: true },
+            { id: "github", platform: "github", name: "GitHub", url: "https://github.com/Bestcynixdev", desc: "Open Source & Repositories", visible: true },
+            { id: "facebook", platform: "facebook", name: "Facebook", url: "https://facebook.com/", desc: "BestCyniX Dev Page", visible: true },
+            { id: "instagram", platform: "instagram", name: "Instagram", url: "https://instagram.com/bestcynix.dev", desc: "@bestcynix.dev", visible: true },
+            { id: "line", platform: "line", name: "LINE", url: "", desc: "Direct Chat & Inquiries", visible: true },
+            { id: "x", platform: "x", name: "X (Twitter)", url: "", desc: "Latest Updates & Dev Log", visible: true }
+          ];
+        }
+        renderSocialChannels();
+      });
+
+      // Tech Stack
+      db.collection("site_cms").doc("tech_stack").onSnapshot((doc) => {
+        if (doc.exists && doc.data().stacks) {
+          const rawStacks = doc.data().stacks;
+          const cleaned = {};
+          TECH_CATEGORIES.forEach(cat => {
+            const arr = Array.isArray(rawStacks[cat.key]) ? rawStacks[cat.key] : [];
+            cleaned[cat.key] = arr.map(s => String(s || '').replace(/^undefined/i, '').trim()).filter(Boolean);
+          });
+          techStacksData = cleaned;
+        }
+        renderTechStackCMS();
+      });
+    };
+
+    // 2. Render Projects Table with Reordering & Direct < 0 > Index Input
+    let currentProjSearchQuery = "";
+    let currentProjStatusFilter = "all";
+
+    const renderProjectsTable = () => {
+      const tbody = document.getElementById("projectsTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const filteredList = projectsList.filter((p) => {
+        const matchesStatus = (currentProjStatusFilter === "all" || p.status === currentProjStatusFilter);
+        const searchStr = `${p.title || ''} ${p.period || ''} ${p.description || ''} ${(p.stack || []).join(' ')}`.toLowerCase();
+        const matchesSearch = !currentProjSearchQuery || searchStr.includes(currentProjSearchQuery.toLowerCase());
+        return matchesStatus && matchesSearch;
+      });
+
+      if (filteredList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--muted); padding: 2rem;">ไม่พบข้อมูลโปรเจกต์ที่ตรงกับคำค้นหา</td></tr>`;
+        return;
+      }
+
+      filteredList.forEach((p) => {
+        const origIdx = projectsList.findIndex(item => item.id === p.id);
+        const tr = document.createElement("tr");
+        const statusClass = p.status === "active" ? "pill-active" : p.status === "closed" ? "pill-closed" : "pill-spoiler";
+        const statusText = p.status === "active" ? "🟢 เปิดอยู่" : p.status === "closed" ? "🔴 ปิดแล้ว" : "🔒 สปอยล์";
+
+        tr.innerHTML = `
+          <td style="white-space: nowrap; text-align: center;">
+            <div style="display: inline-flex; align-items: center; gap: 0.2rem; background: rgba(0,0,0,0.35); padding: 0.2rem 0.35rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+              <button type="button" class="btn-action-icon" onclick="window.moveProjectItem(${origIdx}, -1)" ${origIdx === 0 ? 'disabled style="opacity:0.3;"' : ''} title="เลื่อนขึ้น">▲</button>
+              <input type="number" min="0" max="${projectsList.length - 1}" value="${origIdx}" onchange="window.setProjectItemOrder(${origIdx}, this.value)" style="width: 42px; text-align: center; background: rgba(5,11,22,0.9); border: 1px solid var(--accent); color: #32ffc9; border-radius: 6px; font-weight: 700; font-family: 'Chakra Petch', sans-serif; font-size: 0.85rem; padding: 0.15rem 0;" title="เปลี่ยนลำดับตรงนี้" />
+              <button type="button" class="btn-action-icon" onclick="window.moveProjectItem(${origIdx}, 1)" ${origIdx === projectsList.length - 1 ? 'disabled style="opacity:0.3;"' : ''} title="เลื่อนลง">▼</button>
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <img src="${p.coverImage || 'assets/photo/bcxlogo2.png'}" alt="Cover" style="width: 34px; height: 34px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border);" />
+              <strong>${p.title}</strong>
+            </div>
+          </td>
+          <td>${p.period}</td>
+          <td><span class="pill-badge ${statusClass}">${statusText}</span></td>
+          <td>${p.isFeatured ? "⭐ เด่น" : "-"}</td>
+          <td>${p.accessLevel === "dev_only" ? "🛡️ เฉพาะ DEV" : "🌐 สาธารณะ"}</td>
+          <td>${p.isSpoiler ? "🔒 สปอยล์" : "ปกติ"}</td>
+          <td>
+            <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
+              <button type="button" class="btn-action-icon" onclick="window.openEditProject(${origIdx})" title="แก้ไข">✏️ แก้ไข</button>
+              <button type="button" class="btn-action-icon" onclick="window.toggleProjectActive(${origIdx})" title="${p.status === 'closed' ? 'เปิดใช้งาน' : 'ซ่อน/ปิด'}">${p.status === 'closed' ? '✓ เปิด' : '👁️ ซ่อน'}</button>
+              <button type="button" class="btn-action-icon del" onclick="window.deleteProject(${origIdx})" title="ลบ">🗑️ ลบ</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.moveProjectItem = async (fromIdx, direction) => {
+      const targetIdx = fromIdx + direction;
+      if (targetIdx < 0 || targetIdx >= projectsList.length) return;
+      const item = projectsList.splice(fromIdx, 1)[0];
+      projectsList.splice(targetIdx, 0, item);
+      renderProjectsTable();
+      await db.collection("site_cms").doc("projects").set({ list: projectsList });
+    };
+
+    window.setProjectItemOrder = async (fromIdx, toIdx) => {
+      toIdx = parseInt(toIdx, 10);
+      if (isNaN(toIdx) || toIdx < 0 || toIdx >= projectsList.length || toIdx === fromIdx) {
+        renderProjectsTable();
+        return;
+      }
+      const item = projectsList.splice(fromIdx, 1)[0];
+      projectsList.splice(toIdx, 0, item);
+      renderProjectsTable();
+      await db.collection("site_cms").doc("projects").set({ list: projectsList });
+    };
+
+    window.toggleProjectActive = async (idx) => {
+      const p = projectsList[idx];
+      if (!p) return;
+      p.status = p.status === "closed" ? "active" : "closed";
+      renderProjectsTable();
+      await db.collection("site_cms").doc("projects").set({ list: projectsList });
+    };
+
+    document.getElementById("btnSaveAllProjectsOrder")?.addEventListener("click", async () => {
+      await db.collection("site_cms").doc("projects").set({ list: projectsList });
+      showCyberToast("✓ บันทึกลำดับโปรเจกต์เรียบร้อยแล้ว", "", "success");
+    });
+
+    document.getElementById("projTableSearch")?.addEventListener("input", (e) => {
+      currentProjSearchQuery = e.target.value.trim();
+      renderProjectsTable();
+    });
+
+    document.getElementById("projTableStatusFilter")?.addEventListener("change", (e) => {
+      currentProjStatusFilter = e.target.value;
+      renderProjectsTable();
+    });
+
+    // 3. Render Future Plans Table with Reordering & Direct < 0 > Index Input
+    const renderFutureTable = () => {
+      const tbody = document.getElementById("futureTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (!futurePlansList.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 2rem;">ยังไม่มีแผนงานในอนาคต กด '+ เพิ่มแผนงานใหม่' เพื่อเริ่ม</td></tr>`;
+        return;
+      }
+
+      futurePlansList.forEach((f, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="white-space: nowrap; text-align: center;">
+            <div style="display: inline-flex; align-items: center; gap: 0.2rem; background: rgba(0,0,0,0.35); padding: 0.2rem 0.35rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+              <button type="button" class="btn-action-icon" onclick="window.moveFutureItem(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3;"' : ''} title="เลื่อนขึ้น">▲</button>
+              <input type="number" min="0" max="${futurePlansList.length - 1}" value="${idx}" onchange="window.setFutureItemOrder(${idx}, this.value)" style="width: 42px; text-align: center; background: rgba(5,11,22,0.9); border: 1px solid var(--accent); color: #32ffc9; border-radius: 6px; font-weight: 700; font-family: 'Chakra Petch', sans-serif; font-size: 0.85rem; padding: 0.15rem 0;" title="เปลี่ยนลำดับตรงนี้" />
+              <button type="button" class="btn-action-icon" onclick="window.moveFutureItem(${idx}, 1)" ${idx === futurePlansList.length - 1 ? 'disabled style="opacity:0.3;"' : ''} title="เลื่อนลง">▼</button>
+            </div>
+          </td>
+          <td><strong>${f.title}</strong></td>
+          <td><span class="pill-badge pill-spoiler">${f.tag || 'Roadmap'}</span></td>
+          <td>${f.description}</td>
+          <td>${f.active !== false ? "🟢 กำลังแสดง" : "⚪ ซ่อนอยู่"}</td>
+          <td>
+            <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
+              <button type="button" class="btn-action-icon" onclick="window.openEditFutureModal(${idx})">✏️ แก้ไข</button>
+              <button type="button" class="btn-action-icon" onclick="window.toggleFutureActive(${idx})">${f.active !== false ? "👁️ ซ่อน" : "✓ แสดง"}</button>
+              <button type="button" class="btn-action-icon del" onclick="window.deleteFuture(${idx})">🗑️ ลบ</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.moveFutureItem = async (fromIdx, direction) => {
+      const targetIdx = fromIdx + direction;
+      if (targetIdx < 0 || targetIdx >= futurePlansList.length) return;
+      const item = futurePlansList.splice(fromIdx, 1)[0];
+      futurePlansList.splice(targetIdx, 0, item);
+      renderFutureTable();
+      await db.collection("site_cms").doc("future_plans").set({ list: futurePlansList });
+    };
+
+    window.setFutureItemOrder = async (fromIdx, toIdx) => {
+      toIdx = parseInt(toIdx, 10);
+      if (isNaN(toIdx) || toIdx < 0 || toIdx >= futurePlansList.length || toIdx === fromIdx) {
+        renderFutureTable();
+        return;
+      }
+      const item = futurePlansList.splice(fromIdx, 1)[0];
+      futurePlansList.splice(toIdx, 0, item);
+      renderFutureTable();
+      await db.collection("site_cms").doc("future_plans").set({ list: futurePlansList });
+    };
+
+    window.toggleFutureActive = async (idx) => {
+      futurePlansList[idx].active = futurePlansList[idx].active === false ? true : false;
+      renderFutureTable();
+      await db.collection("site_cms").doc("future_plans").set({ list: futurePlansList });
+    };
+
+    window.deleteFuture = async (idx) => {
+      if (!confirm("⚠️ ต้องการลบแผนงานนี้ใช่หรือไม่?")) return;
+      futurePlansList.splice(idx, 1);
+      renderFutureTable();
+      await db.collection("site_cms").doc("future_plans").set({ list: futurePlansList });
+    };
+
+    // Future Modal Actions
+    const futureModal = document.getElementById("futureModal");
+    const closeFutureModal = () => futureModal.classList.remove("active");
+    document.getElementById("btnCloseFutureModal")?.addEventListener("click", closeFutureModal);
+    document.getElementById("btnCancelFuture")?.addEventListener("click", closeFutureModal);
+
+    document.getElementById("btnOpenAddFutureModal")?.addEventListener("click", () => {
+      document.getElementById("futurePlanId").value = "plan_" + Date.now();
+      document.getElementById("futurePlanForm").reset();
+      document.getElementById("futureActive").checked = true;
+      document.getElementById("futureModalTitle").textContent = "🚀 เพิ่มแผนงานใหม่ในอนาคต";
+      futureModal.classList.add("active");
+    });
+
+    window.openEditFutureModal = (idx) => {
+      const f = futurePlansList[idx];
+      if (!f) return;
+      document.getElementById("futurePlanId").value = f.id || ("plan_" + idx);
+      document.getElementById("futureTitle").value = f.title || "";
+      document.getElementById("futureTag").value = f.tag || "";
+      document.getElementById("futureDesc").value = f.description || "";
+      document.getElementById("futureActive").checked = f.active !== false;
+      document.getElementById("futureModalTitle").textContent = "✏️ แก้ไขแผนงาน: " + f.title;
+      futureModal.classList.add("active");
+    };
+
+    document.getElementById("futurePlanForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("futurePlanId").value;
+      const title = document.getElementById("futureTitle").value.trim();
+      const tag = document.getElementById("futureTag").value.trim();
+      const description = document.getElementById("futureDesc").value.trim();
+      const active = document.getElementById("futureActive").checked;
+
+      const planData = { id, title, tag, description, active };
+      const existingIdx = futurePlansList.findIndex(p => p.id === id);
+      if (existingIdx >= 0) {
+        futurePlansList[existingIdx] = planData;
+      } else {
+        futurePlansList.push(planData);
+      }
+
+      await db.collection("site_cms").doc("future_plans").set({ list: futurePlansList });
+      renderFutureTable();
+      closeFutureModal();
+      showCyberToast("✓ บันทึกแผนงานเรียบร้อยแล้ว", "", "success");
+    });
+
+    document.getElementById("btnSaveAllFutureOrder")?.addEventListener("click", async () => {
+      await db.collection("site_cms").doc("future_plans").set({ list: futurePlansList });
+      showCyberToast("✓ บันทึกแผนงานทั้งหมดเรียบร้อยแล้ว", "", "success");
+    });
+
+    // 4. Render Dynamic Social Channels with Automatic Logo Icon Extraction
+    const getPlatformIcon = (platform, url) => {
+      const p = String(platform || '').toLowerCase();
+      const u = String(url || '').toLowerCase();
+      if (window.BCX_BRAND_ICONS) {
+        if (p.includes('discord') || u.includes('discord')) return window.BCX_BRAND_ICONS['discord_brand'] || window.BCX_BRAND_ICONS['discord.js'];
+        if (p.includes('github') || u.includes('github')) return window.BCX_BRAND_ICONS['github'];
+        if (p.includes('facebook') || u.includes('facebook')) return window.BCX_BRAND_ICONS['facebook_brand'];
+        if (p.includes('instagram') || u.includes('instagram')) return window.BCX_BRAND_ICONS['instagram_brand'];
+        if (p.includes('line') || u.includes('line.me')) return window.BCX_BRAND_ICONS['line_brand'];
+        if (p.includes('x') || p.includes('twitter') || u.includes('twitter') || u.includes('x.com')) return window.BCX_BRAND_ICONS['x_brand'];
+        if (p.includes('email') || u.includes('mailto')) return window.BCX_BRAND_ICONS['email_brand'];
+      }
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#32ffc9" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+    };
+
+    const renderSocialChannels = () => {
+      const container = document.getElementById("socialChannelsContainer");
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (!socialChannelsList.length) {
+        container.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 2rem;">ยังไม่มีช่องทางติดต่อ กด '+ เพิ่มช่องทางติดต่อใหม่' เพื่อเริ่ม</div>`;
+        return;
+      }
+
+      socialChannelsList.forEach((ch, idx) => {
+        const card = document.createElement("div");
+        card.style.css?v=20260826_110 = "background: linear-gradient(160deg, rgba(8, 22, 40, 0.95), rgba(4, 12, 24, 0.98)); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 1rem 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;";
+        const iconSvg = getPlatformIcon(ch.platform || ch.name, ch.url);
+
+        card.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 260px;">
+            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              ${iconSvg}
+            </div>
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <strong style="color: #fff; font-size: 0.95rem;">${ch.name || 'ไม่ระบุชื่อ'}</strong>
+                <span style="font-size: 0.74rem; padding: 0.15rem 0.5rem; border-radius: 999px; ${ch.visible !== false ? 'background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);' : 'background: rgba(255, 255, 255, 0.08); color: var(--muted); border: 1px solid rgba(255, 255, 255, 0.15);'}">
+                  ${ch.visible !== false ? '🟢 แสดงอยู่' : '⚪ ซ่อนอยู่'}
+                </span>
+              </div>
+              <div style="font-size: 0.8rem; color: var(--accent); margin-top: 0.2rem; word-break: break-all;">
+                ${ch.url ? `<a href="${ch.url}" target="_blank" style="color: var(--accent); text-decoration: none;">${ch.url}</a>` : '<span style="color: var(--muted);">(ยังไม่ได้ระบุ URL)</span>'}
+              </div>
+              ${ch.desc ? `<div style="font-size: 0.74rem; color: var(--muted); margin-top: 0.15rem;">${ch.desc}</div>` : ''}
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+            <!-- Reorder Index < 0 > Controls -->
+            <div style="display: inline-flex; align-items: center; gap: 0.2rem; background: rgba(0,0,0,0.35); padding: 0.2rem 0.35rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+              <button type="button" class="btn-action-icon" onclick="window.moveSocialItem(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3;"' : ''} title="เลื่อนขึ้น">▲</button>
+              <input type="number" min="0" max="${socialChannelsList.length - 1}" value="${idx}" onchange="window.setSocialItemOrder(${idx}, this.value)" style="width: 40px; text-align: center; background: rgba(5,11,22,0.9); border: 1px solid var(--accent); color: #32ffc9; border-radius: 6px; font-weight: 700; font-family: 'Chakra Petch', sans-serif; font-size: 0.85rem; padding: 0.15rem 0;" title="เปลี่ยนลำดับตรงนี้" />
+              <button type="button" class="btn-action-icon" onclick="window.moveSocialItem(${idx}, 1)" ${idx === socialChannelsList.length - 1 ? 'disabled style="opacity:0.3;"' : ''} title="เลื่อนลง">▼</button>
+            </div>
+
+            <button type="button" class="btn-action-icon" onclick="window.openEditSocialModal(${idx})" title="แก้ไข">✏️ แก้ไข</button>
+            <button type="button" class="btn-action-icon" onclick="window.toggleSocialVisibility(${idx})" title="${ch.visible !== false ? 'ซ่อน' : 'แสดง'}">${ch.visible !== false ? '👁️ ซ่อน' : '✓ แสดง'}</button>
+            <button type="button" class="btn-action-icon del" onclick="window.deleteSocialItem(${idx})" title="ลบ">🗑️ ลบ</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    };
+
+    window.moveSocialItem = async (fromIdx, direction) => {
+      const targetIdx = fromIdx + direction;
+      if (targetIdx < 0 || targetIdx >= socialChannelsList.length) return;
+      const item = socialChannelsList.splice(fromIdx, 1)[0];
+      socialChannelsList.splice(targetIdx, 0, item);
+      renderSocialChannels();
+      await db.collection("site_cms").doc("social_contact").set({ channels: socialChannelsList });
+    };
+
+    window.setSocialItemOrder = async (fromIdx, toIdx) => {
+      toIdx = parseInt(toIdx, 10);
+      if (isNaN(toIdx) || toIdx < 0 || toIdx >= socialChannelsList.length || toIdx === fromIdx) {
+        renderSocialChannels();
+        return;
+      }
+      const item = socialChannelsList.splice(fromIdx, 1)[0];
+      socialChannelsList.splice(toIdx, 0, item);
+      renderSocialChannels();
+      await db.collection("site_cms").doc("social_contact").set({ channels: socialChannelsList });
+    };
+
+    window.toggleSocialVisibility = async (idx) => {
+      socialChannelsList[idx].visible = socialChannelsList[idx].visible === false ? true : false;
+      renderSocialChannels();
+      await db.collection("site_cms").doc("social_contact").set({ channels: socialChannelsList });
+    };
+
+    window.deleteSocialItem = async (idx) => {
+      if (!confirm("⚠️ ต้องการลบช่องทางติดต่อนี้ใช่หรือไม่?")) return;
+      socialChannelsList.splice(idx, 1);
+      renderSocialChannels();
+      await db.collection("site_cms").doc("social_contact").set({ channels: socialChannelsList });
+    };
+
+    // Social Modal Actions
+    const socialModal = document.getElementById("socialModal");
+    const closeSocialModal = () => socialModal.classList.remove("active");
+    document.getElementById("btnCloseSocialModal")?.addEventListener("click", closeSocialModal);
+    document.getElementById("btnCancelSocialModal")?.addEventListener("click", closeSocialModal);
+
+    document.getElementById("btnAddNewSocialChannel")?.addEventListener("click", () => {
+      document.getElementById("socialChannelId").value = "ch_" + Date.now();
+      document.getElementById("socialChannelForm").reset();
+      document.getElementById("socialChannelVisible").checked = true;
+      document.getElementById("socialModalTitle").textContent = "📱 เพิ่มช่องทางติดต่อใหม่";
+      socialModal.classList.add("active");
+    });
+
+    window.openEditSocialModal = (idx) => {
+      const ch = socialChannelsList[idx];
+      if (!ch) return;
+      document.getElementById("socialChannelId").value = ch.id || ("ch_" + idx);
+      document.getElementById("socialPlatformSelect").value = ch.platform || "other";
+      document.getElementById("socialChannelName").value = ch.name || "";
+      document.getElementById("socialChannelUrl").value = ch.url || "";
+      document.getElementById("socialChannelDesc").value = ch.desc || "";
+      document.getElementById("socialChannelVisible").checked = ch.visible !== false;
+      document.getElementById("socialModalTitle").textContent = "✏️ แก้ไขช่องทาง: " + ch.name;
+      socialModal.classList.add("active");
+    };
+
+    document.getElementById("socialPlatformSelect")?.addEventListener("change", (e) => {
+      const sel = e.target.value;
+      const nameInput = document.getElementById("socialChannelName");
+      if (sel === "discord") nameInput.value = "Discord Server";
+      else if (sel === "github") nameInput.value = "GitHub";
+      else if (sel === "facebook") nameInput.value = "Facebook Page";
+      else if (sel === "instagram") nameInput.value = "Instagram";
+      else if (sel === "line") nameInput.value = "LINE Official";
+      else if (sel === "x") nameInput.value = "X (Twitter)";
+      else if (sel === "youtube") nameInput.value = "YouTube Channel";
+      else if (sel === "tiktok") nameInput.value = "TikTok";
+      else if (sel === "telegram") nameInput.value = "Telegram";
+      else if (sel === "email") nameInput.value = "Email";
+    });
+
+    document.getElementById("socialChannelForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("socialChannelId").value;
+      const platform = document.getElementById("socialPlatformSelect").value;
+      const name = document.getElementById("socialChannelName").value.trim();
+      const url = document.getElementById("socialChannelUrl").value.trim();
+      const desc = document.getElementById("socialChannelDesc").value.trim();
+      const visible = document.getElementById("socialChannelVisible").checked;
+
+      const chData = { id, platform, name, url, desc, visible };
+      const existingIdx = socialChannelsList.findIndex(c => c.id === id);
+      if (existingIdx >= 0) {
+        socialChannelsList[existingIdx] = chData;
+      } else {
+        socialChannelsList.push(chData);
+      }
+
+      await db.collection("site_cms").doc("social_contact").set({ channels: socialChannelsList });
+      renderSocialChannels();
+      closeSocialModal();
+      showCyberToast("✓ บันทึกช่องทางติดต่อเรียบร้อยแล้ว", "", "success");
+    });
+
+    document.getElementById("btnSaveSocialSettings")?.addEventListener("click", async () => {
+      await db.collection("site_cms").doc("social_contact").set({ channels: socialChannelsList });
+      showCyberToast("✓ บันทึกช่องทางติดต่อทั้งหมดเรียบร้อยแล้ว", "", "success");
+    });
+
+    // 5. Render Dynamic Tech Stack Manager with Real Icons & Autocomplete Search Filter
+    const TECH_CATEGORIES = [
+      { key: "languages", label: "01 ภาษาโปรแกรม (Programming Languages)", icon: "💻" },
+      { key: "frontend", label: "02 ฟรอนต์เอนด์ (Frontend Technologies)", icon: "🎨" },
+      { key: "backend", label: "03 แบ็กเอนด์ (Backend)", icon: "⚙️" },
+      { key: "databases", label: "04 ฐานข้อมูล (Databases)", icon: "🗄️" },
+      { key: "cloudTools", label: "05 คลาวด์และเครื่องมือ (Cloud & Tools)", icon: "☁️" }
+    ];
+
+    const renderTechStackCMS = () => {
+      const container = document.getElementById("techStackManagerContainer");
+      if (!container) return;
+      container.innerHTML = "";
+
+      TECH_CATEGORIES.forEach(cat => {
+        const catKey = cat.key;
+        const rawList = Array.isArray(techStacksData[catKey]) ? techStacksData[catKey] : [];
+        const currentList = rawList.map(s => String(s || '').replace(/^undefined/i, '').trim()).filter(Boolean);
+        const card = document.createElement("div");
+        card.style.css?v=20260826_110 = "background: linear-gradient(160deg, rgba(8, 22, 40, 0.95), rgba(4, 12, 24, 0.98)); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 1.3rem; display: flex; flex-direction: column; gap: 0.9rem;";
+
+        card.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.6rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 1.2rem;">${cat.icon}</span>
+              <strong style="color: #fff; font-size: 0.98rem;">${cat.label}</strong>
+              <span style="font-size: 0.74rem; background: rgba(50,255,201,0.1); border: 1px solid rgba(50,255,201,0.25); color: var(--accent); padding: 0.1rem 0.45rem; border-radius: 999px;">${currentList.length} รายการ</span>
+            </div>
+            <button type="button" class="btn-action-icon" onclick="window.saveSingleTechCategory('${catKey}')" style="background: rgba(16, 185, 129, 0.15); border-color: #10b981; color: #4ade80; font-weight: 700;">💾 บันทึกหมวดนี้</button>
+          </div>
+
+          <!-- Visual Real Icon Badges Container -->
+          <div id="techCategoryBadges_${catKey}" style="display: flex; flex-wrap: wrap; gap: 0.45rem; min-height: 44px; padding: 0.6rem; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; align-items: center;">
+            ${currentList.map((stk, sIdx) => {
+              const iconSvg = window.getBCXTechIcon ? window.getBCXTechIcon(stk) : '';
+              return `
+                <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(10, 26, 48, 0.9); border: 1px solid rgba(50, 255, 201, 0.35); padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.8rem; color: #fff; font-weight: 600;">
+                  <span style="display: flex; align-items: center; width: 18px; height: 18px;">${iconSvg}</span>
+                  <span>${stk}</span>
+                  <button type="button" onclick="window.removeCategoryStack('${catKey}', ${sIdx})" style="background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.9rem; padding: 0; line-height: 1; margin-left: 0.2rem;" title="ลบสแต็กนี้">✕</button>
+                </span>
+              `;
+            }).join('') || '<span style="color: var(--muted); font-size: 0.8rem;">ยังไม่มีสแต็กในหมวดนี้ ค้นหาหรือพิมพ์เพิ่มด้านล่าง</span>'}
+          </div>
+
+          <!-- Add / Search Stack Input -->
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <input type="text" id="inputSearchTech_${catKey}" class="form-input" placeholder="พิมพ์ชื่อสแต็กเพื่อค้นหาหรือเพิ่ม เช่น React, PostgreSQL, Docker..." style="flex: 1; min-width: 220px;" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addCategoryStack('${catKey}');}" />
+            <button type="button" class="btn-nav-action" onclick="window.addCategoryStack('${catKey}')" style="cursor: pointer; white-space: nowrap;">+ เพิ่มสแต็ก</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    };
+
+    window.addCategoryStack = (catKey) => {
+      const input = document.getElementById(`inputSearchTech_${catKey}`);
+      if (!input || !input.value.trim()) return;
+      const raw = input.value.trim();
+      const tags = raw.split(",").map(t => t.trim()).filter(Boolean);
+      if (!Array.isArray(techStacksData[catKey])) techStacksData[catKey] = [];
+
+      tags.forEach(t => {
+        if (!techStacksData[catKey].some(s => s.toLowerCase() === t.toLowerCase())) {
+          techStacksData[catKey].push(t);
+        }
+      });
+
+      input.value = "";
+      renderTechStackCMS();
+    };
+
+    window.removeCategoryStack = (catKey, sIdx) => {
+      if (!Array.isArray(techStacksData[catKey])) return;
+      techStacksData[catKey].splice(sIdx, 1);
+      renderTechStackCMS();
+    };
+
+    window.saveSingleTechCategory = async (catKey) => {
+      await db.collection("site_cms").doc("tech_stack").set({ stacks: techStacksData });
+      showCyberToast("✓ บันทึกสแต็กหมวดนี้เรียบร้อยแล้ว", "", "success");
+    };
+
+    document.getElementById("btnSaveStackSettings")?.addEventListener("click", async () => {
+      await db.collection("site_cms").doc("tech_stack").set({ stacks: techStacksData });
+      showCyberToast("✓ บันทึกสแต็กเทคโนโลยีทั้งหมดเรียบร้อยแล้ว", "", "success");
+    });
+
+    // 6. Project Modal Helpers & Previews
+    const projectModal = document.getElementById("projectModal");
+    const coverPreviewWrap = document.getElementById("coverPreviewWrap");
+    const coverPreviewImg = document.getElementById("coverPreviewImg");
+    const projCoverImage = document.getElementById("projCoverImage");
+
+    const updateCoverPreview = (src) => {
+      if (src && src.trim()) {
+        coverPreviewImg.src = src.trim();
+        coverPreviewWrap.style.display = "block";
+      } else {
+        coverPreviewWrap.style.display = "none";
+      }
+    };
+
+    projCoverImage?.addEventListener("input", (e) => updateCoverPreview(e.target.value));
+
+    // Cover Image Upload Handler
+    const fileCoverUpload = document.getElementById("fileCoverUpload");
+    document.getElementById("btnTriggerCoverUpload")?.addEventListener("click", () => fileCoverUpload.click());
+    fileCoverUpload?.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const base64Url = evt.target.result;
+        projCoverImage.value = base64Url;
+        updateCoverPreview(base64Url);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Screenshots Gallery Manager
+    let currentGalleryList = [];
+    const renderGalleryItems = () => {
+      const container = document.getElementById("galleryItemsContainer");
+      const hiddenInput = document.getElementById("projGallery");
+      if (!container) return;
+
+      hiddenInput.value = currentGalleryList.join(", ");
+      
+      if (!currentGalleryList.length) {
+        container.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 0.6rem; font-size: 0.8rem; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">ยังไม่มีภาพตัวอย่าง (ใส่ URL ด้านบนหรือกดอัปโหลดรูป)</div>`;
+        return;
+      }
+
+      container.innerHTML = currentGalleryList.map((url, idx) => `
+        <div style="display: flex; align-items: center; gap: 0.6rem; background: rgba(8, 20, 36, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.4rem 0.6rem;">
+          <span style="font-size: 0.76rem; font-weight: 700; color: var(--accent); min-width: 22px;">#${idx + 1}</span>
+          <img src="${url}" onerror="this.src='assets/photo/bcxlogo2.png'" style="width: 42px; height: 42px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border);" />
+          <input type="text" value="${url}" onchange="window.updateGalleryItemUrl(${idx}, this.value)" class="form-input" style="flex: 1; padding: 0.35rem 0.6rem; font-size: 0.8rem;" />
+          
+          <div style="display: flex; gap: 0.25rem;">
+            <button type="button" class="btn-action-icon" onclick="window.moveGalleryItem(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3;"' : ''} title="เลื่อนขึ้น">▲</button>
+            <button type="button" class="btn-action-icon" onclick="window.moveGalleryItem(${idx}, 1)" ${idx === currentGalleryList.length - 1 ? 'disabled style="opacity:0.3;"' : ''} title="เลื่อนลง">▼</button>
+            <button type="button" class="btn-action-icon del" onclick="window.deleteGalleryItem(${idx})" title="ลบภาพนี้">🗑️</button>
+          </div>
+        </div>
+      `).join("");
+    };
+
+    window.updateGalleryItemUrl = (idx, newUrl) => {
+      if (newUrl && newUrl.trim()) currentGalleryList[idx] = newUrl.trim();
+      renderGalleryItems();
+    };
+
+    window.moveGalleryItem = (idx, direction) => {
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= currentGalleryList.length) return;
+      const temp = currentGalleryList[idx];
+      currentGalleryList[idx] = currentGalleryList[targetIdx];
+      currentGalleryList[targetIdx] = temp;
+      renderGalleryItems();
+    };
+
+    window.deleteGalleryItem = (idx) => {
+      currentGalleryList.splice(idx, 1);
+      renderGalleryItems();
+    };
+
+    window.addGalleryItem = (url) => {
+      if (!url || !url.trim()) return;
+      currentGalleryList.push(url.trim());
+      renderGalleryItems();
+    };
+
+    document.getElementById("btnAddGalleryUrl")?.addEventListener("click", () => {
+      const input = document.getElementById("projGalleryInput");
+      if (input && input.value.trim()) {
+        window.addGalleryItem(input.value.trim());
+        input.value = "";
+      }
+    });
+
+    document.getElementById("projGalleryInput")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("btnAddGalleryUrl")?.click();
+      }
+    });
+
+    // Gallery Multiple Images Upload Handler
+    const fileGalleryUpload = document.getElementById("fileGalleryUpload");
+    document.getElementById("btnTriggerGalleryUpload")?.addEventListener("click", () => fileGalleryUpload.click());
+    fileGalleryUpload?.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+
+      const promises = files.map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (evt) => resolve(evt.target.result);
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(promises).then((dataUrls) => {
+        dataUrls.forEach(url => window.addGalleryItem(url));
+        fileGalleryUpload.value = "";
+      });
+    });
+
+    // Interactive Tech Stack Selector
+    const PRESET_STACKS = [
+      "Node.js", "Discord.js", "Firebase", "JavaScript", "TypeScript", "Python", 
+      "HTML5", "CSS3", "REST API", "AI / LLM", "TailwindCSS", "Next.js", "React", 
+      "Vue.js", "Docker", "PostgreSQL", "MySQL", "MongoDB", "Redis", "Express", 
+      "FastAPI", "WebSocket", "OAuth 2.0", "Cloudflare", "Linux", "Java", "C++", "Rust", "Go", "Git", "VS Code"
+    ];
+
+    let currentStackList = [];
+
+    const renderStackManager = () => {
+      const chipsContainer = document.getElementById("selectedStackChips");
+      const pillsContainer = document.getElementById("presetStackPills");
+      const hiddenInput = document.getElementById("projStack");
+      if (!chipsContainer || !pillsContainer) return;
+
+      hiddenInput.value = currentStackList.join(", ");
+
+      // Render Selected Chips
+      if (!currentStackList.length) {
+        chipsContainer.innerHTML = `<span style="color: var(--muted); font-size: 0.8rem;" id="noStackPlaceholder">ยังไม่ได้เลือกสแต็กเทคโนโลยี (คลิกเลือกด้านล่าง หรือพิมพ์เพิ่ม)</span>`;
+      } else {
+        chipsContainer.innerHTML = currentStackList.map((stk, idx) => {
+          const iconSvg = window.getBCXTechIcon ? window.getBCXTechIcon(stk) : '';
+          return `
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(50, 255, 201, 0.15); border: 1px solid var(--accent); color: #fff; padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600;">
+              <span style="display: flex; align-items: center; width: 16px; height: 16px;">${iconSvg}</span>
+              <span>${stk}</span>
+              <button type="button" onclick="window.removeStackItem(${idx})" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.85rem; padding:0; line-height:1;">✕</button>
+            </span>
+          `;
+        }).join("");
+      }
+
+      // Render Preset Clickable Pills
+      pillsContainer.innerHTML = PRESET_STACKS.map(stk => {
+        const isSelected = currentStackList.some(s => s.toLowerCase() === stk.toLowerCase());
+        const pillStyle = isSelected
+          ? "background: rgba(50, 255, 201, 0.2); border-color: var(--accent); color: var(--accent); font-weight: 700;"
+          : "background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.15); color: #cbd5e1;";
+        return `
+          <button type="button" onclick="window.toggleStackItem('${stk}')" style="border: 1px solid; border-radius: 6px; padding: 0.25rem 0.55rem; font-size: 0.76rem; cursor: pointer; transition: all 0.2s; ${pillStyle}">
+            ${isSelected ? "✓ " : "+ "}${stk}
+          </button>
+        `;
+      }).join("");
+    };
+
+    window.toggleStackItem = (stk) => {
+      const idx = currentStackList.findIndex(s => s.toLowerCase() === stk.toLowerCase());
+      if (idx >= 0) {
+        currentStackList.splice(idx, 1);
+      } else {
+        currentStackList.push(stk);
+      }
+      renderStackManager();
+    };
+
+    window.removeStackItem = (idx) => {
+      currentStackList.splice(idx, 1);
+      renderStackManager();
+    };
+
+    window.addCustomStack = () => {
+      const input = document.getElementById("customStackInput");
+      if (!input || !input.value.trim()) return;
+      const raw = input.value.trim();
+      const tags = raw.split(",").map(t => t.trim()).filter(Boolean);
+      tags.forEach(t => {
+        if (!currentStackList.some(s => s.toLowerCase() === t.toLowerCase())) {
+          currentStackList.push(t);
+        }
+      });
+      input.value = "";
+      renderStackManager();
+    };
+
+    document.getElementById("btnAddCustomStack")?.addEventListener("click", window.addCustomStack);
+    document.getElementById("customStackInput")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        window.addCustomStack();
+      }
+    });
+
+    // Open Edit Project Modal
+    window.openEditProject = (idx) => {
+      const p = projectsList[idx];
+      if (!p) return;
+      document.getElementById("projId").value = p.id;
+      document.getElementById("projTitle").value = p.title || "";
+      document.getElementById("projPeriod").value = p.period || "";
+      document.getElementById("projStatus").value = p.status || "active";
+      document.getElementById("projAccess").value = p.accessLevel || "public";
+      document.getElementById("projUrl").value = p.url || "";
+      document.getElementById("projCoverImage").value = p.coverImage || "";
+      document.getElementById("projFeatured").checked = p.isFeatured === true;
+      document.getElementById("projSpoiler").checked = p.isSpoiler === true;
+      document.getElementById("projReleaseDate").value = p.releaseDate ? p.releaseDate.substring(0, 16) : "";
+      document.getElementById("projDesc").value = p.description || "";
+      document.getElementById("projDetails").value = p.details || "";
+
+      // Populate Gallery & Tech Stack lists
+      currentGalleryList = Array.isArray(p.gallery) ? [...p.gallery] : (p.gallery ? p.gallery.split(",").map(s => s.trim()).filter(Boolean) : []);
+      renderGalleryItems();
+
+      currentStackList = Array.isArray(p.stack) ? [...p.stack] : (p.stack ? p.stack.split(",").map(s => s.trim()).filter(Boolean) : []);
+      renderStackManager();
+
+      updateCoverPreview(p.coverImage);
+
+      document.getElementById("projectModalTitle").textContent = "✏️ แก้ไขโปรเจกต์: " + p.title;
+      projectModal.classList.add("active");
+    };
+
+    document.getElementById("btnOpenAddProjectModal")?.addEventListener("click", () => {
+      document.getElementById("projId").value = "proj_" + Date.now();
+      document.getElementById("projectEditForm").reset();
+      currentGalleryList = [];
+      renderGalleryItems();
+      currentStackList = [];
+      renderStackManager();
+      updateCoverPreview("");
+      document.getElementById("projectModalTitle").textContent = "➕ เพิ่มโปรเจกต์ใหม่";
+      projectModal.classList.add("active");
+    });
+
+    // Close Modal Event Listeners
+    const closeProjectModal = () => projectModal.classList.remove("active");
+    document.getElementById("btnCancelProj")?.addEventListener("click", closeProjectModal);
+    document.getElementById("btnCloseProjectModal")?.addEventListener("click", closeProjectModal);
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeProjectModal();
+        closeFutureModal();
+        closeSocialModal();
+      }
+    });
+
+    document.getElementById("projectEditForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("projId").value;
+      const title = document.getElementById("projTitle").value.trim();
+      const period = document.getElementById("projPeriod").value.trim();
+      const status = document.getElementById("projStatus").value;
+      const accessLevel = document.getElementById("projAccess").value;
+      const url = document.getElementById("projUrl").value.trim();
+      const coverImage = document.getElementById("projCoverImage").value.trim();
+      const gallery = [...currentGalleryList];
+      const isFeatured = document.getElementById("projFeatured").checked;
+      const isSpoiler = document.getElementById("projSpoiler").checked;
+      const releaseDateVal = document.getElementById("projReleaseDate").value;
+      const description = document.getElementById("projDesc").value.trim();
+      const details = document.getElementById("projDetails").value.trim();
+      const stack = [...currentStackList];
+
+      const projectData = {
+        id,
+        title,
+        period,
+        status,
+        accessLevel,
+        url,
+        coverImage: coverImage || null,
+        gallery: gallery || [],
+        isFeatured,
+        isSpoiler,
+        releaseDate: releaseDateVal ? new Date(releaseDateVal).toISOString() : null,
+        description,
+        details,
+        stack
+      };
+
+      const existingIdx = projectsList.findIndex(p => p.id === id);
+      if (existingIdx >= 0) {
+        projectsList[existingIdx] = projectData;
+      } else {
+        projectsList.push(projectData);
+      }
+
+      await db.collection("site_cms").doc("projects").set({ list: projectsList });
+      if (window.logAdminAudit) {
+        window.logAdminAudit('SAVE_PROJECT', `บันทึกข้อมูลโปรเจกต์ ${title}`, { id, status, isFeatured });
+      }
+      showCyberToast("✓ บันทึกโปรเจกต์เรียบร้อยแล้ว", "", "success");
+      projectModal.classList.remove("active");
+    });
+
+    window.deleteProject = async (idx) => {
+      if (!confirm("⚠️ ต้องการลบโปรเจกต์นี้ใช่หรือไม่?")) return;
+      projectsList.splice(idx, 1);
+      await db.collection("site_cms").doc("projects").set({ list: projectsList });
+    };
+  </script>
+
+  <footer class="site-footer"></footer>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+  <script src="js/audit-logger.js?v=20260826_22"></script>
+</body>
+</html>

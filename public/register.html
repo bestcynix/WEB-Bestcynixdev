@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+  <title>สมัครสมาชิก (Register) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-710F6F2YG5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-710F6F2YG5');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.88);
+      --accent: #32ffc9;
+      --accent-hover: #1be4b0;
+      --accent-blue: #0284c7;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+      --danger: #ff5574;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(circle at 85% 15%, rgba(2, 132, 199, 0.22), transparent 45%),
+        radial-gradient(circle at 15% 85%, rgba(50, 255, 201, 0.15), transparent 40%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      width: min(520px, calc(100vw - 2rem));
+      margin: auto;
+      padding: 2.2rem 0;
+    }
+    .brand-header {
+      text-align: center;
+      margin-bottom: 1.8rem;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    .brand-link img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 15px rgba(50, 255, 201, 0.4);
+    }
+    .auth-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.4rem;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(50, 255, 201, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--accent-blue), transparent);
+    }
+    .auth-title {
+      font-size: 1.5rem;
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .auth-subtitle {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 1.6rem;
+    }
+    .btn-google {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #fff;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .btn-google:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 1.5rem 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .auth-divider span {
+      padding: 0 0.8rem;
+    }
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.88rem;
+      color: #d6e8f7;
+      font-weight: 500;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(6, 18, 33, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 10px;
+      color: #e9f6ff;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.94rem;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+    .form-input:focus {
+      border-color: var(--accent);
+      background: rgba(10, 26, 46, 0.95);
+      box-shadow: 0 0 0 3px rgba(50, 255, 201, 0.2);
+    }
+    .password-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .password-input-wrap .form-input {
+      padding-right: 2.8rem;
+    }
+    .password-toggle-btn {
+      position: absolute;
+      right: 0.6rem;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+    .password-toggle-btn:hover {
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .password-match-indicator {
+      font-size: 0.8rem;
+      margin-top: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .password-match-indicator.valid { color: var(--accent); }
+    .password-match-indicator.invalid { color: var(--danger); }
+
+    .form-checkbox-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.84rem;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 1.4rem;
+    }
+    .form-checkbox-label input[type="checkbox"] {
+      margin-top: 0.2rem;
+      accent-color: var(--accent);
+    }
+    .link-accent {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .link-accent:hover {
+      text-decoration: underline;
+      color: var(--accent-hover);
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+      color: #050b14;
+      border: none;
+      border-radius: 12px;
+      font-family: "Prompt", sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(50, 255, 201, 0.25);
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(50, 255, 201, 0.4);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .auth-footer-text {
+      text-align: center;
+      margin-top: 1.8rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .back-home-wrap {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    .btn-back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.86rem;
+      transition: all 0.2s ease;
+    }
+    .btn-back-home:hover {
+      color: var(--accent);
+    }
+
+    /* Verification Flow Screen */
+    .verify-screen {
+      display: none;
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .verify-icon-wrap {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem auto;
+      border-radius: 50%;
+      background: rgba(50, 255, 201, 0.12);
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      box-shadow: 0 0 25px rgba(50, 255, 201, 0.3);
+      position: relative;
+    }
+    .verify-pulse-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      animation: radarPulse 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+    @keyframes radarPulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .verify-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1rem;
+      background: rgba(234, 179, 8, 0.15);
+      border: 1px solid rgba(234, 179, 8, 0.5);
+      border-radius: 999px;
+      color: #fef08a;
+      font-size: 0.84rem;
+      font-weight: 500;
+      margin: 1.2rem 0;
+    }
+    .verify-status-badge.verified {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: #22c55e;
+      color: #86efac;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .toast {
+      background: rgba(13, 31, 52, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1.2rem;
+      color: #fff;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast-success { border-color: var(--accent); color: var(--accent); }
+    .toast-error { border-color: var(--danger); color: #ffa8b8; }
+    .toast-info { border-color: var(--accent-blue); color: #90d5ff; }
+  </style>
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+</head>
+<body>
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="container">
+    <div class="brand-header">
+      <a href="/" class="brand-link">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
+        <span>BESTCYNIX DEV</span>
+      </a>
+    </div>
+
+    <div class="auth-card">
+      <!-- Standard Register Form View -->
+      <div id="registerFormView">
+        <h1 class="auth-title">✨ สมัครสมาชิกใหม่</h1>
+        <p class="auth-subtitle">สร้างบัญชีผู้ใช้เพื่อรับสิทธิ์เข้าถึงระบบและพูดคุยสดกับทีมงาน</p>
+
+        <!-- Google Register -->
+        <button type="button" class="btn-google" id="btnGoogleRegister">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span>ดำเนินการต่อด้วย Google (ไม่ต้องยืนยันอีเมล)</span>
+        </button>
+
+        <div class="auth-divider">
+          <span>หรือลงทะเบียนด้วยอีเมล</span>
+        </div>
+
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="regName">ชื่อที่ใช้แสดง (Display Name)</label>
+            <input type="text" id="regName" class="form-input" placeholder="เช่น SkyDev_01" required />
+          </div>
+
+          <div class="form-group">
+            <label for="regEmail">ที่อยู่อีเมล (Email)</label>
+            <input type="email" id="regEmail" class="form-input" placeholder="example@email.com" required autocomplete="email" />
+          </div>
+
+          <div class="form-group">
+            <label for="regPassword">รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)</label>
+            <div class="password-input-wrap">
+              <input type="password" id="regPassword" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password" />
+              <button type="button" class="password-toggle-btn" data-target="regPassword" aria-label="ดูรหัสผ่าน">👁️</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="regPasswordConfirm">ยืนยันรหัสผ่าน (Confirm Password)</label>
+            <div class="password-input-wrap">
+              <input type="password" id="regPasswordConfirm" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password" />
+              <button type="button" class="password-toggle-btn" data-target="regPasswordConfirm" aria-label="ดูรหัสผ่าน">👁️</button>
+            </div>
+            <div class="password-match-indicator" id="passMatchMsg"></div>
+          </div>
+
+          <label class="form-checkbox-label">
+            <input type="checkbox" id="regTermsCheck" required />
+            <span>ฉันยอมรับ <a href="terms" target="_blank" class="link-accent">ข้อตกลงการใช้งาน</a> และ <a href="privacy" target="_blank" class="link-accent">นโยบายความเป็นส่วนตัว (PDPA)</a></span>
+          </label>
+
+          <button type="submit" class="btn-submit" id="btnRegisterSubmit">สร้างบัญชีผู้ใช้</button>
+        </form>
+
+        <div class="auth-footer-text">
+          มีบัญชีผู้ใช้อยู่แล้ว? <a href="login" class="link-accent" style="font-weight: 600;">เข้าสู่ระบบที่นี่ 🔐</a>
+        </div>
+      </div>
+
+      <!-- Real-Time Live Auto-Verification Progress Screen -->
+      <div id="verifyScreenView" class="verify-screen">
+        <div class="verify-icon-wrap">
+          <div class="verify-pulse-ring"></div>
+          <span>📬</span>
+        </div>
+
+        <h2 style="color: #fff; font-size: 1.4rem; margin-bottom: 0.5rem;">ส่งลิงก์ยืนยันตัวตนแล้ว!</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; line-height: 1.6;">
+          เราได้ส่งอีเมลยืนยันไปยัง <strong id="verifyTargetEmail" style="color: var(--accent);">email@example.com</strong><br />
+          กรุณากดเปิดกล่องข้อความและคลิกลิงก์เพื่อยืนยันตัวตน
+        </p>
+
+        <div class="verify-status-badge" id="liveVerifyBadge">
+          <span>⏳ สถานะ: ระบบกำลังตรวจเช็คการยืนยันอัตโนมัติ (ไม่ต้องรีโหลดหน้าเว็บ)</span>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center;">
+          <button type="button" class="btn-google" id="btnResendMail" style="width: auto; padding: 0.6rem 1.2rem; font-size: 0.85rem;">
+            🔄 ส่งอีเมลยืนยันอีกครั้ง
+          </button>
+          <a href="/" class="btn-submit" style="width: auto; padding: 0.6rem 1.2rem; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center;">
+            ไปหน้าแรก →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="back-home-wrap">
+      <a href="/" class="btn-back-home">← กลับไปที่หน้าหลัก</a>
+    </div>
+  </div>
+
+  <!-- Firebase v10 SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      databaseURL: "https://bestcynixdev-default-rtdb.asia-southeast1.firebasedatabase.app",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5",
+      projectNumber: "172682556745"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const showToast = (message, type = "info") => {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      const icon = type === "success" ? "✅" : type === "error" ? "❌" : "ℹ️";
+      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add("show"));
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 400);
+      }, 4000);
+    };
+
+    // Password Toggles
+    document.querySelectorAll(".password-toggle-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = document.getElementById(btn.dataset.target);
+        if (target) {
+          const isPass = target.type === "password";
+          target.type = isPass ? "text" : "password";
+          btn.textContent = isPass ? "🙈" : "👁️";
+        }
+      });
+    });
+
+    // Real-time password match validator
+    const regPassword = document.getElementById("regPassword");
+    const regPasswordConfirm = document.getElementById("regPasswordConfirm");
+    const passMatchMsg = document.getElementById("passMatchMsg");
+
+    const validateMatch = () => {
+      const p1 = regPassword.value;
+      const p2 = regPasswordConfirm.value;
+      if (!p2) {
+        passMatchMsg.textContent = "";
+        passMatchMsg.className = "password-match-indicator";
+        return;
+      }
+      if (p1 === p2) {
+        passMatchMsg.textContent = "✅ รหัสผ่านตรงกันสมบูรณ์";
+        passMatchMsg.className = "password-match-indicator valid";
+      } else {
+        passMatchMsg.textContent = "❌ รหัสผ่านยังไม่ตรงกัน";
+        passMatchMsg.className = "password-match-indicator invalid";
+      }
+    };
+
+    regPassword.addEventListener("input", validateMatch);
+    regPasswordConfirm.addEventListener("input", validateMatch);
+
+    let verifyCheckInterval = null;
+
+    // Real-time Auto-polling Email Verification Function
+    const startLiveVerificationPolling = (user) => {
+      document.getElementById("registerFormView").style.display = "none";
+      document.getElementById("verifyScreenView").style.display = "block";
+      document.getElementById("verifyTargetEmail").textContent = user.email;
+
+      if (verifyCheckInterval) clearInterval(verifyCheckInterval);
+
+      verifyCheckInterval = setInterval(async () => {
+        try {
+          await user.reload();
+          if (user.emailVerified) {
+            clearInterval(verifyCheckInterval);
+            const badge = document.getElementById("liveVerifyBadge");
+            badge.className = "verify-status-badge verified";
+            badge.innerHTML = "<span>🟢 ตรวจพบการยืนยันอีเมลสำเร็จสมบูรณ์แล้ว! ✅</span>";
+            showToast("🎉 ยืนยันอีเมลสำเร็จเรียบร้อย! กำลังนำคุณสู่หน้าหลัก...", "success");
+
+            if (db) {
+              await db.collection("users").doc(user.uid).set({ emailVerified: true }, { merge: true });
+            }
+
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 2000);
+          }
+        } catch (err) {
+          console.warn("Verify polling error:", err);
+        }
+      }, 3000);
+    };
+
+    // Register Form Submit
+    const registerForm = document.getElementById("registerForm");
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("regName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const password = regPassword.value;
+      const passwordConfirm = regPasswordConfirm.value;
+      const btn = document.getElementById("btnRegisterSubmit");
+
+      if (password !== passwordConfirm) {
+        showToast("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน", "error");
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = "กำลังสร้างบัญชีและส่งอีเมลยืนยัน...";
+
+        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        await cred.user.updateProfile({ displayName: name });
+
+        // Send Email Verification
+        await cred.user.sendEmailVerification();
+
+        if (db) {
+          await db.collection("users").doc(cred.user.uid).set({
+            uid: cred.user.uid,
+            displayName: name,
+            email: email,
+            photoURL: "assets/photo/bcxlogo2.png",
+            role: (email === "bestcynix@gmail.com" || email === "admin@email.com") ? "admin" : "user",
+            emailVerified: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+
+        showToast("สร้างบัญชีสำเร็จ! ระบบส่งอีเมลยืนยันเรียบร้อยแล้ว", "success");
+        startLiveVerificationPolling(cred.user);
+      } catch (err) {
+        showToast(`สมัครสมาชิกไม่สำเร็จ: ${err.message}`, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "สร้างบัญชีผู้ใช้";
+      }
+    });
+
+    const getRedirectTarget = () => {
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect") || params.get("returnUrl");
+      if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
+        return redirect;
+      }
+      return "/";
+    };
+
+    // Google Register
+    document.getElementById("btnGoogleRegister").addEventListener("click", async () => {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+
+        if (db && user) {
+          await db.collection("users").doc(user.uid).set({
+            uid: user.uid,
+            displayName: user.displayName || "Google User",
+            email: user.email,
+            photoURL: user.photoURL || "assets/photo/bcxlogo2.png",
+            role: (user.email === "bestcynix@gmail.com" || user.email === "admin@email.com") ? "admin" : "user",
+            emailVerified: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+
+        showToast("สมัครสมาชิกด้วย Google สำเร็จ! (ยืนยันอีเมลอัตโนมัติ)", "success");
+        setTimeout(() => {
+          window.location.href = getRedirectTarget();
+        }, 1200);
+      } catch (err) {
+        showToast(`Google Auth ไม่สำเร็จ: ${err.message}`, "error");
+      }
+    });
+
+    // Resend Email
+    document.getElementById("btnResendMail").addEventListener("click", async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          await user.sendEmailVerification();
+          showToast(`ส่งอีเมลยืนยันไปยัง ${user.email} อีกครั้งแล้ว`, "success");
+        } catch (err) {
+          showToast(`ไม่สามารถส่งอีเมลได้: ${err.message}`, "error");
+        }
+      }
+    });
+  </script>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+  <title>นโยบายความเป็นส่วนตัว (Privacy Policy) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-710F6F2YG5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-710F6F2YG5');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.85);
+      --accent: #32ffc9;
+      --accent-blue: #0284c7;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      line-height: 1.7;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(2, 132, 199, 0.2), transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(50, 255, 201, 0.12), transparent 40%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      width: min(940px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 2.5rem 0;
+      flex: 1;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .brand-link img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+    .btn-back {
+      padding: 0.5rem 1.2rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+    .btn-back:hover {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+    .doc-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .doc-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(50, 255, 201, 0.15);
+      border: 1px solid rgba(50, 255, 201, 0.4);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+    h1 {
+      font-size: 2.1rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .doc-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    h2 {
+      color: var(--accent);
+      font-size: 1.35rem;
+      margin: 1.8rem 0 0.8rem;
+    }
+    h3 {
+      color: #fff;
+      font-size: 1.1rem;
+      margin: 1.2rem 0 0.5rem;
+    }
+    p, li {
+      color: #d1e5f8;
+      font-size: 0.96rem;
+      margin-bottom: 0.8rem;
+    }
+    ul, ol {
+      padding-left: 1.4rem;
+      margin-bottom: 1.2rem;
+    }
+    .quick-links-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .quick-link-chip {
+      padding: 0.4rem 0.9rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .quick-link-chip:hover {
+      background: rgba(50, 255, 201, 0.12);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      background: rgba(4, 11, 20, 0.8);
+    }
+  </style>
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+</head>
+<body>
+  <div class="container">
+    <nav class="top-nav">
+      <a href="/" class="brand-link">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
+        <span>BestCyniX Dev</span>
+      </a>
+      <a href="/" class="btn-back">← กลับสู่หน้าหลัก</a>
+    </nav>
+
+    <article class="doc-card">
+      <header class="doc-header">
+        <span class="doc-badge">PDPA & Privacy Protection</span>
+        <h1>นโยบายความเป็นส่วนตัว (Privacy Policy)</h1>
+        <div class="doc-meta">มีผลบังคับใช้ตั้งแต่วันที่ 1 มกราคม 2024 • ปรับปรุงล่าสุด: ปี 2026</div>
+      </header>
+
+      <section>
+        <h2>1. บทนำและเจตนารมณ์</h2>
+        <p>BestCyniX Dev ให้ความสำคัญสูงสุดกับการคุ้มครองข้อมูลส่วนบุคคลของผู้ใช้งานทุกท่าน นโยบายนี้จัดทำขึ้นเพื่อให้ท่านเข้าใจวิธีการที่เราจัดเก็บ ใช้ ประมวลผล และปกป้องข้อมูลของท่านเมื่อเข้าชมเว็บไซต์ <strong>https://bestcynixdev.web.app</strong>, ใช้งานระบบบอท Discord (SkyLineBOT #0194), หรือติดต่อเราผ่านระบบแชทสด (Live Web Chat) ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA)</p>
+      </section>
+
+      <section>
+        <h2>2. ข้อมูลส่วนบุคคลที่เราจัดเก็บ</h2>
+        <p>เราจัดเก็บข้อมูลเฉพาะที่จำเป็นต่อการให้บริการ โดยแบ่งออกเป็น:</p>
+        <ul>
+          <li><strong>ข้อมูลบัญชีสมาชิก:</strong> ชื่อที่ใช้แสดง (Display Name), อีเมล (Email), รูปโปรไฟล์ (Avatar), วันเดือนปีเกิด (กรณีระบุเพิ่มเติม), ข้อมูลติดต่อ (เช่น Discord Tag/เบอร์โทร)</li>
+          <li><strong>ข้อมูลการสนทนาและติดต่อ:</strong> ข้อความแชทสด, รูปภาพที่แนบ, เวลาที่ส่ง (Timestamp), สถานะการเปิดอ่าน เพื่อใช้ในการตอบกลับและให้บริการลูกค้า</li>
+          <li><strong>ข้อมูลทางเทคนิคและคุกกี้:</strong> ข้อมูลเบราว์เซอร์, ที่อยู่ IP (เข้ารหัส), สถานะการเข้าสู่ระบบ, การยินยอมคุกกี้</li>
+          <li><strong>ข้อมูลการเชื่อมต่อผ่าน Google:</strong> ชื่อ, อีเมล, รูปภาพโปรไฟล์ และสถานะการยืนยันอีเมลที่ได้รับอนุญาตจาก Google OAuth</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>3. วัตถุประสงค์ในการประมวลผลข้อมูล</h2>
+        <p>ข้อมูลทั้งหมดจะถูกนำไปใช้เพื่อ:</p>
+        <ol>
+          <li>การยืนยันตัวตนและการจัดการสิทธิ์การเข้าใช้งานระบบสมาชิก</li>
+          <li>การให้บริการแชทสด การตอบคำถาม และการซัพพอร์ตผู้ใช้งาน SkyLineBOT และระบบเว็บไซต์</li>
+          <li>การบันทึกการตั้งค่าส่วนบุคคลและการรักษาความปลอดภัยของระบบ</li>
+          <li>การปรับปรุงประสิทธิภาพของเว็บไซต์และป้องกันการโจมตีทางไซเบอร์</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>4. สิทธิของเจ้าของข้อมูลส่วนบุคคล (PDPA Rights)</h2>
+        <p>ภายใต้กฎหมาย PDPA ท่านมีสิทธิอันชอบธรรมดังต่อไปนี้:</p>
+        <ul>
+          <li><strong>สิทธิในการเข้าถึงและขอรับสำเนาข้อมูล (Right of Access):</strong> สามารถตรวจสอบข้อมูลของตนเองได้ตลอดเวลา</li>
+          <li><strong>สิทธิในการขอแก้ไขข้อมูล (Right to Rectification):</strong> สามารถแก้ไขชื่อ รูป และข้อมูลส่วนตัวผ่านหน้าโปรไฟล์</li>
+          <li><strong>สิทธิในการขอลบหรือทำลายข้อมูล (Right to Erasure / Right to be Forgotten):</strong> สามารถกดลบบัญชีผู้ใช้ถาวรผ่านระบบได้ทันที ข้อมูลโปรไฟล์และประวัติแชทจะถูกลบออกจากฐานข้อมูล</li>
+          <li><strong>สิทธิในการเพิกถอนความยินยอม (Right to Withdraw Consent):</strong> สามารถปรับการตั้งค่าคุกกี้ได้ที่หน้า <a href="cookies" style="color: var(--accent);">การจัดการคุกกี้</a></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>5. การรักษาความมั่นคงปลอดภัยและการส่งต่อข้อมูล</h2>
+        <p>เราจัดเก็บข้อมูลบนโครงสร้างพื้นฐานระดับมาตรฐานสากลของ <strong>Google Firebase (Cloud Firestore & Firebase Storage)</strong> โดยมีการเข้ารหัสข้อมูลขณะส่งผ่านเครือข่ายด้วยโปรโตคอล TLS/SSL 256-bit และมีการควบคุมสิทธิ์การเข้าถึงอย่างเคร่งครัด <strong>เราไม่มีนโยบายจำหน่าย แลกเปลี่ยน หรือเปิดเผยข้อมูลส่วนบุคคลของท่านให้แก่บุคคลภายนอกโดยเด็ดขาด</strong></p>
+      </section>
+
+      <section>
+        <h2>6. ข้อมูลติดต่อผู้ควบคุมข้อมูลส่วนบุคคล (Data Controller)</h2>
+        <p>หากมีข้อสงสัยหรือต้องการใช้สิทธิตามกฎหมาย PDPA สามารถติดต่อทีมพัฒนาได้ที่:</p>
+        <ul>
+          <li><strong>ผู้พัฒนา:</strong> BestCyniX Dev</li>
+          <li><strong>อีเมลติดต่อ:</strong> contact@bestcynix.dev / bestcynix@gmail.com</li>
+          <li><strong>ระบบแชทสด:</strong> ติดต่อผ่านหน้าต่าง Live Chat บนหน้าเว็บไซต์</li>
+        </ul>
+      </section>
+
+      <div class="quick-links-bar">
+        <a href="terms" class="quick-link-chip">📜 ข้อตกลงการใช้งาน (Terms of Service)</a>
+        <a href="cookies" class="quick-link-chip">🍪 นโยบายและตั้งค่าคุกกี้ (Cookie Policy)</a>
+        <a href="pdpa" class="quick-link-chip">🛡️ ข้อมูลกฎหมาย PDPA 2562</a>
+        <a href="http-errors" class="quick-link-chip">📖 สารบัญ HTTP Status Codes</a>
+        <a href="sitemap.xml" class="quick-link-chip" target="_blank">🗺️ Sitemap.xml</a>
+        <a href="/" class="quick-link-chip">🏠 หน้าหลัก BestCyniX Dev</a>
+      </div>
+    </article>
+  </div>
+
+  <footer>
+    <p>© 2021 - 2026 BestCyniX Dev • Skyline V1 Creator • ข้อมูลคุ้มครองตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
+  </footer>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+</body>
+</html>

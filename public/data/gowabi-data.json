@@ -1,0 +1,134 @@
+{
+  "name": "GoWabi",
+  "logo": "assets/photo/gowabi.webp",
+  "description": "แอปพลิเคชันจองบริการความงาม สปา นวด คลินิก และซาลอนชั้นนำอันดับ 1 ของไทย รวบรวมดีลและส่วนลดสุดคุ้มมากกว่า 5,000 ร้านค้า",
+  "referralInfo": "รับส่วนลดพิเศษสำหรับการจองบริการความงาม สปา คลินิก และบริการสุขภาพผ่าน GoWabi",
+  "categories": [
+    {
+      "name": "โปรโมชั่นเด็ด",
+      "icon": "🎟️",
+      "url": "https://www.gowabi.com/th/promotions_deals"
+    },
+    {
+      "name": "สปาและนวด",
+      "icon": "💆‍♀️",
+      "url": "https://www.gowabi.com/th/places/spa-and-massage-salons"
+    },
+    {
+      "name": "ผิวหน้าและทรีตเมนต์",
+      "icon": "✨",
+      "url": "https://www.gowabi.com/th/places/face-treatments-salons"
+    },
+    {
+      "name": "บริการขนตาและคิ้ว",
+      "icon": "👁️",
+      "url": "https://www.gowabi.com/th/places/eyelash-and-eyebrow-salons"
+    },
+    {
+      "name": "ทำเล็บและเนลบาร์",
+      "icon": "💅",
+      "url": "https://www.gowabi.com/th/places/nail-salons-and-nail-bars"
+    },
+    {
+      "name": "แว็กซ์กำจัดขน",
+      "icon": "🪒",
+      "url": "https://www.gowabi.com/th/places/hair-removal-salons"
+    },
+    {
+      "name": "คลินิกความงาม",
+      "icon": "🏥",
+      "url": "https://www.gowabi.com/th/places/beauty-clinics"
+    },
+    {
+      "name": "ซาลอนทำผม",
+      "icon": "💇‍♀️",
+      "url": "https://www.gowabi.com/th/places/hair-salons"
+    },
+    {
+      "name": "คลินิกทันตกรรม",
+      "icon": "🦷",
+      "url": "https://www.gowabi.com/th/places/dental-clinics"
+    },
+    {
+      "name": "ฟิตเนสและโยคะ",
+      "icon": "🧘‍♀️",
+      "url": "https://www.gowabi.com/th/places/fitness-and-yoga-salons"
+    },
+    {
+      "name": "การบำบัดทางเลือก",
+      "icon": "🌿",
+      "url": "https://www.gowabi.com/th/places/alternative-therapy"
+    },
+    {
+      "name": "ศัลยกรรมความงาม",
+      "icon": "💉",
+      "url": "https://www.gowabi.com/th/places/surgery"
+    },
+    {
+      "name": "สุขภาพและเวชศาสตร์",
+      "icon": "🩺",
+      "url": "https://www.gowabi.com/th/places/health-wellness"
+    },
+    {
+      "name": "กิจกรรมและไลฟ์สไตล์",
+      "icon": "🎯",
+      "url": "https://www.gowabi.com/th/places/activities"
+    },
+    {
+      "name": "สักลายและแทททู",
+      "icon": "🎨",
+      "url": "https://www.gowabi.com/th/places/tatoos"
+    },
+    {
+      "name": "บทความรีวิวความงาม",
+      "icon": "📖",
+      "url": "https://www.gowabi.com/blog"
+    }
+  ],
+  "deals": [
+    {
+      "id": "gw_1",
+      "name": "แพ็กเกจนวดอโรม่าและสปาผ่อนคลาย 90 นาที",
+      "shop": "GoWabi Top Spa",
+      "price": "599฿",
+      "origPrice": "1,500฿",
+      "discount": "60%",
+      "category": "spa",
+      "url": "https://www.gowabi.com/th/places/spa-and-massage-salons",
+      "image": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=500&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "gw_2",
+      "name": "ทรีตเมนต์บำรุงผิวหน้าล้ำลึก Hydro Facial Glow",
+      "shop": "Beauty Clinic TH",
+      "price": "899฿",
+      "origPrice": "2,500฿",
+      "discount": "64%",
+      "category": "face",
+      "url": "https://www.gowabi.com/th/places/face-treatments-salons",
+      "image": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "gw_3",
+      "name": "ต่อขนตาธรรมชาติ เส้นต่อเส้น ไม่จำกัดจำนวนเส้น",
+      "shop": "Lash & Brow Studio",
+      "price": "499฿",
+      "origPrice": "1,200฿",
+      "discount": "58%",
+      "category": "eyes",
+      "url": "https://www.gowabi.com/th/places/eyelash-and-eyebrow-salons",
+      "image": "https://images.unsplash.com/photo-1583001931096-959e9a1a6223?w=500&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "gw_4",
+      "name": "ทาสีเจลมือ-เท้า ไม่จำกัดสี พรีเมียมติดทน",
+      "shop": "Nail Bar Official",
+      "price": "299฿",
+      "origPrice": "800฿",
+      "discount": "62%",
+      "category": "nails",
+      "url": "https://www.gowabi.com/th/places/nail-salons-and-nail-bars",
+      "image": "https://images.unsplash.com/photo-1632345031435-8727f6897d53?w=500&auto=format&fit=crop&q=80"
+    }
+  ]
+}

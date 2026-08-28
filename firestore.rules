@@ -1,0 +1,176 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && (request.auth.token.admin == true
+          || request.auth.token.email in ['admin@email.com', 'bestcynix@gmail.com']);
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function validText(field, maxLength) {
+      return field is string && field.size() <= maxLength;
+    }
+
+    function isValidUserDoc(userId) {
+      let data = request.resource.data;
+      return data.uid == userId
+        && validText(data.displayName, 100)
+        && (!('bio' in data) || validText(data.bio, 1000))
+        && (!('phone' in data) || validText(data.phone, 60))
+        && (!('email' in data) || validText(data.email, 150))
+        && (isAdmin() || !('role' in data) || data.role == 'user'
+          || (resource != null && data.role == resource.data.role));
+    }
+
+    function validChatId(chatId) {
+      return chatId.matches('^anon_[A-Za-z0-9]{7}$')
+        || (isSignedIn() && chatId == request.auth.uid);
+    }
+
+    function canAccessChat(chatId) {
+      return isAdmin() || validChatId(chatId);
+    }
+
+    function isValidChatMessage(chatId) {
+      let data = request.resource.data;
+      return canAccessChat(chatId)
+        && validText(data.senderId, 128)
+        && data.senderId == chatId
+        && validText(data.senderName, 100)
+        && data.senderRole == 'user'
+        && (!('text' in data) || validText(data.text, 2500))
+        && (!('imageUrl' in data) || data.imageUrl == null || validText(data.imageUrl, 1000))
+        && (!('replyTo' in data) || (data.replyTo is map && validText(data.replyTo.text, 2500)));
+    }
+
+    function isValidAdminChatMessage() {
+      let data = request.resource.data;
+      return isAdmin()
+        && validText(data.senderId, 128)
+        && validText(data.senderName, 100)
+        && data.senderRole == 'dev'
+        && (!('text' in data) || validText(data.text, 2500))
+        && (!('imageUrl' in data) || data.imageUrl == null || validText(data.imageUrl, 1000))
+        && (!('replyTo' in data) || (data.replyTo is map && validText(data.replyTo.text, 2500)));
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create, update: if (isOwner(userId) && isValidUserDoc(userId)) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+
+      match /notifications/{notifId} {
+        allow read, update, delete: if isOwner(userId) || isAdmin();
+        allow create: if isAdmin() || (isOwner(userId)
+          && request.resource.data.keys().hasOnly(['title', 'message', 'type', 'url', 'applicationId', 'positionName', 'createdAt', 'read'])
+          && validText(request.resource.data.title, 200)
+          && validText(request.resource.data.message, 2500));
+      }
+    }
+
+    match /userNotifications/{notifId} {
+      allow read, write: if false;
+    }
+
+    match /chats/{chatId} {
+      allow read: if canAccessChat(chatId);
+      allow create: if canAccessChat(chatId)
+        && request.resource.data.userId == chatId
+        && validText(request.resource.data.userName, 100)
+        && validText(request.resource.data.userEmail, 150)
+        && validText(request.resource.data.lastMessage, 2500);
+      allow update: if canAccessChat(chatId)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userName', 'userEmail', 'userPhoto', 'lastMessage', 'lastSenderRole', 'status', 'tag', 'updatedAt']);
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if canAccessChat(chatId);
+        allow create: if isValidChatMessage(chatId) || isValidAdminChatMessage();
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    match /site_stats/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /site_cms/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /contactMessages/{messageId} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'subject', 'message', 'chatId', 'status', 'createdAt'])
+        && validText(request.resource.data.name, 100)
+        && validText(request.resource.data.email, 150)
+        && validText(request.resource.data.subject, 200)
+        && validText(request.resource.data.message, 3000)
+        && validText(request.resource.data.chatId, 128);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /joinTeamForms/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /joinTeamApplications/{appId} {
+      allow create: if request.resource.data.status == 'submitted'
+        && request.resource.data.applicant is map
+        && request.resource.data.applicant.size() <= 30
+        && validText(request.resource.data.positionId, 100)
+        && validText(request.resource.data.positionName, 200)
+        && validText(request.resource.data.contractRefNo, 80)
+        && (!('applicantEmail' in request.resource.data) || request.resource.data.applicantEmail == null || validText(request.resource.data.applicantEmail, 150))
+        && (!('applicantUid' in request.resource.data) || request.resource.data.applicantUid == null || validText(request.resource.data.applicantUid, 128));
+      allow read: if isAdmin() || (isSignedIn() && (resource.data.applicantUid == request.auth.uid || resource.data.userId == request.auth.uid));
+      allow update: if isAdmin() || (isSignedIn()
+        && (resource.data.applicantUid == request.auth.uid || resource.data.userId == request.auth.uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
+      allow delete: if isAdmin();
+    }
+
+    match /joinTeamNotifications/{notifId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if request.resource.data.type == 'submitted'
+        && validText(request.resource.data.applicationId, 128)
+        && validText(request.resource.data.applicantName, 200)
+        && validText(request.resource.data.positionName, 200);
+    }
+
+    match /admin_integrations/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /admin_settings/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn()
+        && request.resource.data.adminUid == request.auth.uid
+        && validText(request.resource.data.action, 120);
+      allow update, delete: if false;
+    }
+
+    match /notifications/{notifId} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ศูนย์รวมดีลสินค้าและโปรโมชั่น Affiliate Hub | BestCyniX Dev</title>
+  <meta name="description" content="ศูนย์รวมลิงก์ดีลสินค้า แคมเปญส่วนลด Shopee, Lazada, GoWabi, Agoda, B2S, OfficeMate และบริการคลาวด์โฮสติ้ง" />
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js?v=20260826_85"></script>
+
+  <style>
+    body {
+      background: #030812;
+      color: #e6f3ff;
+      font-family: 'Prompt', sans-serif;
+      overflow-x: hidden;
+    }
+    .deals-hero {
+      padding: 6.5rem 0 2rem 0;
+      text-align: center;
+      position: relative;
+    }
+    .deals-hero-title {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.8rem;
+      font-family: 'Chakra Petch', sans-serif;
+      text-shadow: 0 0 30px rgba(50, 255, 201, 0.2);
+    }
+    .deals-hero-desc {
+      color: var(--muted, #8aa9c7);
+      max-width: 720px;
+      margin: 0 auto 2.5rem auto;
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+
+    .gateway-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.8rem;
+      margin-bottom: 3.5rem;
+    }
+    .gateway-card {
+      border-radius: 24px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    }
+    .gateway-card:hover {
+      transform: translateY(-6px);
+    }
+    .gateway-card.shopee {
+      background: linear-gradient(145deg, rgba(32, 14, 10, 0.98), rgba(12, 20, 36, 0.98));
+      border: 1px solid rgba(238, 77, 45, 0.4);
+    }
+    .gateway-card.lazada {
+      background: linear-gradient(145deg, rgba(12, 20, 56, 0.98), rgba(8, 14, 30, 0.98));
+      border: 1px solid rgba(0, 160, 233, 0.4);
+    }
+    .gateway-card.gowabi {
+      background: linear-gradient(145deg, rgba(8, 36, 32, 0.98), rgba(4, 16, 24, 0.98));
+      border: 1px solid rgba(32, 201, 151, 0.4);
+    }
+    .gateway-card.agoda {
+      background: linear-gradient(145deg, rgba(8, 24, 48, 0.98), rgba(4, 12, 28, 0.98));
+      border: 1px solid rgba(2, 132, 199, 0.4);
+    }
+    .gateway-card.priceza {
+      background: linear-gradient(145deg, rgba(36, 28, 8, 0.98), rgba(14, 12, 24, 0.98));
+      border: 1px solid rgba(234, 179, 8, 0.4);
+    }
+    .gateway-card.alliance {
+      background: linear-gradient(145deg, rgba(8, 24, 46, 0.98), rgba(4, 14, 28, 0.98));
+      border: 1px solid rgba(50, 255, 201, 0.4);
+    }
+
+    .prod-btn-action {
+      margin-top: 1.2rem;
+      padding: 0.75rem 1.2rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .prod-btn-action.shopee { background: linear-gradient(135deg, #ee4d2d, #ff7043); color: #fff; }
+    .prod-btn-action.lazada { background: linear-gradient(135deg, #0f146d, #00a0e9); color: #fff; }
+    .prod-btn-action.gowabi { background: linear-gradient(135deg, #20c997, #0ca678); color: #fff; }
+    .prod-btn-action.agoda { background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; }
+    .prod-btn-action.priceza { background: linear-gradient(135deg, #eab308, #ca8a04); color: #050b14; }
+    .prod-btn-action.alliance { background: linear-gradient(135deg, var(--accent), #0284c7); color: #050b14; }
+  </style>
+</head>
+<body>
+  <div class="particle-layer" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="/" class="brand" style="text-decoration: none;">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Dev Logo" />
+        <span>BestCyniX Dev</span>
+      </a>
+      <div style="display: flex; gap: 0.8rem; align-items: center;">
+        <a href="/" class="btn-secondary" style="font-size: 0.85rem; padding: 0.45rem 0.9rem; text-decoration: none; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff;">
+          <span>← กลับสู่หน้าหลัก</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="deals-hero">
+      <div style="display:inline-flex; align-items:center; gap:0.6rem; background:rgba(50,255,201,0.1); border:1px solid var(--accent); color:var(--accent); padding:0.35rem 1rem; border-radius:999px; font-size:0.82rem; font-weight:800; margin-bottom:1rem; font-family:'Chakra Petch', sans-serif;">
+        <span>🛍️ BESTCYNIX DEV • AFFILIATE HUB</span>
+      </div>
+      <h1 class="deals-hero-title">ศูนย์รวมดีลสินค้าและโปรโมชั่น</h1>
+      <p class="deals-hero-desc">
+        เลือกช้อปสินค้าไอที แกดเจ็ต โต๊ะทำงาน ความงาม โรงแรมที่พัก และบริการโฮสติ้งจากแพลตฟอร์มพันธมิตรที่คุณชื่นชอบ สั่งซื้อผ่านลิงก์เพื่อรับดีลพิเศษ พร้อมสนับสนุนทีมงาน BestCyniX Dev
+      </p>
+    </section>
+
+    <!-- Platform Gateway Cards Grid (6 Hub Cards) -->
+    <div class="gateway-grid">
+      <!-- 1. Shopee Card -->
+      <div class="gateway-card shopee">
+        <div>
+          <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+            <img src="assets/photo/shopee_affiliate.jpg" alt="Shopee" style="max-height:64px; border-radius:10px;" />
+            <div>
+              <span style="font-size:0.75rem; font-weight:800; color:#ff7a5c; font-family:'Chakra Petch',sans-serif;">🟠 SHOPEE DEALS</span>
+              <h3 style="font-size:1.4rem; font-weight:800; color:#fff; margin:0.1rem 0;">ดีลสินค้า Shopee</h3>
+            </div>
+          </div>
+          <p style="font-size:0.84rem; color:#cbd5e1; line-height:1.5;">รวมสินค้าไอที โต๊ะทำงาน เครื่องเขียน และสินค้าแนะนำกว่า 100 รายการ พร้อม 22 หมวดหมู่ข้อเสนอตรง</p>
+        </div>
+        <a href="/shopeedeals" class="prod-btn-action shopee">
+          <span>🛒 ไปยังหน้าดีล Shopee (/shopeedeals) →</span>
+        </a>
+      </div>
+
+      <!-- 2. Lazada Card -->
+      <div class="gateway-card lazada">
+        <div>
+          <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+            <img src="assets/photo/lazada_banner.jpg" alt="Lazada" style="max-height:64px; border-radius:10px;" />
+            <div>
+              <span style="font-size:0.75rem; font-weight:800; color:#38bdf8; font-family:'Chakra Petch',sans-serif;">🔵 LAZADA MEGA DEALS</span>
+              <h3 style="font-size:1.4rem; font-weight:800; color:#fff; margin:0.1rem 0;">ดีลสินค้า Lazada</h3>
+            </div>
+          </div>
+          <p style="font-size:0.84rem; color:#cbd5e1; line-height:1.5;">แคมเปญส่งฟรี 10 ล้านใบ คูปองส่วนลด 30% แคมเปญ Coins Plus และดีลลดสูงสุด 80%</p>
+        </div>
+        <a href="/lazadadeals" class="prod-btn-action lazada">
+          <span>🛒 ไปยังหน้าดีล Lazada (/lazadadeals) →</span>
+        </a>
+      </div>
+
+      <!-- 3. GoWabi Card -->
+      <div class="gateway-card gowabi">
+        <div>
+          <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+            <img src="assets/photo/gowabi.webp" alt="GoWabi" style="max-height:64px; border-radius:10px; background:#fff; padding:4px;" />
+            <div>
+              <span style="font-size:0.75rem; font-weight:800; color:#20c997; font-family:'Chakra Petch',sans-serif;">🌸 GOWABI BEAUTY & SPA</span>
+              <h3 style="font-size:1.4rem; font-weight:800; color:#fff; margin:0.1rem 0;">ดีลความงาม GoWabi</h3>
+            </div>
+          </div>
+          <p style="font-size:0.84rem; color:#cbd5e1; line-height:1.5;">จองบริการสปา นวด ทรีตเมนต์ผิวหน้า ต่อขนตา ทำเล็บ คลินิกความงาม และศัลยกรรมกว่า 5,000 ร้านค้า</p>
+        </div>
+        <a href="/gowabideals" class="prod-btn-action gowabi">
+          <span>🌸 ไปยังหน้าดีล GoWabi (/gowabideals) →</span>
+        </a>
+      </div>
+
+      <!-- 4. Agoda Card -->
+      <div class="gateway-card agoda">
+        <div>
+          <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+            <img src="assets/photo/agoda.png" alt="Agoda" style="max-height:64px; border-radius:10px; background:#fff; padding:4px;" />
+            <div>
+              <span style="font-size:0.75rem; font-weight:800; color:#38bdf8; font-family:'Chakra Petch',sans-serif;">✈️ AGODA TRAVEL & HOTEL</span>
+              <h3 style="font-size:1.4rem; font-weight:800; color:#fff; margin:0.1rem 0;">ดีลโรงแรม & เที่ยว Agoda</h3>
+            </div>
+          </div>
+          <p style="font-size:0.84rem; color:#cbd5e1; line-height:1.5;">จองโรงแรม ที่พัก รีสอร์ต ตั๋วเครื่องบินทั่วโลก กรุงเทพฯ ภูเก็ต เชียงใหม่ ญี่ปุ่น เกาหลี การันตีราคาดีที่สุด</p>
+        </div>
+        <a href="/agodadeals" class="prod-btn-action agoda">
+          <span>✈️ ไปยังหน้าดีล Agoda (/agodadeals) →</span>
+        </a>
+      </div>
+
+      <!-- 5. B2S / Priceza Card -->
+      <div class="gateway-card priceza">
+        <div>
+          <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+            <span style="font-size:2.4rem;">📚</span>
+            <div>
+              <span style="font-size:0.75rem; font-weight:800; color:#facc15; font-family:'Chakra Petch',sans-serif;">📚 B2S & OFFICEMATE</span>
+              <h3 style="font-size:1.4rem; font-weight:800; color:#fff; margin:0.1rem 0;">ดีล B2S, Office & ประกัน</h3>
+            </div>
+          </div>
+          <p style="font-size:0.84rem; color:#cbd5e1; line-height:1.5;">เครื่องเขียน อุปกรณ์ศิลปะ B2S โต๊ะทำงาน เก้าอี้สุขภาพ OfficeMate และประกันเดินทาง Tune Protect</p>
+        </div>
+        <a href="/pricezadeals" class="prod-btn-action priceza">
+          <span>📚 ไปยังหน้าดีล B2S & Office (/pricezadeals) →</span>
+        </a>
+      </div>
+
+      <!-- 6. Hosting Alliance Card -->
+      <div class="gateway-card alliance">
+        <div>
+          <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+            <span style="font-size:2.4rem;">⭐</span>
+            <div>
+              <span style="font-size:0.75rem; font-weight:800; color:var(--accent); font-family:'Chakra Petch',sans-serif;">⭐ HOSTING ALLIANCE</span>
+              <h3 style="font-size:1.4rem; font-weight:800; color:#fff; margin:0.1rem 0;">โฮสติ้งและบริการแนะนำ</h3>
+            </div>
+          </div>
+          <p style="font-size:0.84rem; color:#cbd5e1; line-height:1.5;">โครงสร้างพื้นฐานเซิร์ฟเวอร์รันบอท Discord, เว็บไซต์, Cloud VPS จาก VISPER HOST และ HOSTINGER</p>
+        </div>
+        <a href="/alliance" class="prod-btn-action alliance">
+          <span>⭐ ไปยังหน้าพันธมิตร (/alliance) →</span>
+        </a>
+      </div>
+    </div>
+
+    <section aria-labelledby="hubCatalogTitle" style="margin:3rem 0 4rem;">
+      <div style="display:flex; justify-content:space-between; align-items:end; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;">
+        <div>
+          <div style="font-size:0.78rem; color:var(--accent); font-weight:800; letter-spacing:0.04em;">VERIFIED AFFILIATE CATALOG</div>
+          <h2 id="hubCatalogTitle" style="margin:0.2rem 0 0; color:#fff;">สินค้าที่มีลิงก์ Affiliate ยืนยันแล้ว</h2>
+        </div>
+        <div id="productsCountLabel" style="font-size:0.86rem; color:var(--muted);">กำลังโหลดรายการสินค้า...</div>
+      </div>
+
+      <div id="categoryOffersScroll" class="cat-offers-scroll" aria-label="หมวดหมู่ดีลที่ผ่านการตรวจสอบ"></div>
+
+      <div class="deals-controls" style="margin-top:1rem;">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="dealsSearchInput" class="deals-search-input" placeholder="ค้นหาสินค้าใน Affiliate Hub..." />
+        </div>
+        <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+          <select id="dealsSortSelect" aria-label="เรียงลำดับดีล" style="background:rgba(4,10,22,0.9); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:0.6rem 0.8rem; border-radius:10px; font-family:'Prompt',sans-serif; font-size:0.85rem; outline:none;">
+            <option value="sold_desc">🔥 ขายดี</option>
+            <option value="comm_desc">💰 คอมมิชชันสูง</option>
+            <option value="price_asc">💵 ราคาต่ำไปสูง</option>
+            <option value="price_desc">💎 ราคาสูงไปต่ำ</option>
+          </select>
+          <select id="dealsPageSizeSelect" aria-label="จำนวนรายการต่อหน้า" style="background:rgba(4,10,22,0.9); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:0.6rem 0.8rem; border-radius:10px; font-family:'Prompt',sans-serif; font-size:0.85rem; outline:none;">
+            <option value="12">12 ชิ้น/หน้า</option>
+            <option value="24" selected>24 ชิ้น/หน้า</option>
+            <option value="all">ทั้งหมด</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-pills-bar" aria-label="กรองหมวดหมู่สินค้า">
+        <button type="button" class="filter-pill active" data-cat="all">🌟 ทั้งหมด <span id="cntAll"></span></button>
+        <button type="button" class="filter-pill" data-cat="computers">💻 คอมพิวเตอร์</button>
+        <button type="button" class="filter-pill" data-cat="home">🏠 บ้าน</button>
+        <button type="button" class="filter-pill" data-cat="beauty">💄 ความงาม</button>
+        <button type="button" class="filter-pill" data-cat="fashion">👕 แฟชั่น</button>
+        <button type="button" class="filter-pill" data-cat="health">💚 สุขภาพ</button>
+      </div>
+
+      <div id="productsContainer" class="products-grid"></div>
+      <div id="dealsPaginationBar" style="display:flex; align-items:center; justify-content:center; gap:0.6rem; margin-top:1.5rem;">
+        <button type="button" class="btn-secondary" id="btnDealsPrev">&lt; ก่อนหน้า</button>
+        <span style="color:var(--muted);"><span id="lblCurrentPage">1</span> / <span id="lblTotalPages">1</span></span>
+        <button type="button" class="btn-secondary" id="btnDealsNext">ถัดไป &gt;</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+  <script src="js/affiliate.js?v=20260828_1"></script>
+  <script src="js/deals.js?v=20260828_1"></script>
+</body>
+</html>

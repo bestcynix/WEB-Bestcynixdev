@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="BestCyniX Dev • ผู้พัฒนา Bot Discord, Web Application, และ Server Architecture ประสิทธิภาพสูง" />
+  <meta name="keywords" content="BestCyniX, BestCyniX Dev, SkylineBOT, Skyline V1, Discord Bot, Developer Thailand, Minecraft Server" />
+  <meta name="author" content="BestCyniX Dev" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+
+  <!-- Open Graph / Meta -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://bestcynixdev.web.app/" />
+  <meta property="og:title" content="BestCyniX Dev • Full-Stack Bot & Web Engineering" />
+  <meta property="og:description" content="สร้างสรรค์ระบบ Discord Bot, ระบบเว็บ และ Full-Stack Architecture ประสิทธิภาพสูง ปลอดภัย และเสถียรภาพระดับโปรดักชัน" />
+  <meta property="og:image" content="https://bestcynixdev.web.app/assets/photo/bcxlogo2.png" />
+
+  <title>BestCyniX Dev • Full-Stack Bot & Web Engineering</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+  <meta name="theme-color" content="#050b14" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Schema.org Structured Data (Google Rich Snippets & Knowledge Graph) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://bestcynixdev.web.app/#organization",
+        "name": "BestCyniX Dev",
+        "url": "https://bestcynixdev.web.app/",
+        "logo": "https://bestcynixdev.web.app/assets/photo/bcxlogo2.png",
+        "founder": {
+          "@type": "Person",
+          "name": "พงศ์ภรณ์ ทองศิริ",
+          "alternateName": ["ไรว้าาาาา!", "bestasic", "BestCyniX"],
+          "identifier": "1350901490805637202",
+          "jobTitle": "Full-Stack Developer & Bot Architect"
+        },
+        "sameAs": [
+          "https://github.com/",
+          "https://in-skylineendless.web.app/",
+          "https://skylinebot.xyz/"
+        ],
+        "description": "ผู้พัฒนา Bot, Web และ Community Server • Skyline V1 Creator & SkyLineBOT #0194"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://bestcynixdev.web.app/#website",
+        "url": "https://bestcynixdev.web.app/",
+        "name": "BestCyniX Dev • Full-Stack Engineering",
+        "publisher": {
+          "@id": "https://bestcynixdev.web.app/#organization"
+        },
+        "inLanguage": "th"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "SkyLineBOT #0194",
+        "operatingSystem": "Discord, Cloud, Web",
+        "applicationCategory": "UtilitiesApplication",
+        "url": "https://skylinebot.xyz/",
+        "author": {
+          "@id": "https://bestcynixdev.web.app/#organization"
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-710F6F2YG5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-710F6F2YG5');
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Modular CSS Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      databaseURL: "https://bestcynixdev-default-rtdb.asia-southeast1.firebasedatabase.app",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5",
+      projectNumber: "172682556745"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+  <!-- Ambient Orbs & Particle Layer -->
+  <div class="orb orb-1" id="orb1"></div>
+  <div class="orb orb-2" id="orb2"></div>
+  <div class="orb orb-3" id="orb3"></div>
+  <div class="orb orb-4" id="orb4"></div>
+  <div class="particle-layer" aria-hidden="true"></div>
+
+  <!-- Topbar Navigation -->
+  <header class="topbar" id="topbar">
+    <div class="scroll-progress-bar" id="scrollProgress"></div>
+    <div class="container topbar-inner">
+      <a href="/" class="brand" style="text-decoration: none;">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Dev Logo" />
+        <span>BestCyniX Dev</span>
+      </a>
+
+      <nav class="nav" id="siteNav" data-open="false">
+        <!-- Mobile Drawer Quick Actions Header (Visible on Mobile/Tablet) -->
+        <div class="mobile-drawer-header">
+          <!-- Dev Admin Quick Banner -->
+          <a href="admin-dashboard" class="mobile-dev-banner" id="mobileDevBanner" style="display: none;">
+            <div class="dev-banner-left">
+              <span class="pulse-dot"></span>
+              <span class="dev-banner-icon">⚡</span>
+              <div class="dev-banner-text">
+                <strong>Dev Management Dashboard</strong>
+                <small>เข้าสู่ศูนย์ควบคุมระบบผู้พัฒนา</small>
+              </div>
+            </div>
+            <span class="dev-banner-arrow">→</span>
+          </a>
+
+          <!-- Logged-in User Profile Summary -->
+          <div class="mobile-user-card" id="mobileUserCard" style="display: none;">
+            <div class="mobile-user-header">
+              <div class="mobile-user-avatar-wrap">
+                <img src="assets/photo/bcxlogo2.png" alt="Avatar" class="mobile-user-avatar" id="mobileUserAvatar" />
+                <span class="user-online-dot"></span>
+              </div>
+              <div class="mobile-user-info">
+                <span class="mobile-user-name" id="mobileUserName">User</span>
+                <span class="mobile-user-role" id="mobileUserRole">👑 DEV ADMIN</span>
+              </div>
+            </div>
+            <div class="mobile-user-actions-grid">
+              <a href="profile" class="btn-mobile-profile-pill">
+                <span>⚙️ จัดการโปรไฟล์</span>
+              </a>
+              <button type="button" class="btn-mobile-logout-pill" id="btnMobileLogout">
+                <span>🚪 ออกจากระบบ</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Guest Login / Register in Drawer -->
+          <div class="mobile-guest-card" id="mobileGuestCard">
+            <a href="login" class="btn-mobile-login">
+              <span>🔐 เข้าสู่ระบบ</span>
+            </a>
+            <a href="register" class="btn-mobile-register">
+              <span>✨ สมัครสมาชิก</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="mobile-drawer-divider"></div>
+
+        <!-- Navigation Menu (Desktop Dropdowns + Mobile Cyber Drawer) -->
+        <div class="drawer-nav-list">
+          <!-- 1. เกี่ยวกับเรา -->
+          <a href="#about" class="drawer-nav-item">
+            <span class="drawer-icon-box cyan">🏠</span>
+            <div class="drawer-nav-content">
+              <span class="drawer-nav-title">เกี่ยวกับเรา</span>
+              <span class="drawer-nav-subtitle">สรุปเส้นทาง & ประวัติสังเขป</span>
+            </div>
+            <span class="drawer-arrow">›</span>
+          </a>
+
+          <!-- 2. Dropdown: ผู้พัฒนา & ระบบ -->
+          <div class="nav-dropdown-group">
+            <button type="button" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
+              <span>👑 ผู้พัฒนา & สถิติ</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dropdown-chevron">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="nav-dropdown-menu">
+              <a href="#owner" class="nav-dropdown-link highlight-owner">
+                <span class="drawer-icon-box gold dropdown-icon">👑</span>
+                <div class="dropdown-link-text">
+                  <strong>BOT OWNER & DEVELOPER</strong>
+                  <small>โปรไฟล์และสถานะสด Discord</small>
+                </div>
+              </a>
+              <a href="#history" class="nav-dropdown-link">
+                <span class="drawer-icon-box orange dropdown-icon">📜</span>
+                <div class="dropdown-link-text">
+                  <strong>ประวัติความเป็นมา</strong>
+                  <small>จุดเริ่มต้นบอท 2021 สู่ 2026</small>
+                </div>
+              </a>
+              <a href="#skills" class="nav-dropdown-link">
+                <span class="drawer-icon-box blue dropdown-icon">💻</span>
+                <div class="dropdown-link-text">
+                  <strong>Stackที่ใช้งาน</strong>
+                  <small>Languages, Frameworks & Cloud</small>
+                </div>
+              </a>
+              <a href="#stats" class="nav-dropdown-link">
+                <span class="drawer-icon-box emerald dropdown-icon">📊</span>
+                <div class="dropdown-link-text">
+                  <strong>ภาพรวมระบบ & สถิติ</strong>
+                  <small>สถิติผู้ใช้งาน & ระบบ</small>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- 3. Dropdown: ผลงาน & แผนงาน -->
+          <div class="nav-dropdown-group">
+            <button type="button" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
+              <span>📁 ผลงาน & โปรเจกต์</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dropdown-chevron">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="nav-dropdown-menu">
+              <a href="#projects" class="nav-dropdown-link">
+                <span class="drawer-icon-box purple dropdown-icon">📁</span>
+                <div class="dropdown-link-text">
+                  <strong>ผลงานและโปรเจกต์เด่น</strong>
+                  <small>SkyLineBOT, MusicBOT & เว็บไซต์</small>
+                </div>
+              </a>
+              <a href="#timeline" class="nav-dropdown-link">
+                <span class="drawer-icon-box teal dropdown-icon">⏳</span>
+                <div class="dropdown-link-text">
+                  <strong>ไทม์ไลน์การพัฒนา</strong>
+                  <small>Roadmap แต่ละยุค</small>
+                </div>
+              </a>
+              <a href="#future" class="nav-dropdown-link">
+                <span class="drawer-icon-box pink dropdown-icon">🚀</span>
+                <div class="dropdown-link-text">
+                  <strong>แผนการพัฒนาต่อไป</strong>
+                  <small>Roblox, Minecraft & Cloud Server</small>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- 4. Dropdown: ดีลและสินค้าแนะนำ -->
+          <div class="nav-dropdown-group">
+            <button type="button" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
+              <span>🛍️ ดีลสินค้า</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dropdown-chevron">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="nav-dropdown-menu">
+              <a href="shopeedeals" class="nav-dropdown-link">
+                <span class="drawer-icon-box orange dropdown-icon">🟠</span>
+                <div class="dropdown-link-text">
+                  <strong>ดีลสินค้า Shopee</strong>
+                  <small>ไอที โต๊ะทำงาน เครื่องเขียน 100 รายการ</small>
+                </div>
+              </a>
+              <a href="lazadadeals" class="nav-dropdown-link">
+                <span class="drawer-icon-box blue dropdown-icon">🔵</span>
+                <div class="dropdown-link-text">
+                  <strong>ดีลสินค้า Lazada</strong>
+                  <small>ส่งฟรี 10 ล้านใบ คูปองลด 30%</small>
+                </div>
+              </a>
+              <a href="gowabideals" class="nav-dropdown-link">
+                <span class="drawer-icon-box teal dropdown-icon">🌸</span>
+                <div class="dropdown-link-text">
+                  <strong>ดีลความงาม & สปา GoWabi</strong>
+                  <small>สปา นวด ทรีตเมนต์ คลินิก 16 หมวด</small>
+                </div>
+              </a>
+              <a href="agodadeals" class="nav-dropdown-link">
+                <span class="drawer-icon-box cyan dropdown-icon">✈️</span>
+                <div class="dropdown-link-text">
+                  <strong>ดีลโรงแรม & ท่องเที่ยว Agoda</strong>
+                  <small>โรงแรม ที่พัก ตั๋วเครื่องบินทั่วโลก</small>
+                </div>
+              </a>
+              <a href="pricezadeals" class="nav-dropdown-link">
+                <span class="drawer-icon-box gold dropdown-icon">📚</span>
+                <div class="dropdown-link-text">
+                  <strong>ดีล B2S, Office & ประกันภัย</strong>
+                  <small>เครื่องเขียน โต๊ะทำงาน Tune Protect</small>
+                </div>
+              </a>
+              <a href="alliance" class="nav-dropdown-link">
+                <span class="drawer-icon-box emerald dropdown-icon">⭐</span>
+                <div class="dropdown-link-text">
+                  <strong>โฮสติ้งและบริการแนะนำ</strong>
+                  <small>VISPER HOST & HOSTINGER ส่วนลดพิเศษ</small>
+                </div>
+              </a>
+              <a href="deals" class="nav-dropdown-link">
+                <span class="drawer-icon-box purple dropdown-icon">🌟</span>
+                <div class="dropdown-link-text">
+                  <strong>รวมดีลทั้งหมด (Affiliate Hub)</strong>
+                  <small>ศูนย์รวมโปรโมชั่นทุกแพลตฟอร์ม</small>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- 4. สถานะระบบ (Live Status) -->
+          <a href="status" class="drawer-nav-item nav-status-item">
+            <span class="drawer-icon-box green-live">🟢</span>
+            <div class="drawer-nav-content">
+              <span class="drawer-nav-title"><span class="pulse-dot" style="width:7px; height:7px; background:#4ade80; display:inline-block; vertical-align:middle; margin-right:4px;"></span>สถานะระบบ</span>
+              <span class="drawer-nav-subtitle">เช็ก Ping, Uptime & Latency สด</span>
+            </div>
+            <span class="drawer-arrow">›</span>
+          </a>
+
+          <!-- 5. ติดต่อเรา -->
+          <a href="#contact" class="drawer-nav-item nav-contact-item">
+            <span class="drawer-icon-box blue-alt">💬</span>
+            <div class="drawer-nav-content">
+              <span class="drawer-nav-title">💬 ติดต่อเรา</span>
+              <span class="drawer-nav-subtitle">Discord, อีเมล & แบบฟอร์ม</span>
+            </div>
+            <span class="drawer-arrow">›</span>
+          </a>
+
+          <!-- 6. สมัครร่วมทีม (Real-Time Auto Hide if Closed) -->
+          <a href="join-team" class="drawer-nav-item nav-jointeam-item" id="navJoinTeamItem" style="display: none;">
+            <span class="drawer-icon-box pink">🚀</span>
+            <div class="drawer-nav-content">
+              <span class="drawer-nav-title"><span class="pulse-dot" style="width:7px; height:7px; background:#32ffc9; display:inline-block; vertical-align:middle; margin-right:4px;"></span>🚀 สมัครร่วมทีม</span>
+              <span class="drawer-nav-subtitle" id="navJoinTeamSubtitle">เปิดรับสมัคร Developer & Staff</span>
+            </div>
+            <span class="drawer-arrow">›</span>
+          </a>
+        </div>
+
+        <div class="mobile-drawer-divider"></div>
+        <button type="button" class="mobile-chat-trigger" id="btnMobileOpenChat">
+          <span class="chat-trigger-icon">💬</span>
+          <div class="chat-trigger-text">
+            <strong>เปิดแชทสดติดต่อทีมพัฒนา (Live Chat)</strong>
+            <small>ปรึกษาเรื่องบอทและเว็บไซต์ได้ตลอด 24 ชม.</small>
+          </div>
+        </button>
+      </nav>
+
+      <!-- Right Action Controls (Auth + Hamburger) -->
+      <div class="topbar-actions">
+        <div class="nav-auth-wrap" id="navAuthWrap">
+          <a href="admin-dashboard" class="btn-dev-portal" id="btnDevPortal" style="display: none; text-decoration: none;">
+            <span>⚡ Dev Dashboard</span>
+          </a>
+
+          <!-- Guest: Single Login Button -->
+          <div class="nav-guest-actions" id="navGuestButtons">
+            <a href="login" class="btn-auth-open">
+              <span>🔐 เข้าสู่ระบบ</span>
+            </a>
+          </div>
+
+          <!-- Logged In User Pill Dropdown -->
+          <div class="user-pill-wrap" id="userPillWrap" style="display: none;">
+            <button type="button" class="user-pill-btn" id="btnUserMenu" aria-label="เมนูผู้ใช้">
+              <img src="assets/photo/bcxlogo2.png" alt="Avatar" class="user-pill-avatar" id="userPillAvatar" />
+              <span class="user-pill-name" id="userPillName">User</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+              <a href="profile" class="user-dropdown-item">
+                <span>👤 โปรไฟล์และการจัดการบัญชี</span>
+              </a>
+              <button type="button" class="user-dropdown-item" id="btnOpenChatFromMenu">
+                <span>💬 แชทติดต่อ Dev</span>
+              </button>
+              <a href="admin-dashboard" class="user-dropdown-item" id="btnOpenDevPortalFromMenu" style="display: none;">
+                <span>⚡ แดชบอร์ดผู้พัฒนา (Dashboard)</span>
+              </a>
+              <a href="admin-join-team" class="user-dropdown-item" id="btnOpenDevJoinTeamFromMenu" style="display: none;">
+                <span>🚀 จัดการระบบรับสมัครร่วมทีม</span>
+              </a>
+              <a href="admin-content" class="user-dropdown-item" id="btnOpenDevCmsFromMenu" style="display: none;">
+                <span>📁 จัดการเนื้อหาเว็บ (CMS)</span>
+              </a>
+              <a href="admin-chats" class="user-dropdown-item" id="btnOpenDevChatsFromMenu" style="display: none;">
+                <span>💬 จัดการแชทลูกค้า</span>
+              </a>
+              <a href="admin-users" class="user-dropdown-item" id="btnOpenDevUsersFromMenu" style="display: none;">
+                <span>👥 จัดการผู้ใช้งาน</span>
+              </a>
+              <div class="user-dropdown-divider"></div>
+              <button type="button" class="user-dropdown-item danger" id="btnLogout">
+                <span>🚪 ออกจากระบบ</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Hamburger Toggle placed at far right -->
+        <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav" aria-label="เปิดเมนูนำทาง">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. Hero Section (2-Column Cyber Layout matching media_1787428689170.png) -->
+  <section class="hero reveal-on-scroll" id="about">
+    <div class="container hero-grid-layout">
+      <!-- Left Column: Intro Text & Action Buttons -->
+      <div class="hero-text-col">
+        <div class="hero-badge">
+          <span>✨ Skyline V1 Creator • Discord Bot Developer</span>
+        </div>
+        <h1 class="hero-title">
+          BestCyniX Dev<br />
+          ผู้พัฒนา Bot, Web<br />
+          และ <span class="gradient-text">Community Server</span>
+        </h1>
+        <p class="hero-subtitle">
+          หน้าเว็บนี้สรุปเส้นทางของ BestCyniX Dev ตั้งแต่ยุคบอท Discord ช่วงปี 2021 - 2023, การกลับมาเปิดตัวโปรเจกต์ใหม่ในปี 2024 และการพัฒนา SkyLineBOT #0194 อย่างต่อเนื่องในปี 2026 และมีแผนขยายไปสู่ Roblox Server และ Minecraft Server App Game ในอนาคต
+        </p>
+        <div class="hero-actions">
+          <a href="https://skylinebot.xyz/" target="_blank" rel="noopener noreferrer" class="btn-primary">
+            <span>🚀 เปิดดู SkyLineBOT #0194</span>
+          </a>
+          <a href="#projects" class="btn-secondary">
+            <span>📁 ดูผลงานทั้งหมด</span>
+          </a>
+          <a href="join-team" class="btn-primary" id="heroJoinTeamBtn" style="display: none; background: linear-gradient(135deg, var(--accent), #0284c7); color: #050b14; font-weight: 700; text-decoration: none;">
+            <span>✨ สมัครร่วมทีมกับเรา</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: Dev Master Avatar Artwork Card -->
+      <div class="hero-dev-card">
+        <div class="dev-card-img-wrap">
+          <img src="assets/photo/bestcynixprodev.png" alt="BestCyniX Dev Master Artwork" class="dev-portrait-img" />
+        </div>
+        <div class="dev-card-caption">
+          จุดเด่นของสายพัฒนา: ระบบบอทเพลง, เว็บแอปสำหรับคำสั่งบอท, คอมมูนิตี้ Discord, และเซิร์ฟเวอร์เกมที่สร้างด้วยความตั้งใจตั้งแต่ต้นจนใช้งานจริง
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Discord Bot Owner & Developer Showcase Section (Matching media_1787442962346.png) -->
+  <section id="owner" class="discord-owner-section">
+    <div class="container">
+      <div class="discord-owner-card-wrap reveal-on-scroll">
+        <!-- Header Tag & Title -->
+        <div class="discord-owner-header">
+          <div class="discord-tag-badge">
+            <span>👑 BOT OWNER & DEVELOPER</span>
+          </div>
+          <h2 class="discord-owner-title">SkylineBOT Official Owner</h2>
+          <p class="discord-owner-subtitle">
+            SkylineBOT is built with Python 3.11, Next.js, and custom cloud microservices. Maintained and operated by <span id="dcOwnerNameInline" style="color: #fff; font-weight: 600;">ไรว้าาาาา!</span> (<span id="dcOwnerTagInline" style="color: var(--accent);">@bestasic</span>).
+          </p>
+        </div>
+
+        <!-- Center Interactive Discord Profile Card (100% Real Live Discord Data) -->
+        <div class="discord-profile-card">
+          <!-- Top Banner with Floating Badges -->
+          <div class="dc-card-banner" id="dcBanner" style="background-color: #5cf4a0;">
+            <div class="dc-banner-badge-left">
+              <span class="dc-status-indicator" id="dcPresenceStatusDot"></span>
+              <span id="dcPresenceStatusText">กำลังเชื่อมต่อ Discord API...</span>
+            </div>
+            <div class="dc-banner-badge-right">
+              <span>🛡️ MAIN OWNER 👑</span>
+            </div>
+          </div>
+
+          <!-- Avatar & Badge Row -->
+          <div class="dc-avatar-row">
+            <div class="dc-avatar-wrap">
+              <img src="https://cdn.discordapp.com/avatars/1350901490805637202/2912a5e73dbc19ecd5cdc4bff0225c0c.png" alt="Discord Avatar" id="dcAvatar" class="dc-avatar-img" />
+              <span class="dc-avatar-status" id="dcAvatarStatusDot"></span>
+            </div>
+            <div class="dc-badges-pill" id="dcBadgesPill">
+              <span class="dc-badge-icon" title="Server / Bot Owner">👑</span>
+              <span class="dc-badge-icon" title="Discord Developer">⚡</span>
+            </div>
+          </div>
+
+          <!-- User Details -->
+          <div class="dc-body">
+            <div class="dc-user-header">
+              <div class="dc-name-row">
+                <span class="dc-display-name" id="dcDisplayName">ไรว้าาาาา!</span>
+                <span class="dc-role-badge">MAIN OWNER</span>
+              </div>
+              <div class="dc-handle-row">
+                <span id="dcHandle">@bestasic</span> • <span>ID: <span id="dcUserId">1350901490805637202</span></span>
+              </div>
+            </div>
+
+            <!-- Custom Status Box (Dynamically shown ONLY if active on Discord) -->
+            <div class="dc-box" id="dcCustomStatusBox" style="display: none;">
+              <div class="dc-box-title">
+                <span class="dc-box-dot"></span>
+                <span>CUSTOM STATUS</span>
+              </div>
+              <div class="dc-box-content dc-status-content" id="dcCustomStatusText"></div>
+            </div>
+
+            <!-- Voice / Activity Box (Dynamically shown ONLY if listening/playing on Discord) -->
+            <div class="dc-box dc-voice-box" id="dcActivityBox" style="display: none;">
+              <div class="dc-voice-left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#57f287" stroke-width="2">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+                <span id="dcVoiceChannelName">Activity</span>
+              </div>
+              <div class="dc-voice-right" id="dcVoiceGuildName">SkyLine&Music BOT SUPPORT</div>
+            </div>
+
+            <!-- About Me Box -->
+            <div class="dc-box dc-about-box">
+              <div class="dc-box-title">เกี่ยวกับฉัน (ABOUT ME)</div>
+              <div class="dc-about-text" id="dcAboutText">ผู้พัฒนาหลักและเจ้าของโปรเจกต์ SkylineBOT #0194 • BestCyniX Dev</div>
+              <div class="dc-divider"></div>
+              <div class="dc-joined-row">
+                <span class="dc-joined-label">สมาชิกตั้งแต่:</span>
+                <span class="dc-joined-val" id="dcJoinedDate">17 มี.ค. 2568</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="dc-actions-row">
+              <a href="https://skylinebot.xyz/" target="_blank" rel="noopener noreferrer" class="btn-dc-action btn-dc-primary">
+                <span>✨ เว็บโปรไฟล์ OwnerBOT</span>
+              </a>
+              <a href="https://in-skylineendless.web.app/" target="_blank" class="btn-dc-action btn-dc-blurple">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                </svg>
+                <span>Discord</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom 4 Spec Features Grid -->
+        <div class="dc-specs-grid">
+          <div class="dc-spec-card">
+            <div class="dc-spec-label">BOT RUNTIME</div>
+            <div class="dc-spec-value cyan">Python 3.11 + discord.py</div>
+          </div>
+          <div class="dc-spec-card">
+            <div class="dc-spec-label">WEB DASHBOARD</div>
+            <div class="dc-spec-value">Next.js 14 + TypeScript</div>
+          </div>
+          <div class="dc-spec-card">
+            <div class="dc-spec-label">LANGUAGES</div>
+            <div class="dc-spec-value">TH Thai / US English</div>
+          </div>
+          <div class="dc-spec-card">
+            <div class="dc-spec-label">ADMIN PORTAL</div>
+            <div class="dc-spec-value purple">Master OwnerBOT</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. History Section -->
+  <section id="history">
+    <div class="container">
+      <div class="section-header reveal-on-scroll">
+        <div class="section-tag">
+          <span>📖 STORY & BACKGROUND</span>
+        </div>
+        <h2 class="section-title">ประวัติการเริ่มต้น</h2>
+        <p class="section-desc">
+          จุดเริ่มต้นของ BestCyniX Dev เกิดจากความชอบการเขียนโค้ด, การเล่น Minecraft และการสร้างคอมมูนิตี้ Discord ตั้งแต่โปรเจกต์ MC-Slashz.net ในปี 2020 ก่อนต่อยอดเป็นระบบบอท, เซิร์ฟเวอร์เกม และงานเว็บไซต์ที่พัฒนาต่อเนื่องมาถึงปัจจุบัน
+        </p>
+      </div>
+
+      <div class="history-grid">
+        <div class="history-card reveal-on-scroll">
+          <h3>🎮 จากความชอบ สู่โปรเจกต์จริง</h3>
+          <p>
+            เริ่มจากความสนใจด้านการพัฒนาระบบเว็บไซต์ ควบคู่กับความชอบในชุมชน Discord และการเล่น Minecraft จึงเริ่มลงมือสร้างคอมมูนิตี้ Discord ขึ้นมา 2 กิลด์ และต่อยอดสู่การทำบอทของตัวเอง เพื่อให้ใช้งานได้สะดวกและตรงความต้องการมากที่สุด
+          </p>
+          <p style="margin-top: 0.8rem;">
+            หลังจากนั้นได้พัฒนาระบบบอท Discord จำนวน 2 ตัวจนเปิดใช้งานจริงสำเร็จ คือ <strong>Skylinebot#1391</strong> และ <strong>MusicBOT#5750</strong> แต่ก็พบข้อจำกัดสำคัญเรื่องงบประมาณและเซิร์ฟเวอร์ สำหรับการดูแลบอทให้ออนไลน์ตลอด 24/7
+          </p>
+        </div>
+
+        <div class="history-card reveal-on-scroll">
+          <h3>⚡ ช่วงท้าทาย และการกลับมาพัฒนาใหม่</h3>
+          <p>
+            มีการร่วมทีมกับเพื่อนเพื่อวางแผนและสร้างเซิร์ฟเวอร์ Minecraft จนเปิดได้สำเร็จ แต่เมื่อเวลาผ่านไป ปัญหาด้านทรัพยากร, เงินทุน, เวลา และทีมงาน ทำให้ต้องปิดตัวลงในที่สุด และแม้พยายามรื้อฟื้นอีกครั้ง ก็ยังเจอข้อจำกัดเดิมจนต้องปิดตัวเป็นครั้งที่ 2
+          </p>
+          <p style="margin-top: 0.8rem;">
+            ตั้งแต่ปี 2024 - 2026 ได้เดินหน้าพัฒนาระบบร้านค้าอย่างต่อเนื่อง และรื้อฟื้นระบบบอทใหม่เป็น <strong>SkyLineBOT #0194</strong> โดยรวมความสามารถของ SkylineBOT กับ MusicBOT ไว้ในตัวเดียว พร้อม Dashboard ที่ตั้งค่าง่ายขึ้น และมี AI ช่วยงาน ทำให้พัฒนาได้เร็วขึ้นกว่าปีก่อนๆ
+          </p>
+        </div>
+        <div class="history-card reveal-on-scroll">
+          <h3>⛏️ ลำดับเซิร์ฟเวอร์ Minecraft รุ่นแรก</h3>
+          <p>
+            โปรเจกต์ในช่วงเริ่มต้นของทีมเรียงตามช่วงเวลาที่เปิดให้บริการ ได้แก่ <strong>MC-Slashz.net</strong> (01/01/2020 - 08/06/2020), <strong>Mc-ctc.ml</strong> (29/08/2020 - 06/01/2021) และ <strong>Mc-Kileema.net</strong> (01/03/2021 - 17/05/2021)
+          </p>
+          <p style="margin-top: 0.8rem;">
+            ประสบการณ์จากทั้งสามโปรเจกต์เป็นพื้นฐานสำคัญของงานเซิร์ฟเวอร์และคอมมูนิตี้ในรุ่นถัดมา รวมถึงแผน <strong>Mc-Skyline</strong> ที่กำลังเตรียมเปิดตัว โดยช่วงเวลาเปิดตัวยังอยู่ระหว่างการยืนยัน
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Tech Stack Section (Matching media_1787429046512.png) -->
+  <section id="skills">
+    <div class="container">
+      <div class="section-glass-container reveal-on-scroll">
+        <div class="section-glass-header">
+          <h2>Stackที่ใช้งาน</h2>
+          <p>รวมภาษาโปรแกรม เครื่องมือ ฟรอนต์เอนด์ แบ็กเอนด์ ฐานข้อมูล และระบบคลาวด์ที่ใช้ในการพัฒนา</p>
+        </div>
+
+        <div class="stack-groups-container" id="stackGroupsContainer">
+          <!-- Dynamic Grouped Tech Stack Pills Rendered by cms-loader.js -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Stats Overview Section (Matching media_1787429087727.png) -->
+  <section id="stats">
+    <div class="container">
+      <div class="section-glass-container reveal-on-scroll">
+        <div class="section-glass-header">
+          <h2>ภาพรวมผลงาน</h2>
+          <p>นับรวมโปรเจกต์เด่นที่เปิดตัวและดูแลอย่างต่อเนื่อง</p>
+        </div>
+
+        <div class="stats-overview-grid">
+          <div class="stat-box">
+            <div class="stat-box-num" id="statProjectsCount">5</div>
+            <div class="stat-box-label">โปรเจกต์หลัก</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-num" id="statInitialEraCount">3</div>
+            <div class="stat-box-label">ช่วงพัฒนาแรก (2021-2023)</div>
+          </div>
+          <div class="stat-box stat-highlight">
+            <div class="stat-box-num">2,026</div>
+            <div class="stat-box-label">ปีที่พัฒนาต่อเนื่องปัจจุบัน</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-num" id="statFutureCount">2</div>
+            <div class="stat-box-label">แผนเซิร์ฟเวอร์ใหม่</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Timeline Section -->
+  <section id="timeline" style="background: rgba(4, 12, 22, 0.4);">
+    <div class="container">
+      <div class="section-header reveal-on-scroll">
+        <div class="section-tag">
+          <span>⏳ MILESTONES</span>
+        </div>
+        <h2 class="section-title">เส้นทางการพัฒนา</h2>
+        <p class="section-desc">ไทม์ไลน์โปรเจกต์สำคัญของ BestCyniX Dev ตามข้อมูลที่คุณให้ไว้</p>
+      </div>
+
+      <div class="history-grid">
+        <div class="history-card reveal-on-scroll">
+          <div class="badge-pill badge-closed" style="display: inline-block; margin-bottom: 0.8rem;">Legacy Era • Closed 2023</div>
+          <h3>2021 - 2023: ยุคเริ่มต้นของบอทและเซิร์ฟเวอร์</h3>
+          <p>
+            พัฒนาและดูแล MC-Slashz.net, Mc-ctc.ml, Mc-Kileema.net, Skylinebot#1391, MusicBOT#5750, Discord MH-Myhome, SkyLineEndless และ Server Minecraft หลายชุด (โปรเจกต์ในช่วงนี้ปิดตัวลงตามช่วงเวลาของแต่ละโปรเจกต์ และงานรุ่นบอทปิดตัวลงในปี 2023)
+          </p>
+        </div>
+
+        <div class="history-card reveal-on-scroll">
+          <div class="badge-pill badge-active" style="display: inline-block; margin-bottom: 0.8rem;">Relaunch • Since 2024</div>
+          <h3>2024: เปิดตัวรอบใหม่</h3>
+          <p>
+            เริ่มพัฒนาเว็บไซต์ใหม่ ได้แก่ Niceshopallforme และขยายงานฝั่งเว็บให้จริงจังมากขึ้น เพื่อต่อยอดสเกลระบบ
+          </p>
+        </div>
+
+        <div class="history-card reveal-on-scroll">
+          <div class="badge-pill badge-featured" style="display: inline-block; margin-bottom: 0.8rem;">Live Product • 2026</div>
+          <h3>2026: SkyLineBOT #0194 เปิดตัวแล้ว</h3>
+          <p>
+            SkyLineBOT #0194 เปิดตัวเรียบร้อย และยังพัฒนาระบบต่อเนื่องเพื่อเพิ่มความเสถียรและความสามารถใหม่ พร้อม AI Workflow
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dynamic Join Team Recruitment Banner (Auto-hidden if closed) -->
+  <section id="homeJoinTeamSection" style="display: none; margin: 1rem 0 2rem 0;">
+    <div class="container">
+      <div class="reveal-on-scroll" style="background: linear-gradient(135deg, rgba(8, 26, 48, 0.96), rgba(4, 14, 28, 0.96)); border: 1px solid rgba(50, 255, 201, 0.35); border-radius: 20px; padding: 2.2rem 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; box-shadow: 0 15px 45px rgba(0,0,0,0.6);">
+        <div style="flex: 1; min-width: 280px;">
+          <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(50, 255, 201, 0.15); border: 1px solid var(--accent); color: var(--accent); padding: 0.3rem 0.85rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.8rem;">
+            <span class="pulse-dot" style="background: var(--accent);"></span>
+            <span>WE ARE HIRING • เปิดรับสมัครร่วมทีม</span>
+          </div>
+          <h3 style="color: #fff; font-size: 1.65rem; margin-bottom: 0.4rem; font-weight: 700;" id="homeJoinTeamTitle">สมัครร่วมทีม BestCyniX Dev</h3>
+          <p style="color: var(--muted); font-size: 0.92rem; line-height: 1.6;" id="homeJoinTeamDesc">
+            เรากำลังเปิดรับสมัครผู้ร่วมทีมและนักพัฒนาเข้ามาร่วมสร้างสรรค์โปรเจกต์ ทั้ง Bot, Web และ Community Server
+          </p>
+        </div>
+        <a href="join-team" class="btn-primary" style="padding: 0.85rem 1.8rem; font-size: 1rem; font-weight: 700; white-space: nowrap; text-decoration: none;">
+          <span>🚀 ดูตำแหน่งและกรอกใบสมัคร →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Projects Section -->
+  <section id="projects">
+    <div class="container">
+      <div class="section-header reveal-on-scroll">
+        <div class="section-tag">
+          <span>📁 FEATURED PORTFOLIO</span>
+        </div>
+        <h2 class="section-title">โปรเจกต์เด่น</h2>
+        <p class="section-desc">
+          รวมงานบอท, เว็บไซต์ และคอมมูนิตี้ที่เป็นตัวตนของ BestCyniX Dev ค้นหาและกรองได้แบบเรียลไทม์
+        </p>
+      </div>
+
+      <!-- Controls: Search & Filter Pills -->
+      <div class="projects-controls reveal-on-scroll">
+        <div class="project-search-box">
+          <span class="project-search-icon">🔍</span>
+          <input type="text" class="project-search-input" id="projectSearchInput" placeholder="ค้นหาชื่อโปรเจกต์, เทคโนโลยี, หรือรายละเอียด..." />
+        </div>
+
+        <div class="project-filter-pills">
+          <button type="button" class="p-filter-pill active" data-filter="all">ทั้งหมด</button>
+          <button type="button" class="p-filter-pill" data-filter="featured">⭐ เด่น (Pinned)</button>
+          <button type="button" class="p-filter-pill" data-filter="active">🟢 เปิดอยู่</button>
+          <button type="button" class="p-filter-pill" data-filter="closed">🔴 ปิดตัวแล้ว</button>
+          <button type="button" class="p-filter-pill" data-filter="spoiler">🔒 ความลับ / สปอยล์</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.2rem; font-size: 0.88rem; color: var(--muted);" id="projectCountLabel" class="reveal-on-scroll">
+        กำลังโหลดโปรเจกต์...
+      </div>
+
+      <!-- Projects Grid Container -->
+      <div class="projects-grid" id="projectsContainer">
+        <!-- Dynamically rendered by cms-loader.js with Dedicated Page Links -->
+      </div>
+
+      <!-- Portfolio Pagination Controls (< 0 >) & View All Projects Button -->
+      <div class="portfolio-pagination-bar reveal-on-scroll" id="portfolioPaginationBar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 2.2rem; padding: 1.1rem 1.4rem; background: rgba(8, 20, 36, 0.85); border: 1px solid var(--border); border-radius: 16px; backdrop-filter: blur(12px);">
+        <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; color: var(--muted);">
+          <span>แสดงต่อหน้า:</span>
+          <select id="projectPageSizeSelect" class="form-input" style="padding: 0.35rem 0.75rem; font-size: 0.85rem; width: auto; background: rgba(14, 34, 58, 0.95); color: #fff; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; outline: none;">
+            <option value="3">3 รายการ</option>
+            <option value="6" selected>6 รายการ</option>
+            <option value="9">9 รายการ</option>
+            <option value="12">12 รายการ</option>
+            <option value="all">ทั้งหมด (All)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <button type="button" class="btn-nav-action" id="btnProjectPrevPage" title="หน้าก่อนหน้า" style="padding: 0.4rem 0.9rem; font-weight: 700; cursor: pointer;">
+            &lt; หน้าก่อน
+          </button>
+          
+          <div style="display: flex; align-items: center; gap: 0.35rem; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border); padding: 0.25rem 0.65rem; border-radius: 8px; font-family: 'Chakra Petch', sans-serif;">
+            <span style="color: var(--muted);">&lt;</span>
+            <input type="number" id="inputProjectPageNumber" min="1" max="1" value="1" style="width: 36px; text-align: center; background: transparent; border: none; color: var(--accent); font-weight: 700; font-size: 0.95rem; outline: none;" />
+            <span style="color: var(--muted);" id="projectTotalPagesLabel">/ 1 &gt;</span>
+          </div>
+
+          <button type="button" class="btn-nav-action" id="btnProjectNextPage" title="หน้าถัดไป" style="padding: 0.4rem 0.9rem; font-weight: 700; cursor: pointer;">
+            หน้าถัดไป &gt;
+          </button>
+        </div>
+
+        <a href="project" class="btn-primary" id="btnViewAllProjectsArchive" style="padding: 0.45rem 1.2rem; font-size: 0.88rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+          <span>✨ ดูโปรเจกต์ทั้งหมด →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Recommended Partner / Affiliate Sponsor Section -->
+  
+  <!-- Recommended Partners / Affiliate Showcase Section -->
+  <section id="partner" class="partner-section" style="margin: 4rem 0;">
+    <div class="container">
+      <div class="section-header reveal-on-scroll" style="text-align: center; margin-bottom: 2.2rem;">
+        <div class="section-tag" style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(50, 255, 201, 0.12); border: 1px solid rgba(50, 255, 201, 0.35); color: var(--accent); padding: 0.35rem 0.95rem; border-radius: 999px; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; font-family: 'Chakra Petch', sans-serif;">
+          <span>⭐ RECOMMENDED HOSTING PARTNERS</span>
+          <span style="opacity: 0.5;">•</span>
+          <span>โฮสติ้งและบริการแนะนำ</span>
+        </div>
+        <h2 class="section-title" style="font-size: 2.1rem; color: #fff; margin-top: 0.6rem; font-weight: 800;">บริการคลาวด์และโฮสติ้งแนะนำ</h2>
+        <p class="section-desc" style="color: var(--muted); max-width: 650px; margin: 0.4rem auto 0 auto; font-size: 0.94rem;">
+          โครงสร้างพื้นฐานเซิร์ฟเวอร์ประสิทธิภาพสูง รองรับบอท Discord, ระบบเว็บไซต์, AI อัตโนมัติ และ Game Servers พร้อมข้อเสนอและส่วนลดพิเศษ
+        </p>
+      </div>
+
+      <div class="partner-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.8rem;">
+        
+        <!-- Partner Card 1: VISPER HOST -->
+        <div class="reveal-on-scroll" style="background: radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.2), transparent 50%), linear-gradient(160deg, rgba(8, 24, 48, 0.96), rgba(4, 12, 24, 0.98)); border: 1px solid rgba(50, 255, 201, 0.35); border-radius: 22px; padding: 2.2rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 15px 45px rgba(0,0,0,0.6); position: relative; overflow: hidden;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 0.6rem 1.2rem; display: inline-flex; align-items: center;">
+                <img src="assets/photo/visperhost.webp" alt="VISPER HOST" style="max-height: 38px; width: auto; object-fit: contain; filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));" />
+              </div>
+              <span style="background: rgba(2, 132, 199, 0.15); border: 1px solid rgba(2, 132, 199, 0.35); color: #38bdf8; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.76rem; font-weight: 700;">
+                🚀 เซิร์ฟเวอร์ในไทย ปิงต่ำ
+              </span>
+            </div>
+
+            <h3 style="font-size: 1.45rem; font-weight: 800; color: #fff; margin-bottom: 0.2rem; font-family: 'Chakra Petch', sans-serif;">VISPER HOST</h3>
+            <p style="font-size: 0.85rem; color: #38bdf8; margin-bottom: 1rem; font-weight: 600;">Cloud VPS & Game Server Hosting ชั้นนำ</p>
+            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.4rem;">
+              บริการ Cloud VPS, โฮสติ้งรัน Discord BOT (Node.js / Python / Java) และ Game Server (Minecraft, FiveM) สปีดแรง ปิงต่ำในไทย เสถียร 24/7 มีระบบกัน DDoS เหมาะสำหรับบอทและเซิร์ฟเวอร์เกม
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1.6rem; font-size: 0.82rem; color: #e2e8f0;">
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 0.7rem; border-radius: 8px;">
+                ⚡ รันบอท Discord 24/7
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 0.7rem; border-radius: 8px;">
+                🎮 Minecraft & FiveM
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 0.7rem; border-radius: 8px;">
+                🛡️ ป้องกัน DDoS 99.9%
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 0.7rem; border-radius: 8px;">
+                💰 ราคาสุดคุ้ม ซัพพอร์ตไว
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <a href="https://client.visperhost.net/order/forms/a/MTM4OTM=" target="_blank" rel="noopener sponsored" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.85rem 1.4rem; font-size: 0.95rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #0284c7, #32ffc9); color: #050b14; border-radius: 12px; box-shadow: 0 4px 20px rgba(50, 255, 201, 0.3);">
+              <span>🚀 ไปยังหน้าสั่งซื้อ Visper Host →</span>
+            </a>
+            <div style="margin-top: 0.75rem; font-size: 0.75rem; color: #94a3b8; text-align: center;">
+              💡 สั่งซื้อผ่านลิงก์นี้เพื่อรับสิทธิประโยชน์และสนับสนุนทีมงาน BestCyniX Dev
+            </div>
+          </div>
+        </div>
+
+        <!-- Partner Card 2: HOSTINGER -->
+        <div class="reveal-on-scroll" style="background: radial-gradient(circle at 90% 20%, rgba(99, 102, 241, 0.2), transparent 50%), linear-gradient(160deg, rgba(16, 20, 48, 0.96), rgba(8, 12, 32, 0.98)); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 22px; padding: 2.2rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 15px 45px rgba(0,0,0,0.6); position: relative; overflow: hidden;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="background: #673de6; border-radius: 12px; padding: 0.45rem 0.9rem; display: inline-flex; align-items: center;">
+                <img src="assets/photo/hostinger.png" alt="HOSTINGER" style="max-height: 38px; width: auto; object-fit: contain;" />
+              </div>
+              <span style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.4); color: #facc15; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.76rem; font-weight: 800;">
+                🎁 ส่วนลด 20% สำหรับแพ็กเกจแรก
+              </span>
+            </div>
+
+            <h3 style="font-size: 1.45rem; font-weight: 800; color: #fff; margin-bottom: 0.2rem; font-family: 'Chakra Petch', sans-serif;">HOSTINGER</h3>
+            <p style="font-size: 0.85rem; color: #a5b4fc; margin-bottom: 1rem; font-weight: 600;">Global Cloud, Web & VPS Hosting ระดับโลก</p>
+            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.4rem;">
+              ผู้ให้บริการเว็บโฮสติ้งและคลาวด์ชั้นนำระดับสากล มีผู้ใช้งานกว่า 120,000+ คนทั่วโลก พร้อมฟรีโดเมน, ฟรีอีเมลธุรกิจ, ระบบ Cloud VPS ความเร็วสูงด้วยชิป AMD EPYC และเครื่องมือ AI Website Builder
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1.6rem; font-size: 0.82rem; color: #e2e8f0;">
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 0.7rem; border-radius: 8px;">
+                🌐 ฟรีโดเมน + ฟรี SSL
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 0.7rem; border-radius: 8px;">
+                💻 VPS ชิป AMD EPYC
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 0.7rem; border-radius: 8px;">
+                🤖 AI Website Builder
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 0.7rem; border-radius: 8px;">
+                ✉️ อีเมลธุรกิจไม่จำกัด
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <a href="https://www.hostinger.com?REFERRALCODE=F1OBESTCYBFK" target="_blank" rel="noopener sponsored" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.85rem 1.4rem; font-size: 0.95rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(168, 85, 247, 0.35);">
+              <span>🎁 ไปยังหน้าสั่งซื้อ Hostinger (รับส่วนลด 20%) →</span>
+            </a>
+            <div style="margin-top: 0.75rem; font-size: 0.75rem; color: #94a3b8; text-align: center;">
+              💡 เพื่อนของคุณประหยัด 20% และช่วยสนับสนุนทีมงาน BestCyniX Dev
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 7. Future Plans Section -->
+  <section id="future" style="background: rgba(4, 12, 22, 0.4);">
+    <div class="container">
+      <div class="section-header reveal-on-scroll">
+        <div class="section-tag">
+          <span>🚀 ROADMAP</span>
+        </div>
+        <h2 class="section-title">แผนในอนาคต</h2>
+        <p class="section-desc">ทิศทางถัดไปที่กำลังวางแผนต่อยอดจากงานปัจจุบัน</p>
+      </div>
+
+      <div class="future-grid" id="futurePlansContainer">
+        <!-- Dynamically rendered by cms-loader.js -->
+      </div>
+
+      <div style="text-align: center; margin-top: 3rem;" class="reveal-on-scroll">
+        <blockquote style="font-size: 1.1rem; color: var(--accent); font-style: italic;">
+          "ปิดบางโปรเจกต์เพื่อเริ่มสิ่งที่ใหญ่กว่า และพัฒนาต่อแบบไม่หยุด" — BestCyniX Dev
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Contact & Social Section -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-header reveal-on-scroll">
+        <div class="section-tag">
+          <span>📱 CONNECT WITH US</span>
+        </div>
+        <h2 class="section-title">ติดต่อเรา & โซเชียลมีเดีย</h2>
+        <p class="section-desc">
+          ช่องทางการติดตามผลงาน พูดคุยเรื่องโปรเจกต์ หรือติดต่อสอบถามข้อมูลการพัฒนาระบบ
+        </p>
+      </div>
+
+      <div class="contact-layout">
+        <!-- Left: Social Channels Grid with Brand Icons -->
+        <div class="contact-card reveal-on-scroll">
+          <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+            🌐 ช่องทางโซเชียลมีเดีย
+          </h3>
+          <div class="social-links-grid" id="socialLinksGrid">
+            <!-- Dynamically rendered by cms-loader.js with Official Brand Icons -->
+          </div>
+
+          <!-- Quick Contact Form -->
+          <div class="cyber-contact-box">
+            <h4 class="cyber-contact-title">✉️ ส่งข้อความติดต่อด่วน (Direct Inquiry)</h4>
+            <p class="cyber-contact-subtitle">
+              ข้อความจะถูกส่งตรงเข้าสู่ <strong>Dev Management Inbox</strong> ทันที โดยทีมงานจะตอบกลับผ่านทาง<strong>อีเมล</strong> หรือผ่านทาง<strong>ระบบแชทสด</strong>ของคุณ
+            </p>
+            <form id="contactForm">
+              <div class="cyber-form-grid">
+                <div class="cyber-input-wrap">
+                  <span class="cyber-input-icon">👤</span>
+                  <input type="text" id="contactName" class="cyber-form-input" placeholder="ชื่อของคุณ *" required />
+                </div>
+                <div class="cyber-input-wrap">
+                  <span class="cyber-input-icon">📧</span>
+                  <input type="email" id="contactEmail" class="cyber-form-input" placeholder="อีเมลสำหรับตอบกลับ *" required />
+                </div>
+              </div>
+              <div class="cyber-input-wrap" style="margin-bottom: 0.8rem;">
+                <span class="cyber-input-icon">🏷️</span>
+                <input type="text" id="contactSubject" class="cyber-form-input" placeholder="หัวข้อเรื่อง (เช่น SkyLineBOT, ปรึกษางานเว็บ, แจ้งปัญหา)" />
+              </div>
+              <div class="cyber-input-wrap" style="margin-bottom: 1rem;">
+                <span class="cyber-input-icon" style="top: 1.2rem; transform: none;">💬</span>
+                <textarea id="contactMessage" class="cyber-form-textarea" rows="3" placeholder="ระบุรายละเอียดข้อความที่คุณต้องการติดต่อ..." required></textarea>
+              </div>
+              <button type="submit" class="cyber-submit-btn" id="btnSubmitContact">
+                <span>➤ ส่งข้อความติดต่อถึง Dev ทันที</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right: Operating Hours & Guidelines -->
+        <div class="contact-card reveal-on-scroll">
+          <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+            🕒 ช่วงเวลาติดต่อและตอบกลับ
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 0.8rem; font-size: 0.92rem; color: var(--muted); margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+              <span>วันจันทร์ - วันศุกร์:</span>
+              <strong style="color: #fff;">10:00 น. - 22:00 น.</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+              <span>วันเสาร์ - วันอาทิตย์:</span>
+              <strong style="color: #fff;">12:00 น. - 20:00 น.</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+              <span>สถานะเซิร์ฟเวอร์ & บอท:</span>
+              <strong style="color: #4ade80;">มอนิเตอร์ 24/7</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem;">
+              <span>ระยะเวลาตอบกลับเฉลี่ย:</span>
+              <strong style="color: var(--accent);">~15 - 30 นาที</strong>
+            </div>
+          </div>
+
+          <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            💡 คำแนะนำในการติดต่อ
+          </h3>
+          <ul style="color: var(--muted); font-size: 0.9rem; line-height: 1.7; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li><strong>แจ้งเรื่องที่ต้องการติดต่อ:</strong> ระบุว่าเกี่ยวกับ SkyLineBOT #0194, ระบบเว็บไซต์, หรือปรึกษาโปรเจกต์</li>
+            <li><strong>แนบภาพหรือข้อผิดพลาด:</strong> หากพบปัญหา สามารถส่งภาพหน้าจอหรือข้อความ Error ในแชทสดเพื่อให้ทีมงานแก้ไขได้รวดเร็ว</li>
+            <li><strong>ช่องทางที่ตอบเร็วที่สุด:</strong> ติดต่อผ่าน Discord Server หรือ LINE จะได้รับการตอบกลับไวที่สุด</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Modern Sleek Footer -->
+  <footer class="site-footer reveal-on-scroll">
+    <!-- Real-Time Site Analytics Metrics Bar -->
+    <div class="container footer-stats-bar">
+      <div class="stat-pill-item">
+        <span>👁️</span>
+        <span>ยอดการเข้าชมทั้งหมด:</span>
+        <strong class="stat-pill-val" id="footerTotalViews">0</strong>
+      </div>
+      <div class="stat-pill-item">
+        <span>👤</span>
+        <span>ผู้เข้าชมไม่ซ้ำ:</span>
+        <strong class="stat-pill-val" id="footerUniqueVisitors">0</strong>
+      </div>
+      <div class="stat-pill-item">
+        <span>👥</span>
+        <span>สมาชิกในระบบ:</span>
+        <strong class="stat-pill-val" id="footerTotalUsers">0</strong>
+      </div>
+      <div class="stat-pill-item">
+        <span>💬</span>
+        <span>จำนวนการติดต่อ:</span>
+        <strong class="stat-pill-val" id="footerTotalChats">0</strong>
+      </div>
+      <div class="stat-pill-item">
+        <span style="color: #4ade80;">🟢</span>
+        <span>สถานะระบบ:</span>
+        <strong class="stat-pill-val" style="color: #4ade80;">100% Online</strong>
+      </div>
+    </div>
+
+    <div class="container footer-links-grid">
+      <div class="footer-col">
+        <div class="brand" style="margin-bottom: 1rem;">
+          <img src="assets/photo/bcxlogo2.png" alt="Logo" />
+          <span>BESTCYNIX DEV</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.6;">
+          สร้างสรรค์ระบบ Discord Bot, ระบบเว็บ และ Full-Stack Architecture ประสิทธิภาพสูง ปลอดภัย และเสถียรภาพระดับโปรดักชัน
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>🌐 ระบบและบริการ</h4>
+        <a href="#projects">โปรเจกต์และผลงาน</a>
+        <a href="#skills">สแต็กเทคโนโลยี</a>
+        <a href="javascript:void(0)" id="footerLiveChatLink">แชทสดติดต่อ Dev</a>
+        <a href="http-errors">HTTP Error Codes Center</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>🔒 นโยบายและความปลอดภัย</h4>
+        <a href="docs">📚 ศูนย์เอกสารและนโยบาย</a>
+        <a href="work-policy">นโยบายการร่วมทีม (Work Policy)</a>
+        <a href="privacy">นโยบายความเป็นส่วนตัว</a>
+        <a href="terms">ข้อตกลงการใช้งาน</a>
+        <a href="cookies">การจัดการคุกกี้</a>
+        <a href="pdpa">ข้อมูลกฎหมาย PDPA</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>🗺️ แผนผังเว็บไซต์ & บัญชี</h4>
+        <a href="sitemap.xml" target="_blank">Sitemap.xml (SEO)</a>
+        <a href="robots.txt" target="_blank">Robots.txt</a>
+        <a href="login">เข้าสู่ระบบสมาชิก</a>
+        <a href="register">สมัครสมาชิกใหม่</a>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <p>© 2021 - 2026 BestCyniX Dev. All rights reserved.</p>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <span style="color: var(--accent);">🛡️ Protected by Cloudflare DDoS & SSL 256-bit</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Cookie Preferences Center Modal -->
+  <div class="cyber-modal" id="cookiePreferencesModal">
+    <div class="cyber-modal-card">
+      <div class="cyber-modal-header">
+        <h3 style="color: #fff; font-size: 1.2rem;">🍪 ศูนย์ตั้งค่าความเป็นส่วนตัวและคุกกี้</h3>
+        <button type="button" class="cyber-modal-close" id="btnCloseCookieModal">✕</button>
+      </div>
+      <div style="font-size: 0.9rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.5rem;">
+        เราให้ความสำคัญกับสิทธิและความเป็นส่วนตัวของคุณตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA) คุณสามารถปรับแต่งการตั้งค่าคุกกี้ได้ตามความต้องการ
+      </div>
+      <div style="display: flex; gap: 0.6rem; justify-content: flex-end; flex-wrap: wrap;">
+        <button type="button" class="btn-cookie-action btn-essential" id="btnModalEssentialOnly">เฉพาะที่จำเป็น</button>
+        <button type="button" class="btn-cookie-action btn-accept" id="btnModalAcceptAll">ยอมรับทั้งหมด</button>
+        <button type="button" class="btn-cookie-action btn-save" id="btnModalSavePreferences">💾 บันทึกการตั้งค่า</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDPA Consent Banner -->
+  <div class="pdpa-banner" id="pdpaBanner">
+    <div class="pdpa-text">
+      🍪 <strong>นโยบายความเป็นส่วนตัวและคุกกี้ (PDPA):</strong> เราใช้คุกกี้เพื่อมอบประสบการณ์การใช้งานที่ดีที่สุด จดจำการตั้งค่า และวิเคราะห์การเข้าชมอย่างปลอดภัย อ่านเพิ่มเติมได้ที่ <a href="privacy" target="_blank">นโยบายความเป็นส่วนตัว</a> หรือ <a href="pdpa" target="_blank">ข้อมูลกฎหมาย PDPA</a>
+    </div>
+    <div class="pdpa-actions">
+      <button type="button" class="btn-pdpa-accept" id="btnPdpaAccept">ยอมรับทั้งหมด</button>
+      <button type="button" class="btn-pdpa-reject" id="btnPdpaReject">เฉพาะที่จำเป็น</button>
+      <button type="button" class="btn-pdpa-reject" id="btnOpenCookieModal" style="border-color: var(--accent); color: var(--accent);">⚙️ ตั้งค่าคุกกี้</button>
+    </div>
+  </div>
+
+  <!-- Floating Live Chat Launcher -->
+  <button class="live-chat-floating-btn" id="btnLiveChatLauncher" aria-label="เปิดแชทสดติดต่อทีมงาน" title="แชทติดต่อทีมงาน Dev">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span class="chat-unread-badge" id="chatUnreadBadge">0</span>
+  </button>
+
+  <!-- Live Chat Window (Messenger / LINE Style - Enhanced) -->
+  <div class="chat-window" id="liveChatWindow" role="dialog" aria-label="ห้องแชทสด">
+    <div class="chat-header">
+      <div class="chat-agent-info">
+        <img src="assets/photo/bcxlogo2.png" alt="Dev Team" class="chat-agent-avatar" />
+        <div class="chat-agent-meta">
+          <h4>BestCyniX Support</h4>
+          <span class="chat-agent-status" id="chatAgentStatus">
+            <span class="status-dot" id="chatOnlineDot"></span>
+            <span id="chatOnlineStatusText">ออนไลน์พร้อมตอบกลับ</span>
+          </span>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button type="button" class="chat-header-btn" id="btnToggleChatMaximize" title="ขยายเต็มจอ / ย่อกลับ" aria-label="ขยายเต็มจอ">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </button>
+        <button type="button" class="chat-header-btn" id="btnToggleChatSearch" title="ค้นหาข้อความในแชท" aria-label="ค้นหาข้อความ">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <button type="button" class="chat-header-btn" id="btnCloseChatWindow" title="ปิดหน้าต่างแชท" aria-label="ปิด">✕</button>
+      </div>
+    </div>
+
+    <!-- In-Chat Search Bar Dropdown -->
+    <div class="chat-search-dropdown" id="chatSearchDropdown">
+      <input type="text" class="chat-search-input" id="chatSearchInput" placeholder="พิมพ์คำค้นหาข้อความ..." aria-label="ค้นหาข้อความในแชท" />
+    </div>
+
+    <!-- Chat Messages Area -->
+    <div class="chat-messages-area" id="chatMessagesArea">
+      <!-- Dynamic Messages rendered by chat.js -->
+    </div>
+
+    <!-- Chat Input Area -->
+    <div class="chat-input-area">
+      <!-- Quote Reply Preview Bar -->
+      <div class="user-quote-preview" id="userQuotePreview">
+        <div>
+          <span style="font-size: 0.72rem; color: var(--accent);">↩️ ตอบกลับอ้างอิง:</span>
+          <span id="userQuoteSnippet" style="margin-left: 0.4rem; color: #fff;">...</span>
+        </div>
+        <button type="button" style="background: transparent; border: none; color: var(--muted); cursor: pointer;" id="btnCancelUserQuote">✕</button>
+      </div>
+
+      <!-- Quick Emoji Bar -->
+      <div class="emoji-quick-bar">
+        <button type="button" class="btn-emoji-quick" data-emoji="😀">😀</button>
+        <button type="button" class="btn-emoji-quick" data-emoji="👍">👍</button>
+        <button type="button" class="btn-emoji-quick" data-emoji="🔥">🔥</button>
+        <button type="button" class="btn-emoji-quick" data-emoji="✨">✨</button>
+        <button type="button" class="btn-emoji-quick" data-emoji="🚀">🚀</button>
+        <button type="button" class="btn-emoji-quick" data-emoji="❤️">❤️</button>
+        <button type="button" class="btn-emoji-quick" data-emoji="🎉">🎉</button>
+        <button type="button" class="btn-emoji-quick" data-emoji="💯">💯</button>
+      </div>
+
+      <!-- Selected Image Preview before sending -->
+      <div class="chat-preview-wrap" id="chatPreviewWrap" style="display: none;">
+        <img src="" alt="Preview" class="chat-preview-img" id="chatPreviewImg" style="width: 48px; height: 48px; border-radius: 6px; object-fit: cover;" />
+        <span style="font-size: 0.8rem; color: var(--muted); flex: 1;" id="chatPreviewName">รูปภาพที่เลือก</span>
+        <button type="button" id="btnRemoveChatImg" style="background: rgba(255, 60, 60, 0.2); border: none; color: #ff5555; width: 22px; height: 22px; border-radius: 50%; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="chat-input-row">
+        <input type="file" id="chatFileInput" accept="image/*" style="display: none;" />
+        <button type="button" class="chat-attach-btn" id="btnChatAttach" title="แนบรูปภาพ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+        </button>
+        <input type="text" class="chat-text-input" id="chatTextInput" placeholder="พิมพ์ข้อความที่นี่... (กด Enter เพื่อส่ง)" />
+        <button type="button" class="chat-send-btn" id="btnChatSend" title="ส่งข้อความ">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" id="btnBackToTop" aria-label="เลื่อนขึ้นบนสุด" title="เลื่อนขึ้นบนสุด">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="m18 15-6-6-6 6"/>
+    </svg>
+  </button>
+
+  <!-- Modular Scripts -->
+  <script src="js/protection.js?v=20260826_22"></script>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/cms-loader.js?v=20260826_22"></script>
+  <script src="js/discord-profile.js?v=20260826_22"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+  <script src="js/main.js?v=20260826_95"></script>
+  <script src="js/chat.js?v=20260826_22"></script>
+  <script src="js/auth.js?v=20260826_22"></script>
+</body>
+</html>

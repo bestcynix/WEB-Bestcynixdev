@@ -1,0 +1,93 @@
+{
+  "name": "Agoda",
+  "logo": "assets/photo/agoda.png",
+  "description": "ผู้นำแพลตฟอร์มจองโรงแรม ที่พัก ตั๋วเครื่องบิน และบริการท่องเที่ยวทั่วโลก จองง่าย การันตีราคาดีที่สุด พร้อมรับสิทธิประโยชน์พิเศษมากมาย",
+  "destinations": [
+    {
+      "name": "กรุงเทพฯ (Bangkok)",
+      "icon": "🏙️",
+      "url": "https://www.agoda.com/city/bangkok-th.html"
+    },
+    {
+      "name": "ภูเก็ต (Phuket)",
+      "icon": "🏖️",
+      "url": "https://www.agoda.com/city/phuket-th.html"
+    },
+    {
+      "name": "เชียงใหม่ (Chiang Mai)",
+      "icon": "⛰️",
+      "url": "https://www.agoda.com/city/chiang-mai-th.html"
+    },
+    {
+      "name": "พัทยา (Pattaya)",
+      "icon": "🌊",
+      "url": "https://www.agoda.com/city/pattaya-th.html"
+    },
+    {
+      "name": "โตเกียว (Tokyo)",
+      "icon": "🗼",
+      "url": "https://www.agoda.com/city/tokyo-jp.html"
+    },
+    {
+      "name": "โอซาก้า (Osaka)",
+      "icon": "🏯",
+      "url": "https://www.agoda.com/city/osaka-jp.html"
+    },
+    {
+      "name": "โซล (Seoul)",
+      "icon": "🌸",
+      "url": "https://www.agoda.com/city/seoul-kr.html"
+    },
+    {
+      "name": "สิงคโปร์ (Singapore)",
+      "icon": "🦁",
+      "url": "https://www.agoda.com/city/singapore-sg.html"
+    }
+  ],
+  "deals": [
+    {
+      "id": "ag_1",
+      "name": "โรงแรมหรูใจกลางกรุงเทพฯ พร้อมวิวแม่น้ำเจ้าพระยา",
+      "location": "กรุงเทพมหานคร",
+      "price": "1,450฿/คืน",
+      "origPrice": "3,200฿",
+      "discount": "55%",
+      "category": "hotel",
+      "url": "https://www.agoda.com/city/bangkok-th.html",
+      "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "ag_2",
+      "name": "รีสอร์ตริมหาดภูเก็ต ติดทะเล สระว่ายน้ำอินฟินิตี้",
+      "location": "ภูเก็ต",
+      "price": "1,890฿/คืน",
+      "origPrice": "4,500฿",
+      "discount": "58%",
+      "category": "resort",
+      "url": "https://www.agoda.com/city/phuket-th.html",
+      "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=500&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "ag_3",
+      "name": "บูทีคโฮเทลบรรยากาศธรรมชาติ นิมมานเหมินทร์",
+      "location": "เชียงใหม่",
+      "price": "990฿/คืน",
+      "origPrice": "2,200฿",
+      "discount": "55%",
+      "category": "hotel",
+      "url": "https://www.agoda.com/city/chiang-mai-th.html",
+      "image": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=500&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "ag_4",
+      "name": "โรงแรมสไตล์โมเดิร์นใกล้สถานีชินจูกุ โตเกียว",
+      "location": "โตเกียว ประเทศญี่ปุ่น",
+      "price": "2,490฿/คืน",
+      "origPrice": "5,000฿",
+      "discount": "50%",
+      "category": "hotel",
+      "url": "https://www.agoda.com/city/tokyo-jp.html",
+      "image": "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=500&auto=format&fit=crop&q=80"
+    }
+  ]
+}

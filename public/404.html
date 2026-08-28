@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+  <title>404 ไม่พบหน้านี้ (Page Not Found) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-710F6F2YG5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-710F6F2YG5');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.88);
+      --accent: #32ffc9;
+      --accent-blue: #0284c7;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-image: 
+        radial-gradient(circle at 50% 30%, rgba(2, 132, 199, 0.25), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(50, 255, 201, 0.15), transparent 45%);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .error-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 3rem 2.2rem;
+      max-width: 580px;
+      width: 100%;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 30px rgba(50, 255, 201, 0.15);
+    }
+    .glitch-code {
+      font-family: "Chakra Petch", monospace;
+      font-size: 5.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.8rem;
+      text-shadow: 0 0 25px rgba(50, 255, 201, 0.5);
+    }
+    .error-title {
+      font-size: 1.4rem;
+      color: #fff;
+      margin-bottom: 0.8rem;
+    }
+    .error-desc {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .btn-row {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-action {
+      padding: 0.65rem 1.4rem;
+      border-radius: 12px;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+      color: #050b14;
+      box-shadow: 0 4px 20px rgba(50, 255, 201, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(50, 255, 201, 0.5);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: #e6f3ff;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+</head>
+<body>
+  <div class="error-card">
+    <div class="glitch-code" id="errorCodeText">404</div>
+    <h1 class="error-title" id="errorTitleText">ไม่พบหน้าเว็บที่คุณกำลังค้นหา (Page Not Found)</h1>
+    <p class="error-desc" id="errorDescText">
+      หน้าที่คุณต้องการอาจถูกย้าย ลบออกไปแล้ว หรือพิมพ์ URL ไม่ถูกต้อง ตรวจสอบสารบัญรหัสสถานะหรือกลับสู่หน้าหลัก
+    </p>
+    <div class="btn-row">
+      <a href="/" class="btn-action btn-primary">🏠 กลับสู่หน้าหลัก</a>
+      <a href="login" class="btn-action btn-secondary" id="btnErrorLogin">🔐 เข้าสู่ระบบ</a>
+      <a href="http-errors" class="btn-action btn-secondary">📖 สารบัญ HTTP Error Codes</a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const codeMap = {
+        '400': { title: 'คำขอไม่ถูกต้อง (400 Bad Request)', desc: 'ไวยากรณ์คำขอหรือพารามิเตอร์ URL ที่ส่งมาไม่ถูกต้องตามมาตรฐานความปลอดภัย' },
+        '401': { title: 'ต้องเข้าสู่ระบบก่อนเข้าถึง (401 Unauthorized)', desc: 'คุณยังไม่ได้เข้าสู่ระบบ กรุณาเข้าสู่ระบบเพื่อยืนยันตัวตนก่อนเข้าใช้งานหน้านี้' },
+        '403': { title: 'ปฏิเสธการเข้าถึง (403 Forbidden)', desc: 'ขออภัย คุณไม่มีสิทธิ์เข้าถึงหน้านี้ หรือพยายามเข้าถึงข้อมูลส่วนตัวที่ไม่ได้รับอนุญาต' },
+        '404': { title: 'ไม่พบหน้าเว็บที่คุณกำลังค้นหา (404 Not Found)', desc: 'หน้าที่คุณต้องการอาจถูกย้าย ลบออกไปแล้ว หรือพิมพ์ URL ไม่ถูกต้อง ตรวจสอบสารบัญรหัสสถานะหรือกลับสู่หน้าหลัก' },
+        '405': { title: 'ไม่อนุญาตเมธอดนี้ (405 Method Not Allowed)', desc: 'HTTP Method ที่ร้องขอไม่ได้รับการสนับสนุนสำหรับทรัพยากรนี้' },
+        '429': { title: 'ส่งคำขอถี่เกินกำหนด (429 Too Many Requests)', desc: 'ระบบตรวจพบการส่งคำขอมากเกินไปตามระบบป้องกัน Rate Limit กรุณารอสักครู่แล้วลองใหม่' },
+        '500': { title: 'เซิร์ฟเวอร์เกิดข้อผิดพลาด (500 Internal Server Error)', desc: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ทีมพัฒนาได้รับการแจ้งเตือนแล้ว' },
+        '502': { title: 'เกตเวย์ขัดข้อง (502 Bad Gateway)', desc: 'เซิร์ฟเวอร์ต้นทางหรือ Reverse Proxy ได้รับการตอบสนองที่ไม่ถูกต้อง' },
+        '503': { title: 'ระบบกำลังปิดปรับปรุง (503 Service Unavailable)', desc: 'บริการไม่พร้อมใช้งานชั่วคราวเนื่องจากกำลังปรับปรุงระบบความปลอดภัย' }
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code') || '404';
+      const info = codeMap[code] || { title: `รหัสสถานะ HTTP ${code}`, desc: 'เกิดข้อผิดพลาดในการประมวลผลคำขอของคุณ' };
+
+      const codeEl = document.getElementById('errorCodeText');
+      const titleEl = document.getElementById('errorTitleText');
+      const descEl = document.getElementById('errorDescText');
+
+      if (codeEl) codeEl.textContent = code;
+      if (titleEl) titleEl.textContent = info.title;
+      if (descEl) descEl.textContent = info.desc;
+      document.title = `${code} ${info.title} • BestCyniX Dev`;
+    })();
+  </script>
+  <footer class="site-footer"></footer>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+</body>
+</html>

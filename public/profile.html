@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="โปรไฟล์และการจัดการบัญชีผู้ใช้ • BestCyniX Dev" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+  <title>โปรไฟล์ของฉัน (My Profile & Settings) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-710F6F2YG5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-710F6F2YG5');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.9);
+      --accent: #32ffc9;
+      --accent-blue: #0284c7;
+      --accent-purple: #a855f7;
+      --accent-red: #ff5574;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(2, 132, 199, 0.2), transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(50, 255, 201, 0.12), transparent 45%);
+    }
+    .container {
+      width: min(900px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 2rem 0 4rem;
+      flex: 1;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .brand-link img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 768px) {
+      .top-nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .nav-actions {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 0.3rem;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+    .btn-nav-action {
+      padding: 0.45rem 1rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: #e6f3ff;
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .btn-nav-action:hover {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+    .btn-logout {
+      border-color: rgba(255, 85, 116, 0.4);
+      color: #ff859d;
+    }
+    .btn-logout:hover {
+      background: var(--accent-red);
+      color: #fff;
+      border-color: var(--accent-red);
+    }
+
+    /* Hero Header */
+    .profile-hero {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+      flex-wrap: wrap;
+    }
+    .avatar-wrapper {
+      position: relative;
+      width: 110px;
+      height: 110px;
+      flex-shrink: 0;
+    }
+    .profile-avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+      box-shadow: 0 0 25px rgba(50, 255, 201, 0.4);
+      background: #0d2238;
+    }
+    .avatar-edit-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all 0.25s;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: var(--accent);
+      gap: 0.2rem;
+    }
+    .avatar-wrapper:hover .avatar-edit-overlay {
+      opacity: 1;
+    }
+    .profile-hero-info {
+      flex: 1;
+      min-width: 260px;
+    }
+    .profile-name-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .profile-display-name {
+      font-size: 1.6rem;
+      color: #fff;
+      font-weight: 700;
+    }
+    .badge-role {
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .role-admin {
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.6);
+      color: #d8b4fe;
+    }
+    .role-user {
+      background: rgba(50, 255, 201, 0.15);
+      border: 1px solid rgba(50, 255, 201, 0.4);
+      color: var(--accent);
+    }
+    .profile-email-line {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 0.8rem;
+    }
+    .uid-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.8rem;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+    .uid-badge:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Cards Grid */
+    .profile-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.8rem;
+    }
+    .profile-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 2rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+    .profile-card h3 {
+      font-size: 1.2rem;
+      color: #fff;
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .password-input-group {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+    .password-input-group .form-input {
+      width: 100%;
+      padding-right: 2.8rem;
+    }
+    .btn-toggle-password {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      padding: 0.25rem;
+      z-index: 2;
+    }
+    .btn-toggle-password:hover {
+      color: var(--accent);
+      transform: translateY(-50%) scale(1.15);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    @media (max-width: 650px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    .form-label {
+      font-size: 0.88rem;
+      color: #d1e5f8;
+      font-weight: 500;
+    }
+    .form-input {
+      padding: 0.75rem 1rem;
+      background: rgba(4, 12, 22, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px;
+      color: #fff;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(50, 255, 201, 0.2);
+    }
+    .form-input:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      background: rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+    }
+    .btn-save-profile {
+      padding: 0.75rem 1.8rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+      color: #050b14;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 4px 18px rgba(50, 255, 201, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-save-profile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(50, 255, 201, 0.5);
+    }
+    .btn-danger-del {
+      padding: 0.7rem 1.4rem;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #f87171;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-danger-del:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    /* Live Email Verification Notice */
+    .verify-banner {
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      background: rgba(234, 179, 8, 0.12);
+      border: 1px solid rgba(234, 179, 8, 0.4);
+      color: #fef08a;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .verify-btn {
+      padding: 0.4rem 0.9rem;
+      background: #eab308;
+      color: #071426;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 99999;
+      background: rgba(8, 24, 42, 0.96);
+      border: 1px solid var(--accent);
+      padding: 0.9rem 1.4rem;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 0.9rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      display: none;
+    }
+
+    /* Avatar Cropper Modal */
+    .cropper-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .cropper-modal.active { display: flex; }
+    .cropper-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.8rem;
+      width: min(420px, 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .cropper-stage {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid var(--accent);
+      background: #030810;
+      position: relative;
+      cursor: grab;
+    }
+    .cropper-stage:active { cursor: grabbing; }
+    .cropper-stage canvas { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <!-- Cyber Profile Page Preloader (Prevents placeholder flash until data is fully loaded) -->
+  <div id="profilePageLoader" style="position: fixed; inset: 0; background: #050b14; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem; transition: opacity 0.35s ease;">
+    <div class="auth-gate-spinner" style="width: 48px; height: 48px; border: 3px solid rgba(50, 255, 201, 0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+    <div style="font-family: 'Chakra Petch', sans-serif; color: var(--accent); font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px; text-shadow: 0 0 15px rgba(50, 255, 201, 0.4);">กำลังโหลดข้อมูลโปรไฟล์ (LOADING PROFILE)...</div>
+  </div>
+
+  <div class="container">
+    <nav class="top-nav">
+      <a href="/" class="brand-link">
+        <img src="assets/photo/bcxlogo2.png" alt="Logo" />
+        <span>BESTCYNIX DEV</span>
+      </a>
+
+      <!-- Right Cluster: Desktop Nav + Bell + Hamburger -->
+      <div class="nav-right-cluster">
+        <div class="desktop-nav-links">
+          <a href="/" class="btn-nav-action">🏠 กลับหน้าหลัก</a>
+          <a href="admin-dashboard" class="btn-nav-action" id="btnDevPortalLink" style="display: none; border-color: var(--accent-purple); color: #d8b4fe;">⚡ Dev Dashboard</a>
+          <button type="button" class="btn-nav-action btn-logout" id="btnLogout">🚪 ออกจากระบบ</button>
+        </div>
+
+        <!-- Mobile Hamburger Toggle Button -->
+        <button class="nav-toggle" id="adminNavToggle" aria-expanded="false" aria-label="เปิดเมนูนำทาง">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Backdrop Overlay -->
+    <div class="mobile-drawer-overlay" id="adminDrawerOverlay"></div>
+
+    <!-- Mobile Cyber Drawer Menu -->
+    <div class="mobile-nav-drawer" id="adminNavDrawer">
+      <div class="mobile-drawer-header">
+        <span style="font-size: 0.82rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Navigation Menu</span>
+        <button type="button" class="btn-close-drawer" id="adminBtnCloseDrawer">✕</button>
+      </div>
+      <div class="mobile-drawer-items">
+        <a href="/" class="mobile-drawer-link">
+          <span class="drawer-icon">🏠</span>
+          <div class="drawer-text">
+            <strong>หน้าหลักเว็บไซต์ (Home)</strong>
+            <small>bestcynixdev.web.app</small>
+          </div>
+        </a>
+        <a href="profile" class="mobile-drawer-link active">
+          <span class="drawer-icon">👤</span>
+          <div class="drawer-text">
+            <strong>โปรไฟล์และการตั้งค่าบัญชี</strong>
+            <small>ข้อมูลส่วนตัว & รหัสผ่าน</small>
+          </div>
+        </a>
+        <a href="admin-dashboard" class="mobile-drawer-link" id="drawerDevLink" style="display: none;">
+          <span class="drawer-icon">⚡</span>
+          <div class="drawer-text">
+            <strong>Dev Dashboard</strong>
+            <small>ศูนย์บริหารจัดการหลัก & สถิติ</small>
+          </div>
+        </a>
+        <a href="join-team" class="mobile-drawer-link">
+          <span class="drawer-icon">🚀</span>
+          <div class="drawer-text">
+            <strong>สมัครร่วมทีม (Join Team)</strong>
+            <small>สมัครเป็นส่วนหนึ่งของพวกเรา</small>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Dev Admin User Inspection Banner -->
+    <div id="devInspectBanner" style="display: none; background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(50, 255, 201, 0.15)); border: 1px solid var(--accent-purple); padding: 1.1rem 1.4rem; border-radius: 16px; margin-bottom: 1.5rem; display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 2rem;">🛡️</span>
+        <div>
+          <strong style="color: var(--accent); font-family: 'Chakra Petch', sans-serif; font-size: 1.05rem;">DEV ADMIN — USER INSPECTION MODE</strong>
+          <p style="font-size: 0.85rem; color: var(--muted); margin: 0.15rem 0 0 0;">กำลังตรวจสอบข้อมูลและจัดการบัญชีของผู้ใช้ (UID: <span id="inspectTargetUid" style="color:#fff; font-family:monospace;">...</span>)</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn-nav-action" id="btnAdminCopyUid">📋 คัดลอก UID</button>
+        <button type="button" class="btn-nav-action" id="btnAdminCopyEmail">✉️ คัดลอกอีเมล</button>
+        <button type="button" class="btn-nav-action" id="btnAdminSendResetEmail" style="border-color: var(--accent); color: var(--accent);">🔑 ส่งรีเซ็ตรหัสผ่าน</button>
+        <a href="admin-users" class="btn-nav-action" style="border-color: var(--accent-purple); color: #d8b4fe;">👥 หน้ารายชื่อผู้ใช้</a>
+      </div>
+    </div>
+
+    <!-- Email Verification Alert Banner -->
+    <div class="verify-banner" id="verifyBanner" style="display: none;">
+      <div>
+        <strong>📧 สถานะอีเมล: รอการยืนยัน (กำลังตรวจเช็คสดอัตโนมัติ ⏳)</strong>
+        <p style="font-size: 0.8rem; margin-top: 0.2rem; color: #fde047;">กรุณาคลิกลิงก์ในกล่องจดหมายของคุณ ระบบจะอัปเดตทันทีโดยไม่ต้องรีเฟรชหน้าเว็บ</p>
+      </div>
+      <button type="button" class="verify-btn" id="btnResendVerify">ส่งอีเมลยืนยันอีกครั้ง</button>
+    </div>
+
+    <!-- Profile Hero Card -->
+    <div class="profile-hero">
+      <div class="avatar-wrapper" id="avatarWrapper" title="คลิกเพื่อเปลี่ยนและครอบตัดรูปภาพ">
+        <img src="assets/photo/bcxlogo2.png" alt="Avatar" class="profile-avatar-img" id="heroAvatarImg" />
+        <div class="avatar-edit-overlay">
+          <span>📷</span>
+          <span>เปลี่ยนรูป</span>
+        </div>
+      </div>
+      <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
+
+      <div class="profile-hero-info">
+        <div class="profile-name-row">
+          <h1 class="profile-display-name" id="heroDisplayName">กำลังโหลด...</h1>
+          <span class="badge-role role-user" id="heroRoleBadge">User</span>
+        </div>
+        <p class="profile-email-line" id="heroEmail">loading@email.com</p>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.8rem;">
+          <span class="badge-role" id="heroProviderBadge" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #fff; font-size: 0.78rem; padding: 0.25rem 0.75rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span>G บัญชี Google</span>
+          </span>
+          <span class="badge-role" id="heroVerifyBadge" style="background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; font-size: 0.78rem; padding: 0.25rem 0.75rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span>✅ ยืนยันอีเมลแล้ว</span>
+          </span>
+        </div>
+        <div class="uid-badge" id="btnCopyUid" title="คลิกเพื่อคัดลอก UID">
+          <span>UID: <span id="heroUid">...</span></span>
+          <span>📋</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Forms Grid -->
+    <div class="profile-cards-grid">
+      <!-- 1. General Profile Info -->
+      <div class="profile-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0.8rem;">
+          <h3 style="margin: 0; padding: 0; border: none;">👤 ข้อมูลทั่วไป (Profile Information)</h3>
+          <button type="button" class="btn-nav-action" id="btnEditProfile" style="border-color: var(--accent); color: var(--accent); font-weight: 700;">
+            <span>✏️ แก้ไขข้อมูลโปรไฟล์</span>
+          </button>
+        </div>
+        <form id="formGeneralProfile">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="inputDisplayName">ชื่อที่ใช้แสดง (Display Name) <span style="color:var(--accent);">*</span></label>
+              <input type="text" id="inputDisplayName" class="form-input" disabled required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inputPhone">เบอร์โทรศัพท์ติดต่อ (Phone - สูงสุด 10 หลัก)</label>
+              <input type="tel" id="inputPhone" class="form-input" maxlength="10" placeholder="08XXXXXXXX" disabled />
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label" for="inputEmail">อีเมล (Email) <small style="color: var(--muted);">(ไม่สามารถเปลี่ยนได้)</small></label>
+              <input type="email" id="inputEmail" class="form-input" disabled />
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label" for="inputBio">ข้อมูลส่วนตัว / แนะนำตัว (Bio)</label>
+              <textarea id="inputBio" class="form-input" rows="3" placeholder="ระบุข้อมูลแนะนำตัว หรือโปรเจกต์ที่สนใจ..." disabled></textarea>
+            </div>
+          </div>
+          <div id="profileEditActions" style="display: none; gap: 0.8rem; align-items: center; margin-top: 1.2rem; flex-wrap: wrap;">
+            <button type="submit" class="btn-save-profile" id="btnSaveGeneral">💾 บันทึกข้อมูลส่วนตัว</button>
+            <button type="button" class="btn-nav-action" id="btnCancelEditProfile" style="padding: 0.75rem 1.4rem; border-radius: 12px; font-weight: 600;">✕ ยกเลิก</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 2. Security & Password -->
+      <div class="profile-card" id="cardSecurity">
+        <h3>🔒 ความปลอดภัยและเปลี่ยนรหัสผ่าน (Security & Password)</h3>
+        <p id="googlePassNote" style="display: none; font-size: 0.86rem; color: #a4adfc; background: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.3); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.2rem;">
+          ℹ️ คุณเข้าสู่ระบบด้วยบัญชี Google หากต้องการ สามารถกำหนดรหัสผ่านใหม่เพื่อใช้ล็อกอินด้วยอีเมลและรหัสผ่านได้เช่นกัน
+        </p>
+        <form id="formChangePassword">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="inputNewPass">รหัสผ่านใหม่ (New Password)</label>
+              <div class="password-input-group">
+                <input type="password" id="inputNewPass" class="form-input" minlength="6" placeholder="อย่างน้อย 6 ตัวอักษร" required />
+                <button type="button" class="btn-toggle-password" data-target="inputNewPass" title="กดเพื่อดู/ซ่อนรหัสผ่าน" aria-label="ดูรหัสผ่าน">👁️</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inputConfirmPass">ยืนยันรหัสผ่านใหม่ (Confirm Password)</label>
+              <div class="password-input-group">
+                <input type="password" id="inputConfirmPass" class="form-input" minlength="6" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" required />
+                <button type="button" class="btn-toggle-password" data-target="inputConfirmPass" title="กดเพื่อดู/ซ่อนรหัสผ่าน" aria-label="ดูรหัสผ่าน">👁️</button>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 1.2rem;">
+            <button type="submit" class="btn-save-profile" style="background: linear-gradient(135deg, #38bdf8, #6366f1); color: #fff;" id="btnSavePassword">🔑 เปลี่ยนรหัสผ่านใหม่</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 3. Account Danger Zone -->
+      <div class="profile-card" style="border-color: rgba(239, 68, 68, 0.4);">
+        <h3 style="color: #f87171; border-color: rgba(239, 68, 68, 0.2);">⚠️ จัดการบัญชีขั้นสูง (Danger Zone)</h3>
+        <p style="font-size: 0.88rem; color: var(--muted); margin-bottom: 1.2rem;">
+          การลบบัญชีผู้ใช้จะลบประวัติการแชท ข้อมูลโปรไฟล์ และสิทธิ์ทั้งหมดออกจากระบบอย่างถาวรตามกฎหมาย PDPA (ไม่สามารถกู้คืนได้)
+        </p>
+        <button type="button" class="btn-danger-del" id="btnDeleteAccount">🗑️ ลบบัญชีผู้ใช้ถาวร (Delete Account)</button>
+      </div>
+    </div>
+    <footer class="site-footer"></footer>
+  </div>
+
+  <!-- Delete Account Confirmation Cyber Modal -->
+  <div class="cropper-modal" id="deleteAccountModal">
+    <div class="cropper-box" style="width: min(520px, calc(100vw - 2rem)); text-align: left;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(239, 68, 68, 0.3); padding-bottom: 0.8rem; margin-bottom: 1.2rem;">
+        <h3 style="color: #f87171; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+          ⚠️ ยืนยันการลบบัญชีผู้ใช้ถาวร
+        </h3>
+        <button type="button" class="btn-nav-action" style="padding: 0.2rem 0.6rem;" id="btnCloseDeleteModal">✕</button>
+      </div>
+
+      <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; padding: 1rem; margin-bottom: 1.2rem; font-size: 0.88rem; color: #fca5a5; line-height: 1.6;">
+        <strong>คำเตือนความปลอดภัย (PDPA):</strong><br />
+        เมื่อทำการลบบัญชี ข้อมูลทั้งหมดของคุณ (ชื่อ, อีเมล, ประวัติการสนทนาแชท, รูปโปรไฟล์) จะถูกทำลายออกจากระบบอย่างถาวร และไม่สามารถกู้คืนได้อีกต่อไป
+      </div>
+
+      <!-- Re-auth Password (for password users) -->
+      <div id="delPasswordGroup" style="margin-bottom: 1.2rem;">
+        <label class="form-label" style="margin-bottom: 0.4rem; color: #fff;">🔑 ยืนยันรหัสผ่านปัจจุบันของคุณ</label>
+        <div class="password-input-group">
+          <input type="password" id="delCurrentPassword" class="form-input" placeholder="กรอกรหัสผ่านปัจจุบันของคุณ..." />
+          <button type="button" class="btn-toggle-password" data-target="delCurrentPassword">👁️</button>
+        </div>
+      </div>
+
+      <!-- Re-auth Google (for Google users) -->
+      <div id="delGoogleGroup" style="display: none; margin-bottom: 1.2rem;">
+        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem;">คุณเข้าสู่ระบบด้วยบัญชี Google กรุณากดยืนยันตัวตนก่อนดำเนินการลบ</p>
+        <button type="button" class="btn-nav-action" style="width: 100%; justify-content: center; background: #ffffff; color: #000; font-weight: 600;" id="btnReauthGoogle">
+          <span>G ยืนยันตัวตนด้วย Google</span>
+        </button>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <label class="form-label" style="margin-bottom: 0.4rem; color: #fff;">
+          พิมพ์คำว่า <span style="color: #ff5574; font-weight: 700; background: rgba(255, 85, 116, 0.15); padding: 0.1rem 0.4rem; border-radius: 4px;">DELETE</span> หรือ <span style="color: #ff5574; font-weight: 700; background: rgba(255, 85, 116, 0.15); padding: 0.1rem 0.4rem; border-radius: 4px;">ลบบัญชี</span> เพื่อปลดล็อก:
+        </label>
+        <input type="text" id="inputConfirmDeleteText" class="form-input" placeholder="พิมพ์ DELETE หรือ ลบบัญชี" style="border-color: rgba(239, 68, 68, 0.4);" />
+      </div>
+
+      <div style="display: flex; gap: 0.8rem; justify-content: flex-end;">
+        <button type="button" class="btn-nav-action" id="btnCancelDelete">ยกเลิก</button>
+        <button type="button" class="btn-danger-del" id="btnConfirmFinalDelete" disabled style="opacity: 0.5; cursor: not-allowed;">
+          🗑️ ยืนยันลบบัญชีถาวร
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Re-auth Modal for Password Change if requires-recent-login -->
+  <div class="cropper-modal" id="reauthPasswordModal">
+    <div class="cropper-box" style="width: min(480px, calc(100vw - 2rem)); text-align: left;">
+      <h3 style="color: #fff; font-size: 1.15rem; margin-bottom: 0.8rem;">🔐 ยืนยันตัวตนเพื่อเปลี่ยนรหัสผ่าน</h3>
+      <p style="font-size: 0.88rem; color: var(--muted); margin-bottom: 1.2rem;">
+        เนื่องจากเหตุผลด้านความปลอดภัย กรุณากรอกรหัสผ่านปัจจุบันของคุณอีกครั้งเพื่อยืนยัน
+      </p>
+      <div class="form-group" style="margin-bottom: 1.2rem;">
+        <label class="form-label" style="color: #fff;">รหัสผ่านปัจจุบัน</label>
+        <div class="password-input-group">
+          <input type="password" id="reauthCurrentPass" class="form-input" placeholder="กรอกรหัสผ่านปัจจุบัน..." />
+          <button type="button" class="btn-toggle-password" data-target="reauthCurrentPass">👁️</button>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
+        <button type="button" class="btn-nav-action" id="btnCancelReauth">ยกเลิก</button>
+        <button type="button" class="btn-save-profile" id="btnConfirmReauthAndSave">ยืนยันและเปลี่ยนรหัสผ่าน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avatar Cropper Modal -->
+  <div class="cropper-modal" id="cropperModal">
+    <div class="cropper-box">
+      <h3 style="color: #fff; font-size: 1.1rem;">✂️ ปรับขนาดและครอบตัดรูปโปรไฟล์</h3>
+      <div class="cropper-stage" id="cropperStage">
+        <canvas id="cropCanvas" width="280" height="280"></canvas>
+      </div>
+      <div style="width: 100%; display: flex; flex-direction: column; gap: 0.6rem;">
+        <label style="font-size: 0.82rem; color: var(--muted);">ซูม (Zoom)</label>
+        <input type="range" id="cropZoom" min="0.5" max="3" step="0.05" value="1" style="width: 100%; accent-color: var(--accent);" />
+      </div>
+      <div style="display: flex; gap: 0.6rem; width: 100%;">
+        <button type="button" class="btn-save-profile" style="flex: 1; justify-content: center;" id="btnApplyCrop">✓ ใช้งานรูปนี้</button>
+        <button type="button" class="btn-nav-action" style="justify-content: center;" id="btnCancelCrop">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      databaseURL: "https://bestcynixdev-default-rtdb.asia-southeast1.firebasedatabase.app",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5",
+      projectNumber: "172682556745"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    let currentUser = null;
+    let currentUserData = null;
+    let autoVerifyInterval = null;
+
+    const showToast = (msg, type = "info") => {
+      const t = document.getElementById("toast");
+      if (!t) return;
+      t.textContent = msg;
+      t.style.borderColor = type === "error" ? "#ff5574" : type === "success" ? "#32ffc9" : "#38bdf8";
+      t.style.display = "block";
+      setTimeout(() => { t.style.display = "none"; }, 3500);
+    };
+
+    // Edit Profile Mode Controls
+    const inputDisplayName = document.getElementById("inputDisplayName");
+    const inputPhone = document.getElementById("inputPhone");
+    const inputBio = document.getElementById("inputBio");
+    const btnEditProfile = document.getElementById("btnEditProfile");
+    const profileEditActions = document.getElementById("profileEditActions");
+    const btnCancelEditProfile = document.getElementById("btnCancelEditProfile");
+
+    const setProfileEditMode = (isEditing) => {
+      inputDisplayName.disabled = !isEditing;
+      inputPhone.disabled = !isEditing;
+      inputBio.disabled = !isEditing;
+
+      if (isEditing) {
+        btnEditProfile.style.display = "none";
+        profileEditActions.style.display = "flex";
+        inputDisplayName.focus();
+      } else {
+        btnEditProfile.style.display = "inline-flex";
+        profileEditActions.style.display = "none";
+      }
+    };
+
+    btnEditProfile?.addEventListener("click", () => setProfileEditMode(true));
+
+    btnCancelEditProfile?.addEventListener("click", () => {
+      inputDisplayName.value = currentUser?.displayName || "";
+      inputPhone.value = currentUserData?.phone || "";
+      inputBio.value = currentUserData?.bio || "";
+      setProfileEditMode(false);
+    });
+
+    // Limit Phone to 10 numbers only
+    inputPhone?.addEventListener("input", (e) => {
+      e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+    });
+
+    // Auth State Listener & Dynamic UID Profile Router
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace(`login?redirect=${returnUrl}`);
+        return;
+      }
+      currentUser = user;
+
+      // Check URL Query UID
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryUid = urlParams.get("uid");
+
+      // Check if current user is Dev/Admin
+      let isDevAdmin = (user.email === "bestcynix@gmail.com" || user.email === "admin@email.com");
+      try {
+        const myDoc = await db.collection("users").doc(user.uid).get();
+        if (myDoc.exists && myDoc.data().role === "admin") isDevAdmin = true;
+      } catch (e) {}
+
+      // Target UID resolution
+      const targetUid = queryUid || user.uid;
+      const isViewingSelf = targetUid === user.uid;
+
+      if (!isViewingSelf && !isDevAdmin) {
+        // Normal user attempting to inspect another UID -> Redirect to 403
+        window.location.replace("http-errors?code=403&msg=ForbiddenUserInspection");
+        return;
+      }
+
+      // Update URL to current UID if viewing self without query
+      if (isViewingSelf && !queryUid) {
+        window.history.replaceState({}, "", `profile?uid=${user.uid}`);
+      }
+
+      // Load target profile
+      let targetProfileData = null;
+      let targetUserEmail = user.email;
+      let targetDisplayName = user.displayName;
+      let targetPhotoURL = user.photoURL;
+
+      if (isViewingSelf) {
+        targetProfileData = currentUserData;
+      } else {
+        // Dev Admin inspecting another user
+        document.getElementById("devInspectBanner").style.display = "flex";
+        document.getElementById("inspectTargetUid").textContent = targetUid;
+        document.getElementById("btnEditProfile").style.display = "none";
+        document.getElementById("btnSaveGeneral").style.display = "none";
+        document.getElementById("delAccountSection") && (document.getElementById("delAccountSection").style.display = "none");
+        document.getElementById("passwordSecuritySection") && (document.getElementById("passwordSecuritySection").style.display = "none");
+        
+        try {
+          const targetSnap = await db.collection("users").doc(targetUid).get();
+          if (targetSnap.exists) {
+            targetProfileData = targetSnap.data();
+            targetUserEmail = targetProfileData.email || "ไม่มีอีเมลระบุ";
+            targetDisplayName = targetProfileData.displayName || "ผู้ใช้ไม่มีชื่อ";
+            targetPhotoURL = targetProfileData.photoURL || "assets/photo/bcxlogo2.png";
+          } else {
+            showToast("⚠️ ไม่พบข้อมูลผู้ใช้ของ UID นี้ในฐานข้อมูล", "error");
+            setTimeout(() => { window.location.replace("admin-users"); }, 2000);
+            return;
+          }
+        } catch (e) {
+          showToast(`เกิดข้อผิดพลาด: ${e.message}`, "error");
+        }
+      }
+
+      // Populate Hero & Inputs
+      document.getElementById("heroDisplayName").textContent = targetDisplayName || targetUserEmail.split("@")[0];
+      document.getElementById("heroEmail").textContent = targetUserEmail;
+      document.getElementById("heroUid").textContent = targetUid;
+      inputDisplayName.value = targetDisplayName || "";
+      document.getElementById("inputEmail").value = targetUserEmail;
+
+      if (targetPhotoURL) {
+        document.getElementById("heroAvatarImg").src = targetPhotoURL;
+      }
+
+      // Check Provider & Verification status
+      const isGoogle = (isViewingSelf && user.providerData && user.providerData.some(p => p.providerId === "google.com")) || (targetProfileData?.provider === "google");
+      const heroProviderBadge = document.getElementById("heroProviderBadge");
+      const heroVerifyBadge = document.getElementById("heroVerifyBadge");
+      const googlePassNote = document.getElementById("googlePassNote");
+
+      if (heroProviderBadge) {
+        heroProviderBadge.innerHTML = isGoogle ? "🔴 <span>บัญชี Google</span>" : "✉️ <span>อีเมล & รหัสผ่าน</span>";
+      }
+
+      const isVerified = isViewingSelf ? (isGoogle || user.emailVerified) : !!targetProfileData?.emailVerified;
+      if (heroVerifyBadge) {
+        heroVerifyBadge.innerHTML = isVerified ? "✅ <span>ยืนยันอีเมลแล้ว</span>" : "⚠️ <span>ยังไม่ยืนยันอีเมล</span>";
+        heroVerifyBadge.style.background = isVerified ? "rgba(34,197,94,0.15)" : "rgba(234,179,8,0.15)";
+        heroVerifyBadge.style.borderColor = isVerified ? "rgba(34,197,94,0.4)" : "rgba(234,179,8,0.4)";
+        heroVerifyBadge.style.color = isVerified ? "#4ade80" : "#facc15";
+      }
+      if (document.getElementById("verifyBanner")) {
+        document.getElementById("verifyBanner").style.display = (isViewingSelf && !isVerified) ? "flex" : "none";
+      }
+
+      if (googlePassNote) {
+        googlePassNote.style.display = isGoogle ? "block" : "none";
+      }
+
+      // Fetch Firestore Doc for self if not fetched yet
+      if (isViewingSelf) {
+        try {
+          const docSnap = await db.collection("users").doc(user.uid).get();
+          if (docSnap.exists) {
+            currentUserData = docSnap.data();
+            if (currentUserData.phone) inputPhone.value = currentUserData.phone;
+            if (currentUserData.bio) inputBio.value = currentUserData.bio;
+            if (currentUserData.photoURL) document.getElementById("heroAvatarImg").src = currentUserData.photoURL;
+
+            const isCurrentAdmin = user.email === "bestcynix@gmail.com" || currentUserData.role === "admin";
+            const roleBadge = document.getElementById("heroRoleBadge");
+            if (roleBadge) {
+              roleBadge.textContent = isCurrentAdmin ? "⚡ Dev / Admin" : "👤 User";
+              roleBadge.className = isCurrentAdmin ? "badge-role role-admin" : "badge-role role-user";
+            }
+            if (isCurrentAdmin) {
+              const devLink = document.getElementById("btnDevPortalLink");
+              if (devLink) devLink.style.display = "inline-flex";
+              const drawerDev = document.getElementById("drawerDevLink");
+              if (drawerDev) drawerDev.style.display = "flex";
+            }
+          }
+        } catch (err) {
+          console.warn("Fetch profile doc:", err);
+        }
+      } else {
+        // Dev viewing other user's doc
+        if (targetProfileData) {
+          if (targetProfileData.phone) inputPhone.value = targetProfileData.phone;
+          if (targetProfileData.bio) inputBio.value = targetProfileData.bio;
+          const targetIsAdmin = targetProfileData.role === "admin";
+          const roleBadge = document.getElementById("heroRoleBadge");
+          if (roleBadge) {
+            roleBadge.textContent = targetIsAdmin ? "⚡ Dev / Admin" : "👤 User";
+            roleBadge.className = targetIsAdmin ? "badge-role role-admin" : "badge-role role-user";
+          }
+        }
+      }
+
+      // Live Auto-Verification Checker (for password users viewing self)
+      if (isViewingSelf && !isGoogle) {
+        startAutoVerifyPoller(user);
+      }
+
+      // Smoothly hide profile preloader
+      const loader = document.getElementById("profilePageLoader");
+      if (loader) {
+        loader.style.opacity = "0";
+        loader.style.pointerEvents = "none";
+        setTimeout(() => { loader.remove(); }, 350);
+      }
+    });
+
+    const startAutoVerifyPoller = (user) => {
+      const banner = document.getElementById("verifyBanner");
+      if (user.emailVerified) {
+        if (banner) banner.style.display = "none";
+        if (autoVerifyInterval) clearInterval(autoVerifyInterval);
+        return;
+      }
+      if (banner) banner.style.display = "flex";
+
+      if (autoVerifyInterval) clearInterval(autoVerifyInterval);
+      autoVerifyInterval = setInterval(async () => {
+        try {
+          await user.reload();
+          if (user.emailVerified) {
+            clearInterval(autoVerifyInterval);
+            if (banner) banner.style.display = "none";
+            const verifyBadge = document.getElementById("heroVerifyBadge");
+            if (verifyBadge) {
+              verifyBadge.innerHTML = "✅ <span>ยืนยันอีเมลแล้ว</span>";
+              verifyBadge.style.background = "rgba(34,197,94,0.15)";
+              verifyBadge.style.borderColor = "rgba(34,197,94,0.4)";
+              verifyBadge.style.color = "#4ade80";
+            }
+            showToast("🎉 ตรวจพบการยืนยันอีเมลสำเร็จสมบูรณ์แล้ว!", "success");
+            await db.collection("users").doc(user.uid).set({ emailVerified: true }, { merge: true });
+          }
+        } catch (e) {}
+      }, 3000);
+    };
+
+    // Copy UID
+    document.getElementById("btnCopyUid")?.addEventListener("click", () => {
+      const uid = document.getElementById("heroUid")?.textContent || currentUser?.uid;
+      if (uid) {
+        navigator.clipboard.writeText(uid).then(() => {
+          showToast("📋 คัดลอก UID เรียบร้อยแล้ว", "success");
+        });
+      }
+    });
+
+    // Admin Copy UID & Email
+    document.getElementById("btnAdminCopyUid")?.addEventListener("click", () => {
+      const uid = document.getElementById("inspectTargetUid")?.textContent || document.getElementById("heroUid")?.textContent;
+      if (uid) {
+        navigator.clipboard.writeText(uid).then(() => showToast("📋 คัดลอก UID ผู้ใช้เรียบร้อยแล้ว", "success"));
+      }
+    });
+
+    document.getElementById("btnAdminCopyEmail")?.addEventListener("click", () => {
+      const email = document.getElementById("heroEmail")?.textContent;
+      if (email) {
+        navigator.clipboard.writeText(email).then(() => showToast("✉️ คัดลอกอีเมลเรียบร้อยแล้ว", "success"));
+      }
+    });
+
+    // Admin Send Reset Email to this User
+    document.getElementById("btnAdminSendResetEmail")?.addEventListener("click", async () => {
+      const email = document.getElementById("heroEmail")?.textContent;
+      if (!email || email.includes("ไม่มีอีเมล")) {
+        showToast("ไม่พบอีเมลของผู้ใช้นี้", "error");
+        return;
+      }
+      if (!confirm(`ต้องการส่งลิงก์ตั้งค่ารหัสผ่านใหม่ไปยังอีเมล ${email} ใช่หรือไม่?`)) return;
+      try {
+        await auth.sendPasswordResetEmail(email);
+        showToast(`✅ ส่งลิงก์รีเซ็ตรหัสผ่านไปยัง ${email} สำเร็จแล้ว`, "success");
+      } catch (err) {
+        showToast(`ส่งไม่สำเร็จ: ${err.message}`, "error");
+      }
+    });
+
+    // Resend Verification Email
+    document.getElementById("btnResendVerify")?.addEventListener("click", async () => {
+      if (!currentUser) return;
+      try {
+        await currentUser.sendEmailVerification();
+        showToast("ส่งอีเมลยืนยันไปยังกล่องจดหมายเรียบร้อยแล้ว", "success");
+      } catch (err) {
+        showToast(`ส่งอีเมลไม่สำเร็จ: ${err.message}`, "error");
+      }
+    });
+
+    // Save General Profile
+    document.getElementById("formGeneralProfile")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+      const btn = document.getElementById("btnSaveGeneral");
+      btn.disabled = true;
+      btn.textContent = "กำลังบันทึก...";
+
+      const newName = inputDisplayName.value.trim();
+      const newPhone = inputPhone.value.trim();
+      const newBio = inputBio.value.trim();
+
+      try {
+        await currentUser.updateProfile({ displayName: newName });
+        await db.collection("users").doc(currentUser.uid).set({
+          displayName: newName,
+          phone: newPhone,
+          bio: newBio,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        if (currentUserData) {
+          currentUserData.phone = newPhone;
+          currentUserData.bio = newBio;
+        }
+
+        document.getElementById("heroDisplayName").textContent = newName;
+        setProfileEditMode(false);
+        showToast("✓ บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว", "success");
+      } catch (err) {
+        showToast(`บันทึกไม่สำเร็จ: ${err.message}`, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "💾 บันทึกข้อมูลส่วนตัว";
+      }
+    });
+
+    // Password Visibility Toggles
+    document.querySelectorAll(".btn-toggle-password").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.dataset.target;
+        const targetInput = document.getElementById(targetId);
+        if (!targetInput) return;
+
+        if (targetInput.type === "password") {
+          targetInput.type = "text";
+          btn.textContent = "🙈";
+        } else {
+          targetInput.type = "password";
+          btn.textContent = "👁️";
+        }
+      });
+    });
+
+    // Change Password Handler
+    let pendingNewPassword = "";
+    document.getElementById("formChangePassword")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+      const p1 = document.getElementById("inputNewPass").value;
+      const p2 = document.getElementById("inputConfirmPass").value;
+
+      if (p1.length < 6) {
+        showToast("รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร", "error");
+        return;
+      }
+
+      if (p1 !== p2) {
+        showToast("รหัสผ่านใหม่ทั้ง 2 ช่องไม่ตรงกัน กรุณาตรวจสอบ", "error");
+        return;
+      }
+
+      const btn = document.getElementById("btnSavePassword");
+      btn.disabled = true;
+      btn.textContent = "กำลังเปลี่ยนรหัสผ่าน...";
+      try {
+        await currentUser.updatePassword(p1);
+        showToast("✓ เปลี่ยนรหัสผ่านใหม่สำเร็จสมบูรณ์", "success");
+        document.getElementById("formChangePassword").reset();
+      } catch (err) {
+        if (err.code === "auth/requires-recent-login") {
+          pendingNewPassword = p1;
+          document.getElementById("reauthPasswordModal")?.classList.add("active");
+        } else {
+          showToast(`เปลี่ยนรหัสผ่านไม่สำเร็จ: ${err.message}`, "error");
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🔑 เปลี่ยนรหัสผ่านใหม่";
+      }
+    });
+
+    // Reauth Password Modal for Password Change
+    document.getElementById("btnCancelReauth")?.addEventListener("click", () => {
+      document.getElementById("reauthPasswordModal")?.classList.remove("active");
+      pendingNewPassword = "";
+    });
+
+    document.getElementById("btnConfirmReauthAndSave")?.addEventListener("click", async () => {
+      const curPass = document.getElementById("reauthCurrentPass")?.value;
+      if (!curPass || !pendingNewPassword) {
+        showToast("กรุณากรอกรหัสผ่านปัจจุบัน", "error");
+        return;
+      }
+
+      try {
+        const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, curPass);
+        await currentUser.reauthenticateWithCredential(cred);
+        await currentUser.updatePassword(pendingNewPassword);
+        showToast("✓ ยืนยันตัวตนและเปลี่ยนรหัสผ่านใหม่สำเร็จสมบูรณ์", "success");
+        document.getElementById("reauthPasswordModal")?.classList.remove("active");
+        document.getElementById("formChangePassword").reset();
+        document.getElementById("reauthCurrentPass").value = "";
+        pendingNewPassword = "";
+      } catch (err) {
+        showToast(`รหัสผ่านปัจจุบันไม่ถูกต้อง: ${err.message}`, "error");
+      }
+    });
+
+    // Delete Account Modal Flow
+    const deleteAccountModal = document.getElementById("deleteAccountModal");
+    const inputConfirmDeleteText = document.getElementById("inputConfirmDeleteText");
+    const btnConfirmFinalDelete = document.getElementById("btnConfirmFinalDelete");
+    const delPasswordGroup = document.getElementById("delPasswordGroup");
+    const delGoogleGroup = document.getElementById("delGoogleGroup");
+    let googleReauthenticated = false;
+
+    document.getElementById("btnDeleteAccount")?.addEventListener("click", () => {
+      if (!currentUser) return;
+
+      const isGoogle = currentUser.providerData.some(p => p.providerId === "google.com");
+      if (isGoogle) {
+        delGoogleGroup.style.display = "block";
+        delPasswordGroup.style.display = "none";
+      } else {
+        delGoogleGroup.style.display = "none";
+        delPasswordGroup.style.display = "block";
+      }
+
+      inputConfirmDeleteText.value = "";
+      btnConfirmFinalDelete.disabled = true;
+      btnConfirmFinalDelete.style.opacity = "0.5";
+      btnConfirmFinalDelete.style.cursor = "not-allowed";
+      googleReauthenticated = false;
+
+      deleteAccountModal.classList.add("active");
+    });
+
+    document.getElementById("btnCloseDeleteModal")?.addEventListener("click", () => {
+      deleteAccountModal.classList.remove("active");
+    });
+    document.getElementById("btnCancelDelete")?.addEventListener("click", () => {
+      deleteAccountModal.classList.remove("active");
+    });
+
+    // Unlock Delete Button on Typing "DELETE" or "ลบบัญชี"
+    inputConfirmDeleteText?.addEventListener("input", (e) => {
+      const val = e.target.value.trim().toUpperCase();
+      const isValid = (val === "DELETE" || val === "ลบบัญชี");
+      btnConfirmFinalDelete.disabled = !isValid;
+      btnConfirmFinalDelete.style.opacity = isValid ? "1" : "0.5";
+      btnConfirmFinalDelete.style.cursor = isValid ? "pointer" : "not-allowed";
+    });
+
+    // Reauth with Google inside Delete Modal
+    document.getElementById("btnReauthGoogle")?.addEventListener("click", async () => {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await currentUser.reauthenticateWithPopup(provider);
+        googleReauthenticated = true;
+        showToast("✓ ยืนยันตัวตนด้วย Google เรียบร้อยแล้ว", "success");
+        document.getElementById("btnReauthGoogle").textContent = "✓ ยืนยันตัวตน Google สำเร็จ";
+        document.getElementById("btnReauthGoogle").style.background = "#4ade80";
+      } catch (err) {
+        showToast(`ยืนยันตัวตน Google ไม่สำเร็จ: ${err.message}`, "error");
+      }
+    });
+
+    // Confirm Final Account Deletion
+    btnConfirmFinalDelete?.addEventListener("click", async () => {
+      if (!currentUser) return;
+      const val = inputConfirmDeleteText.value.trim().toUpperCase();
+      if (val !== "DELETE" && val !== "ลบบัญชี") {
+        showToast("กรุณาพิมพ์คำว่า DELETE หรือ ลบบัญชี เพื่อยืนยัน", "error");
+        return;
+      }
+
+      const isGoogle = currentUser.providerData.some(p => p.providerId === "google.com");
+      const curPass = document.getElementById("delCurrentPassword")?.value;
+
+      btnConfirmFinalDelete.disabled = true;
+      btnConfirmFinalDelete.textContent = "กำลังดำเนินการลบบัญชีถาวร...";
+
+      try {
+        // Reauth with password if password user and password provided
+        if (!isGoogle && curPass) {
+          try {
+            const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, curPass);
+            await currentUser.reauthenticateWithCredential(cred);
+          } catch (reauthErr) {
+            showToast(`รหัสผ่านปัจจุบันไม่ถูกต้อง: ${reauthErr.message}`, "error");
+            btnConfirmFinalDelete.disabled = false;
+            btnConfirmFinalDelete.textContent = "🗑️ ยืนยันลบบัญชีถาวร";
+            return;
+          }
+        }
+
+        const uid = currentUser.uid;
+        // 1. Delete from Firestore users collection
+        await db.collection("users").doc(uid).delete().catch(() => {});
+        // 2. Delete chat messages
+        await db.collection("chats").doc(uid).delete().catch(() => {});
+
+        // 3. Delete Auth Account
+        await currentUser.delete();
+        showCyberToast("✓ ทำการลบบัญชีผู้ใช้และข้อมูลทั้งหมดออกจากระบบเรียบร้อยแล้วตามสิทธิ PDPA", "", "success");
+        setTimeout(() => { window.location.href = "/"; }, 1500);
+      } catch (err) {
+        if (err.code === "auth/requires-recent-login") {
+          showToast("กรุณายืนยันรหัสผ่านปัจจุบัน หรือเข้าสู่ระบบใหม่อีกครั้งเพื่อความปลอดภัย", "error");
+        } else {
+          showToast(`เกิดข้อผิดพลาดในการลบบัญชี: ${err.message}`, "error");
+        }
+        btnConfirmFinalDelete.disabled = false;
+        btnConfirmFinalDelete.textContent = "🗑️ ยืนยันลบบัญชีถาวร";
+      }
+    });
+
+    
+    // ── User Team Contracts & Applications Realtime Loader ───────────────────
+    let unsubContracts = null;
+    const loadUserContractsAndApplications = (user, userProfile) => {
+      if (unsubContracts) unsubContracts();
+      const listWrap = document.getElementById("userContractsList");
+      if (!listWrap) return;
+
+      unsubContracts = db.collection("joinTeamApplications").onSnapshot((snapshot) => {
+        const userUid = user.uid;
+        const userEmail = (user.email || "").toLowerCase();
+        const userName = (user.displayName || userProfile?.displayName || "").toLowerCase();
+
+        const myApps = [];
+        snapshot.forEach((doc) => {
+          const app = doc.data() || {};
+          app.id = doc.id;
+          const a = app.applicant || {};
+          const appUid = app.applicantUid || app.userId || app.uid || a.uid;
+          const appEmail = (app.applicantEmail || a.email || a.socialLinks?.email || "").toLowerCase();
+          const appNick = (a.nickname || "").toLowerCase();
+          const appFirst = (a.firstName || "").toLowerCase();
+          const appDiscord = (a.socialLinks?.discord || "").toLowerCase();
+
+          // Match by UID, Email, or Name/Discord
+          const isMyDoc = (appUid && appUid === userUid) ||
+            (userEmail && appEmail && appEmail === userEmail) ||
+            (userName && (appNick === userName || appDiscord === userName || (appFirst && userName.includes(appFirst))));
+
+          if (isMyDoc) {
+            // If doc doesn't have applicantUid yet, link it
+            if (!app.applicantUid) {
+              db.collection("joinTeamApplications").doc(doc.id).update({
+                applicantUid: userUid,
+                userId: userUid,
+                applicantEmail: user.email || null
+              }).catch(() => {});
+            }
+            myApps.push(app);
+          }
+        });
+
+        if (myApps.length === 0) {
+          listWrap.innerHTML = `
+            <div style="text-align:center;padding:2.5rem 1rem;background:rgba(5,11,22,0.4);border:1px dashed rgba(255,255,255,0.15);border-radius:12px;">
+              <div style="font-size:2.4rem;margin-bottom:0.6rem;">🚀</div>
+              <div style="font-weight:700;color:#fff;font-size:1.05rem;margin-bottom:0.3rem;">คุณยังไม่มีประวัติการสมัครร่วมทีม</div>
+              <div style="font-size:0.86rem;color:var(--muted);margin-bottom:1.2rem;">สนใจมาร่วมสร้างสรรค์และพัฒนาโครงการกับ BestCyniX Dev สมัครได้เลยวันนี้!</div>
+              <a href="join-team" class="btn-save-profile" style="display:inline-flex;padding:0.55rem 1.2rem;font-size:0.85rem;text-decoration:none;">🚀 สมัครร่วมทีมเลย</a>
+            </div>
+          `;
+          return;
+        }
+
+        // Sort by createdAt desc
+        myApps.sort((x, y) => {
+          const tX = x.createdAt?.toMillis ? x.createdAt.toMillis() : 0;
+          const tY = y.createdAt?.toMillis ? y.createdAt.toMillis() : 0;
+          return tY - tX;
+        });
+
+        listWrap.innerHTML = myApps.map((app) => {
+          const a = app.applicant || {};
+          const status = app.status || "submitted";
+          const refNo = app.contractRefNo || ('BCX-CTR-2026-' + app.id.slice(0, 6).toUpperCase());
+          const isSigned = app.contract && app.contract.signed;
+
+          let statusBadge = '<span style="background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:700;">📩 ส่งใบสมัครแล้ว</span>';
+          if (status === "approved") {
+            statusBadge = '<span style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid #4ade80;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:700;">✅ ผ่านการอนุมัติ</span>';
+          } else if (status === "revision") {
+            statusBadge = '<span style="background:rgba(250,204,21,0.15);color:#facc15;border:1px solid #facc15;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:700;">📝 ขอให้แก้ไขข้อมูล</span>';
+          } else if (status === "rejected") {
+            statusBadge = '<span style="background:rgba(248,113,113,0.15);color:#f87171;border:1px solid #f87171;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:700;">❌ ปฏิเสธ</span>';
+          } else if (status === "reviewing") {
+            statusBadge = '<span style="background:rgba(192,132,252,0.15);color:#c084fc;border:1px solid #c084fc;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:700;">🔍 กำลังพิจารณา</span>';
+          }
+
+          const isVoided = Boolean(app.contract && app.contract.voided) || status === "cancelled";
+          let signBadge = isSigned
+            ? '<span style="color:#4ade80;font-size:0.8rem;font-weight:700;">✍️ เซ็นสัญญาแล้ว</span>'
+            : '<span style="color:#fbbf24;font-size:0.8rem;font-weight:700;">⚠️ ยังไม่ได้เซ็นสัญญา</span>';
+          if (isVoided) {
+            signBadge = '<span style="color:#f87171;font-size:0.8rem;font-weight:700;">⛔ ยกเลิกสัญญาแล้ว</span>';
+          }
+
+          const revisionAlert = (status === "revision" && (app.revisionReason || app.note))
+            ? ('<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:0.75rem;margin-top:0.75rem;font-size:0.84rem;color:#fef08a;">' +
+                '<strong>📝 สิ่งที่ต้องแก้ไข:</strong> ' + (app.revisionReason || app.note) +
+              '</div>')
+            : '';
+
+          return '<div style="background:rgba(5,11,22,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.2rem;margin-bottom:1rem;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">' +
+              '<div>' +
+                '<div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">' +
+                  '<h4 style="font-size:1.1rem;color:#fff;margin:0;">' + (app.positionName || 'ไม่ระบุตำแหน่ง') + '</h4>' +
+                  statusBadge +
+                '</div>' +
+                '<div style="font-size:0.8rem;color:var(--muted);margin-top:0.25rem;">' +
+                  'เลขที่สัญญา: <strong style="color:#38bdf8;font-family:\'Chakra Petch\',monospace;">' + refNo + '</strong> • ' + signBadge +
+                '</div>' +
+              '</div>' +
+              '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">' +
+                '<a href="contract?id=' + app.id + '" target="_blank" class="btn-action" style="background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;padding:0.4rem 0.9rem;font-size:0.82rem;border-radius:8px;text-decoration:none;font-weight:700;">' +
+                  '📄 ดูสัญญา / เซ็นสัญญา' +
+                '</a>' +
+              '</div>' +
+            '</div>' +
+            revisionAlert +
+          '</div>';
+        }).join('');
+      }, () => {});
+    };
+
+
+    // Logout
+    document.getElementById("btnLogout")?.addEventListener("click", async () => {
+      if (autoVerifyInterval) clearInterval(autoVerifyInterval);
+      await auth.signOut();
+      window.location.href = "login";
+    });
+
+    // Avatar Cropper Logic
+    const avatarWrapper = document.getElementById("avatarWrapper");
+    const avatarFileInput = document.getElementById("avatarFileInput");
+    const cropperModal = document.getElementById("cropperModal");
+    const cropCanvas = document.getElementById("cropCanvas");
+    const cropZoom = document.getElementById("cropZoom");
+    const btnApplyCrop = document.getElementById("btnApplyCrop");
+    const btnCancelCrop = document.getElementById("btnCancelCrop");
+    let cropImg = null;
+    let cropScale = 1;
+    let cropOffX = 0, cropOffY = 0;
+    let isDragging = false, startX = 0, startY = 0;
+
+    avatarWrapper?.addEventListener("click", () => avatarFileInput.click());
+    avatarFileInput?.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        cropImg = new Image();
+        cropImg.onload = () => {
+          cropScale = 1; cropOffX = 0; cropOffY = 0;
+          if (cropZoom) cropZoom.value = 1;
+          drawCrop();
+          cropperModal.classList.add("active");
+        };
+        cropImg.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    const drawCrop = () => {
+      if (!cropCanvas || !cropImg) return;
+      const ctx = cropCanvas.getContext("2d");
+      const w = cropCanvas.width;
+      const h = cropCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.save();
+      ctx.translate(w / 2 + cropOffX, h / 2 + cropOffY);
+      ctx.scale(cropScale, cropScale);
+      ctx.drawImage(cropImg, -cropImg.width / 2, -cropImg.height / 2);
+      ctx.restore();
+    };
+
+    cropZoom?.addEventListener("input", (e) => {
+      cropScale = parseFloat(e.target.value);
+      drawCrop();
+    });
+
+    cropCanvas?.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      startX = e.clientX - cropOffX;
+      startY = e.clientY - cropOffY;
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      cropOffX = e.clientX - startX;
+      cropOffY = e.clientY - startY;
+      drawCrop();
+    });
+    window.addEventListener("mouseup", () => { isDragging = false; });
+
+    btnCancelCrop?.addEventListener("click", () => cropperModal.classList.remove("active"));
+    btnApplyCrop?.addEventListener("click", () => {
+      if (!cropCanvas || !currentUser) return;
+      cropCanvas.toBlob(async (blob) => {
+        try {
+          showToast("กำลังอัปโหลดรูปโปรไฟล์...", "info");
+          const fileRef = storage.ref(`avatars/${currentUser.uid}/profile_${Date.now()}.png`);
+          await fileRef.put(blob);
+          const photoURL = await fileRef.getDownloadURL();
+
+          await currentUser.updateProfile({ photoURL });
+          await db.collection("users").doc(currentUser.uid).set({ photoURL }, { merge: true });
+
+          document.getElementById("heroAvatarImg").src = photoURL;
+          cropperModal.classList.remove("active");
+          showToast("อัปเดตรูปโปรไฟล์สำเร็จเรียบร้อย!", "success");
+        } catch (err) {
+          showToast(`อัปโหลดรูปไม่สำเร็จ: ${err.message}`, "error");
+        }
+      });
+    });
+  </script>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+</body>
+</html>

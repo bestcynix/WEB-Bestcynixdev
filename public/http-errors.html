@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="สารบัญรหัสสถานะและข้อผิดพลาด HTTP (HTTP Status & Error Codes) โครงสร้าง JSON วิธีแก้ไข และระบบความปลอดภัย • BestCyniX Dev" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+  <title>สารบัญรหัสสถานะ HTTP (HTTP Error & Status Codes) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-710F6F2YG5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-710F6F2YG5');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.88);
+      --card-hover: rgba(16, 38, 64, 0.95);
+      --accent: #32ffc9;
+      --accent-blue: #0284c7;
+      --accent-amber: #f59e0b;
+      --accent-red: #ff5574;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+      --code-bg: #040911;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      line-height: 1.7;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(2, 132, 199, 0.22), transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(50, 255, 201, 0.14), transparent 45%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      width: min(1120px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 2rem 0 4rem;
+      flex: 1;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 1.8rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.2rem;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .brand-link img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 12px rgba(50, 255, 201, 0.35);
+    }
+    .btn-back {
+      padding: 0.45rem 1.1rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+    .btn-back:hover {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+    .hero-box {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 0.3rem 0.85rem;
+      background: rgba(50, 255, 201, 0.12);
+      border: 1px solid rgba(50, 255, 201, 0.4);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+    .hero-title {
+      font-size: 2.1rem;
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      line-height: 1.3;
+    }
+    .hero-subtitle {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 1rem 1.4rem;
+      border-radius: 16px;
+    }
+    .search-wrap {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.65rem 1rem 0.65rem 2.4rem;
+      background: rgba(4, 12, 22, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 10px;
+      color: #fff;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(50, 255, 201, 0.2);
+    }
+    .search-icon {
+      position: absolute;
+      left: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 0.4rem 0.85rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: "Prompt", sans-serif;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+
+    /* Codes Grid */
+    .codes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.4rem;
+    }
+    .code-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .code-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(50, 255, 201, 0.45);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(50, 255, 201, 0.12);
+    }
+    .code-card.filtered-out {
+      display: none;
+    }
+    .code-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .status-badge-lg {
+      font-family: "Chakra Petch", monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      padding: 0.2rem 0.65rem;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .badge-2xx { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .badge-3xx { background: rgba(2, 132, 199, 0.18); color: #38bdf8; border: 1px solid rgba(2, 132, 199, 0.4); }
+    .badge-4xx { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-5xx { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    .code-cat-label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .code-name {
+      font-size: 1.12rem;
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .code-desc {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+      flex: 1;
+      line-height: 1.55;
+    }
+    .code-footer-btn {
+      margin-top: auto;
+      padding: 0.45rem 0.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .code-card:hover .code-footer-btn {
+      background: rgba(50, 255, 201, 0.15);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Interactive Detail Modal */
+    .detail-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .detail-modal.active {
+      display: flex;
+    }
+    .detail-card {
+      background: linear-gradient(160deg, rgba(13, 31, 52, 0.98), rgba(7, 19, 34, 0.99));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 24px;
+      width: min(720px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(50, 255, 201, 0.15);
+      display: flex;
+      flex-direction: column;
+    }
+    .detail-header {
+      padding: 1.5rem 1.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .detail-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .detail-close-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+    .detail-close-btn:hover {
+      background: rgba(255, 80, 80, 0.2);
+      color: #ff5555;
+      border-color: rgba(255, 80, 80, 0.4);
+    }
+    .detail-body {
+      padding: 1.8rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .detail-section {
+      margin-bottom: 1.5rem;
+    }
+    .detail-section h4 {
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .detail-section p, .detail-section ul {
+      font-size: 0.9rem;
+      color: #d6e8f7;
+      line-height: 1.65;
+    }
+    .detail-section ul {
+      padding-left: 1.2rem;
+    }
+    .json-code-box {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      position: relative;
+      margin-top: 0.5rem;
+    }
+    .json-code-box pre {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.84rem;
+      color: #a5f3fc;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+    .btn-copy-code {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      padding: 0.25rem 0.6rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-copy-code:hover {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 0;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 3rem;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+</head>
+<body>
+  <div class="container">
+    <nav class="top-nav">
+      <a href="/" class="brand-link">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
+        <span>BESTCYNIX DEV</span>
+      </a>
+      <a href="/" class="btn-back">← กลับหน้าหลัก</a>
+    </nav>
+
+    <div class="hero-box">
+      <span class="hero-badge">API & HTTP PROTOCOL REFERENCE</span>
+      <h1 class="hero-title">สารบัญรหัสสถานะและข้อผิดพลาด HTTP</h1>
+      <p class="hero-subtitle">
+        คู่มือรหัสสถานะ HTTP ทั้งหมดของระบบ พร้อมสาเหตุ แนวทางแก้ไขสำหรับ Developer โครงสร้าง JSON มาตรฐาน (RFC 7807) และมาตรการความปลอดภัย
+      </p>
+    </div>
+
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchErrorsInput" placeholder="ค้นหารหัส หรือชื่อ เช่น 404, Unauthorized, Rate limit..." />
+      </div>
+      <div class="filter-tabs" id="filterTabs">
+        <button type="button" class="filter-btn active" data-filter="all">ทั้งหมด (<span id="countAll">0</span>)</button>
+        <button type="button" class="filter-btn" data-filter="2xx">2xx สำเร็จ</button>
+        <button type="button" class="filter-btn" data-filter="3xx">3xx ส่งต่อ</button>
+        <button type="button" class="filter-btn" data-filter="4xx">4xx ฝั่งผู้ใช้</button>
+        <button type="button" class="filter-btn" data-filter="5xx">5xx เซิร์ฟเวอร์</button>
+      </div>
+    </div>
+
+    <!-- Codes Grid -->
+    <div class="codes-grid" id="codesGrid">
+      <!-- Generated Dynamically via JS -->
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="detail-modal" id="detailModal">
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="detail-header-left">
+          <span class="status-badge-lg" id="modalBadge">200</span>
+          <div>
+            <h3 style="color: #fff; font-size: 1.25rem;" id="modalTitle">OK</h3>
+            <span style="font-size: 0.78rem; color: var(--muted);" id="modalCategory">Success</span>
+          </div>
+        </div>
+        <button type="button" class="detail-close-btn" id="btnModalClose">✕</button>
+      </div>
+      <div class="detail-body">
+        <div class="detail-section">
+          <h4>💡 ความหมายและสาเหตุที่เกิดขึ้น</h4>
+          <p id="modalMeaning">-</p>
+        </div>
+
+        <div class="detail-section">
+          <h4>🛠️ แนวทางแก้ไข (Troubleshooting & Fix)</h4>
+          <div id="modalFixes">-</div>
+        </div>
+
+        <div class="detail-section">
+          <h4>🛡️ มาตรการความปลอดภัยและการป้องกัน (Security Measures)</h4>
+          <p id="modalSecurity">-</p>
+        </div>
+
+        <div class="detail-section">
+          <h4>📦 ตัวอย่างโครงสร้าง JSON Response (RFC 7807 Standard)</h4>
+          <div class="json-code-box">
+            <button type="button" class="btn-copy-code" id="btnCopyJson">📋 คัดลอก JSON</button>
+            <pre><code id="modalJsonCode">{}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container" style="padding: 0;">
+      <p>© 2021 - 2026 BestCyniX Dev • <a href="sitemap.xml" target="_blank">Sitemap.xml</a> • <a href="privacy">Privacy</a> • <a href="terms">Terms</a></p>
+    </div>
+  </footer>
+
+  <script>
+    const httpCodesData = [
+      {
+        code: 200,
+        cat: "2xx",
+        name: "OK",
+        desc: "คำขอสำเร็จ เซิร์ฟเวอร์ประมวลผลและส่งข้อมูลตอบกลับเรียบร้อย",
+        meaning: "การส่งคำขอแบบ GET, POST, หรือ PUT ได้รับการประมวลผลอย่างสมบูรณ์ และส่งเนื้อหาตอบกลับตามที่ต้องการ",
+        fixes: "<ul><li>คำขอทำงานถูกต้อง ไม่ต้องแก้ไข</li><li>ตรวจสอบให้แน่ใจว่า Cache-Control เหมาะสมกับการใช้งาน</li></ul>",
+        security: "ใช้ HTTPS (SSL/TLS) ในการส่งข้อมูลเสมอ และไม่ส่งข้อมูลรหัสผ่านหรือ Token ที่ไม่ได้เข้ารหัสใน Body",
+        json: {
+          status: 200,
+          success: true,
+          message: "Request processed successfully",
+          data: {
+            service: "BestCyniX Dev API",
+            timestamp: "2026-08-23T01:40:00Z"
+          }
+        }
+      },
+      {
+        code: 201,
+        cat: "2xx",
+        name: "Created",
+        desc: "สร้างทรัพยากรใหม่สำเร็จ (เช่น สมัครสมาชิกใหม่ หรือส่งข้อความแชทใหม่)",
+        meaning: "คำขอสร้างข้อมูลใหม่ เช่น การสมัครสมาชิกผู้ใช้ หรือการส่งข้อความแชทใหม่บันทึกลงฐานข้อมูลเรียบร้อย",
+        fixes: "<ul><li>ส่งกลับ Header <code>Location</code> หรือ ID ของทรัพยากรใหม่ที่ถูกสร้าง</li></ul>",
+        security: "ตรวจสอบ Payload ขาเข้าอย่างเคร่งครัด (Validation) เพื่อป้องกันการฝัง Payload อันตราย (XSS/Injection)",
+        json: {
+          status: 201,
+          success: true,
+          message: "Resource created successfully",
+          createdId: "msg_98a76bc43",
+          createdAt: "2026-08-23T01:40:00Z"
+        }
+      },
+      {
+        code: 204,
+        cat: "2xx",
+        name: "No Content",
+        desc: "คำขอสำเร็จแต่ไม่มีข้อมูลส่งกลับ (เช่น ลบบัญชีหรือลบข้อความสำเร็จ)",
+        meaning: "คำขอได้รับการดำเนินการเรียบร้อยแล้ว และเซิร์ฟเวอร์ไม่จำเป็นต้องส่ง Entity-body กลับมา",
+        fixes: "<ul><li>เหมาะสำหรับการทำงานแบบ DELETE หรือการอัปเดตที่ไม่ต้องการให้เปลี่ยนหน้าเว็บ</li></ul>",
+        security: "ตรวจสอบสิทธิ์ความเป็นเจ้าของ (Owner Check) ก่อนอนุญาตให้ลบข้อมูลทุกครั้ง",
+        json: {
+          status: 204,
+          message: "Action completed with no content returned"
+        }
+      },
+      {
+        code: 301,
+        cat: "3xx",
+        name: "Moved Permanently",
+        desc: "ทรัพยากรย้ายไปยัง URL ใหม่ถาวร",
+        meaning: "หน้าเว็บหรือ Endpoint ถูกย้ายไปยังที่อยู่ใหม่ถาวร เบราว์เซอร์และบอทค้นหา (Google) จะเปลี่ยนไปเก็บ URL ใหม่",
+        fixes: "<ul><li>กำหนด Header <code>Location: https://bestcynixdev.web.app/new-path</code></li><li>อัปเดตลิงก์ในระบบและ Sitemap ให้ชี้ไปที่ URL ใหม่</li></ul>",
+        security: "ตรวจสอบว่า Redirect Destination อยู่ในโดเมนที่ปลอดภัย ป้องกัน Open Redirect Vulnerability",
+        json: {
+          status: 301,
+          message: "Moved Permanently",
+          location: "https://bestcynixdev.web.app/"
+        }
+      },
+      {
+        code: 304,
+        cat: "3xx",
+        name: "Not Modified",
+        desc: "ข้อมูลยังไม่มีการเปลี่ยนแปลง สามารถใช้ข้อมูลจากแคชของเบราว์เซอร์ได้",
+        meaning: "ไคลเอ็นต์ส่งคำขอแบบ Conditional GET (พร้อม ETag หรือ If-Modified-Since) และข้อมูลยังตรงกับในแคช ช่วยประหยัดแบนด์วิดท์",
+        fixes: "<ul><li>เบราว์เซอร์จะดึงไฟล์จาก Cache ทันที ช่วยให้เว็บโหลดเร็วระดับเสี้ยววินาที</li></ul>",
+        security: "กำหนดค่า ETag หรือ Last-Modified อย่างแม่นยำ เพื่อไม่ให้ผู้ใช้ได้รับแคชข้อมูลเก่าที่ล้าสมัย",
+        json: {
+          status: 304,
+          message: "Not Modified (Served from Cache)"
+        }
+      },
+      {
+        code: 400,
+        cat: "4xx",
+        name: "Bad Request",
+        desc: "คำขอไม่ถูกต้อง เช่น รูปแบบ JSON ผิด, ขาดพารามิเตอร์ที่จำเป็น, หรือค่าไม่ถูกต้อง",
+        meaning: "เซิร์ฟเวอร์ไม่สามารถประมวลผลคำขอได้เนื่องจากรูปแบบคำขอจากฝั่งผู้ใช้ผิดพลาด เช่น JSON ผิด Syntax หรือข้อมูลไม่ผ่าน Validation",
+        fixes: "<ul><li>ตรวจสอบว่า Header <code>Content-Type: application/json</code> ถูกต้อง</li><li>ตรวจสอบว่าฟิลด์บังคับถูกกรอกครบถ้วนและชนิดข้อมูลถูกต้อง</li></ul>",
+        security: "ป้องกันไม่ให้เซิร์ฟเวอร์ Crash โดยใช้ Schema Validator (เช่น Zod หรือ Joi) และส่ง Error Message ที่ไม่เปิดเผยข้อมูลภายใน",
+        json: {
+          status: 400,
+          error: "Bad Request",
+          code: "INVALID_PAYLOAD",
+          message: "Field 'email' is required and must be a valid email address.",
+          invalidParams: ["email"]
+        }
+      },
+      {
+        code: 401,
+        cat: "4xx",
+        name: "Unauthorized",
+        desc: "ยังไม่ได้ยืนยันตัวตน (Authentication Required)",
+        meaning: "การเข้าถึงทรัพยากรนี้จำเป็นต้องมีการยืนยันตัวตนก่อน เช่น ยังไม่ได้ล็อกอิน หรือ Token หมดอายุ",
+        fixes: "<ul><li>นำผู้ใช้ไปยังหน้า <a href='login' style='color:var(--accent)'>เข้าสู่ระบบ</a> เพื่อขอรับ Authentication Token ใหม่</li><li>ส่ง Header <code>Authorization: Bearer &lt;token&gt;</code> ในคำขอ</li></ul>",
+        security: "ใช้ JWT หรือ Firebase Auth Token ที่มีการเข้ารหัส และกำหนดวันหมดอายุที่เหมาะสม ป้องกัน Token Replay Attack",
+        json: {
+          status: 401,
+          error: "Unauthorized",
+          code: "AUTH_TOKEN_MISSING_OR_EXPIRED",
+          message: "Authentication token is missing, invalid, or expired. Please sign in again."
+        }
+      },
+      {
+        code: 403,
+        cat: "4xx",
+        name: "Forbidden",
+        desc: "ไม่มีสิทธิ์เข้าถึง (Access Denied / Dev & Admin Only)",
+        meaning: "เซิร์ฟเวอร์เข้าใจตัวตนของผู้ใช้แล้ว แต่ผู้ใช้นั้นไม่มีระดับสิทธิ์ (Role/Permission) ในการเข้าถึง เช่น บัญชีทั่วไปพยายามเข้า Dev Dashboard",
+        fixes: "<ul><li>เข้าสู่ระบบด้วยบัญชีที่มีสิทธิ์ เช่น บัญชีทีมพัฒนา <code>bestcynix@gmail.com</code></li><li>ติดต่อผู้ดูแลระบบหากต้องการขอเพิ่มสิทธิ์</li></ul>",
+        security: "บังคับใช้ระบบ Role-Based Access Control (RBAC) ทั้งใน Backend Rules และ Frontend UI ห้ามพึ่งพาการซ่อนปุ่มเพียงอย่างเดียว",
+        json: {
+          status: 403,
+          error: "Forbidden",
+          code: "INSUFFICIENT_PERMISSIONS",
+          message: "You do not have permission to access the Dev Dashboard. Admin privileges required."
+        }
+      },
+      {
+        code: 404,
+        cat: "4xx",
+        name: "Not Found",
+        desc: "ไม่พบหน้าเว็บหรือทรัพยากรที่ร้องขอ",
+        meaning: "เซิร์ฟเวอร์ไม่พบทรัพยากรตาม URL ที่ระบุ อาจเกิดจากการพิมพ์ URL ผิด ลิงก์เสีย หรือข้อมูลถูกลบไปแล้ว",
+        fixes: "<ul><li>ตรวจสอบการสะกด URL และส่วนขยายไฟล์</li><li>ตรวจสอบว่าไฟล์ถูกอัปโหลดขึ้นโฟลเดอร์ <code>public/</code> หรือยัง</li><li>ดูหน้าสารบัญ <a href='sitemap.xml' style='color:var(--accent)'>Sitemap</a> เพื่อค้นหาหน้าเว็บที่ถูกต้อง</li></ul>",
+        security: "แสดงหน้า 404 ที่ปลอดภัยและสวยงามโดยไม่เปิดเผยโครงสร้าง Folder หรือซอฟต์แวร์เซิร์ฟเวอร์ (Server Information Disclosure)",
+        json: {
+          status: 404,
+          error: "Not Found",
+          code: "RESOURCE_NOT_FOUND",
+          message: "The requested URL or resource does not exist on this server."
+        }
+      },
+      {
+        code: 408,
+        cat: "4xx",
+        name: "Request Timeout",
+        desc: "หมดเวลาการเชื่อมต่อ (Request Timed Out)",
+        meaning: "เซิร์ฟเวอร์ปิดการเชื่อมต่อเนื่องจากรอคำขอจากไคลเอ็นต์นานเกินระยะเวลาที่กำหนด (Idle Timeout)",
+        fixes: "<ul><li>ตรวจสอบความเสถียรของสัญญาณอินเทอร์เน็ต</li><li>ลดขนาดไฟล์หรือข้อมูลที่ส่งในคำขอ</li></ul>",
+        security: "ตั้งค่า Timeout บนเซิร์ฟเวอร์เพื่อป้องกันการโจมตีแบบ Slowloris DDoS ที่พยายามเปิดการเชื่อมต่อค้างไว้",
+        json: {
+          status: 408,
+          error: "Request Timeout",
+          message: "Server timed out waiting for the request. Please try again."
+        }
+      },
+      {
+        code: 429,
+        cat: "4xx",
+        name: "Too Many Requests",
+        desc: "ส่งคำขอถี่เกินไป (Rate Limit Exceeded / Anti-Spam Defense)",
+        meaning: "ผู้ใช้ส่งคำขอเกินจำนวนที่ระบบกำหนดไว้ในช่วงเวลาหนึ่ง เช่น การยิงข้อความแชทรัวๆ หรือการพยายามสุ่มเดารหัสผ่าน",
+        fixes: "<ul><li>เว้นระยะการส่งคำขอตามเวลาที่ระบุใน Header <code>Retry-After</code> (เช่น 1.5 วินาที)</li><li>ระบบเว็บไซต์มีระบบ Anti-Spam อัตโนมัติ</li></ul>",
+        security: "ป้องกันการโจมตีแบบ Brute Force, Credential Stuffing และการยิงสแปมด้วย Token Bucket Rate Limiting และ Cloudflare DDOS Protection",
+        json: {
+          status: 429,
+          error: "Too Many Requests",
+          code: "RATE_LIMIT_EXCEEDED",
+          message: "Anti-spam rate limit triggered. Please wait 1.5 seconds before sending another request.",
+          retryAfterSeconds: 2
+        }
+      },
+      {
+        code: 451,
+        cat: "4xx",
+        name: "Unavailable For Legal Reasons",
+        desc: "ไม่สามารถให้บริการได้เนื่องจากข้อกำหนดทางกฎหมาย (PDPA / Copyright)",
+        meaning: "การเข้าถึงทรัพยากรนี้ถูกปฏิเสธเนื่องจากคำสั่งทางกฎหมาย เช่น ข้อมูลถูกลบตามสิทธิ PDPA (Right to be Forgotten) หรือถูกระงับเรื่องลิขสิทธิ์",
+        fixes: "<ul><li>อ่านรายละเอียดในหน้านโยบาย <a href='pdpa' style='color:var(--accent)'>PDPA</a></li></ul>",
+        security: "จัดเก็บหลักฐานการเพิกถอนความยินยอมอย่างถูกต้องตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562",
+        json: {
+          status: 451,
+          error: "Unavailable For Legal Reasons",
+          code: "LEGAL_RESTRICTION_PDPA",
+          message: "This resource has been deleted or restricted in compliance with PDPA regulations."
+        }
+      },
+      {
+        code: 500,
+        cat: "5xx",
+        name: "Internal Server Error",
+        desc: "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์",
+        meaning: "เซิร์ฟเวอร์พบเงื่อนไขที่ไม่คาดคิดซึ่งทำให้ไม่สามารถดำเนินการตามคำขอได้ เช่น โค้ด Backend มี Unhandled Exception",
+        fixes: "<ul><li>ตรวจสอบ Error Logs บน Firebase Console / Cloud Logging</li><li>ติดต่อทีมพัฒนาเพื่อตรวจสอบ Stack Trace</li></ul>",
+        security: "อย่าส่ง Stack Trace หรือข้อความ Error ฐานข้อมูลให้ผู้ใช้ทั่วไปเห็น เพื่อป้องกัน Hacker นำข้อมูลไปใช้โจมตี",
+        json: {
+          status: 500,
+          error: "Internal Server Error",
+          code: "UNEXPECTED_SERVER_ERROR",
+          message: "An unexpected error occurred. Our engineering team has been notified.",
+          incidentId: "inc_77189a0f"
+        }
+      },
+      {
+        code: 502,
+        cat: "5xx",
+        name: "Bad Gateway",
+        desc: "เซิร์ฟเวอร์ต้นทางได้รับคำตอบที่ไม่ถูกต้องจากเซิร์ฟเวอร์อื่น",
+        meaning: "เซิร์ฟเวอร์ที่ทำหน้าที่เป็น Gateway หรือ Proxy (เช่น Nginx / Cloudflare) ได้รับการตอบกลับที่ไม่ถูกต้องจากเซิร์ฟเวอร์ปลายทาง",
+        fixes: "<ul><li>ตรวจสอบว่า Service Backend / Bot Process ยังคงทำงานปกติ (Running)</li><li>ตรวจสอบ DNS และการเชื่อมต่อระหว่าง Proxy กับ Origin Server</li></ul>",
+        security: "ตั้งค่า Health Check ตรวจสอบเซิร์ฟเวอร์อัตโนมัติ และใช้ Failover Routing",
+        json: {
+          status: 502,
+          error: "Bad Gateway",
+          message: "The proxy server received an invalid response from the upstream server."
+        }
+      },
+      {
+        code: 503,
+        cat: "5xx",
+        name: "Service Unavailable",
+        desc: "ระบบปิดปรับปรุงชั่วคราว หรือเซิร์ฟเวอร์ทำงานหนักเกินไป",
+        meaning: "เซิร์ฟเวอร์ยังไม่พร้อมรองรับคำขอในขณะนี้ อาจเนื่องจากอยู่ในช่วง Maintenance หรือมีทราฟฟิกสูงเกินขีดความสามารถ",
+        fixes: "<ul><li>กำหนด Header <code>Retry-After: 300</code> แจ้งเตือนเวลาที่คาดว่าจะกลับมาให้บริการ</li><li>ตรวจสอบสถานะบน Discord Community Server หรือหน้าข่าวสาร</li></ul>",
+        security: "ใช้ระบบ Auto-Scaling บนคลาวด์เพื่อขยายขนาดเซิร์ฟเวอร์อัตโนมัติเมื่อทราฟฟิกพุ่งสูง",
+        json: {
+          status: 503,
+          error: "Service Unavailable",
+          code: "MAINTENANCE_MODE",
+          message: "The system is currently undergoing scheduled maintenance. Please check back shortly.",
+          retryAfter: "2026-08-23T02:00:00Z"
+        }
+      },
+      {
+        code: 504,
+        cat: "5xx",
+        name: "Gateway Timeout",
+        desc: "หมดเวลารอคำตอบจากเซิร์ฟเวอร์ต้นทาง",
+        meaning: "เซิร์ฟเวอร์ Proxy / Gateway รอคำตอบจากเซิร์ฟเวอร์ Backend นานเกินไปจนตัดการเชื่อมต่อ",
+        fixes: "<ul><li>ปรับปรุงประสิทธิภาพของฐานข้อมูลและการสืบค้น (Database Indexing / Optimization)</li><li>เพิ่มค่า Timeout ใน Nginx/Proxy ให้เหมาะสมกับการประมวลผลงานหนัก</li></ul>",
+        security: "ใช้ระบบ Caching และ Asynchronous Background Queue สำหรับงานที่ใช้เวลาประมวลผลนาน",
+        json: {
+          status: 504,
+          error: "Gateway Timeout",
+          message: "The upstream server failed to respond within the specified time limit."
+        }
+      }
+    ];
+
+    // Render Codes Grid
+    const codesGrid = document.getElementById("codesGrid");
+    const countAll = document.getElementById("countAll");
+    if (countAll) countAll.textContent = httpCodesData.length;
+
+    const renderCodes = (items) => {
+      if (!codesGrid) return;
+      codesGrid.innerHTML = "";
+      items.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "code-card";
+        card.dataset.code = item.code;
+        card.dataset.cat = item.cat;
+        card.dataset.name = item.name.toLowerCase();
+        card.dataset.desc = item.desc.toLowerCase();
+
+        card.innerHTML = `
+          <div class="code-card-header">
+            <span class="status-badge-lg badge-${item.cat}">${item.code}</span>
+            <span class="code-cat-label">${item.cat} Protocol</span>
+          </div>
+          <h3 class="code-name">${item.name}</h3>
+          <p class="code-desc">${item.desc}</p>
+          <div class="code-footer-btn">
+            <span>ดูสาเหตุ, วิธีแก้ & JSON</span>
+            <span>→</span>
+          </div>
+        `;
+
+        card.addEventListener("click", () => openDetailModal(item));
+        codesGrid.appendChild(card);
+      });
+    };
+
+    renderCodes(httpCodesData);
+
+    // Filter by category & search
+    let currentFilter = "all";
+    let currentSearch = "";
+
+    const applyFilter = () => {
+      const query = currentSearch.toLowerCase().trim();
+      const cards = document.querySelectorAll(".code-card");
+      cards.forEach((card) => {
+        const cat = card.dataset.cat;
+        const code = card.dataset.code;
+        const name = card.dataset.name;
+        const desc = card.dataset.desc;
+
+        const matchCat = currentFilter === "all" || cat === currentFilter;
+        const matchSearch = query === "" || code.includes(query) || name.includes(query) || desc.includes(query);
+
+        card.classList.toggle("filtered-out", !(matchCat && matchSearch));
+      });
+    };
+
+    document.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilter = btn.dataset.filter;
+        applyFilter();
+      });
+    });
+
+    document.getElementById("searchErrorsInput")?.addEventListener("input", (e) => {
+      currentSearch = e.target.value;
+      applyFilter();
+    });
+
+    // Detail Modal Handling
+    const detailModal = document.getElementById("detailModal");
+    const modalBadge = document.getElementById("modalBadge");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalCategory = document.getElementById("modalCategory");
+    const modalMeaning = document.getElementById("modalMeaning");
+    const modalFixes = document.getElementById("modalFixes");
+    const modalSecurity = document.getElementById("modalSecurity");
+    const modalJsonCode = document.getElementById("modalJsonCode");
+    const btnModalClose = document.getElementById("btnModalClose");
+    const btnCopyJson = document.getElementById("btnCopyJson");
+
+    let currentJsonStr = "";
+
+    const openDetailModal = (item) => {
+      modalBadge.textContent = item.code;
+      modalBadge.className = `status-badge-lg badge-${item.cat}`;
+      modalTitle.textContent = `${item.code} ${item.name}`;
+      modalCategory.textContent = `${item.cat} HTTP Status Code`;
+      modalMeaning.textContent = item.meaning;
+      modalFixes.innerHTML = item.fixes;
+      modalSecurity.textContent = item.security;
+
+      currentJsonStr = JSON.stringify(item.json, null, 2);
+      modalJsonCode.textContent = currentJsonStr;
+
+      detailModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    };
+
+    const closeDetailModal = () => {
+      detailModal.classList.remove("active");
+      document.body.style.overflow = "";
+    };
+
+    btnModalClose?.addEventListener("click", closeDetailModal);
+    detailModal?.addEventListener("click", (e) => {
+      if (e.target === detailModal) closeDetailModal();
+    });
+
+    // Copy JSON
+    btnCopyJson?.addEventListener("click", () => {
+      navigator.clipboard.writeText(currentJsonStr).then(() => {
+        btnCopyJson.textContent = "✅ คัดลอกแล้ว!";
+        setTimeout(() => {
+          btnCopyJson.textContent = "📋 คัดลอก JSON";
+        }, 2000);
+      });
+    });
+  </script>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+</body>
+</html>

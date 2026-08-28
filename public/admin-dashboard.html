@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Dev Management Dashboard • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.88);
+      --accent: #32ffc9;
+      --accent-purple: #a855f7;
+      --accent-blue: #0284c7;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(168, 85, 247, 0.18), transparent 45%),
+        radial-gradient(circle at 90% 90%, rgba(50, 255, 201, 0.14), transparent 45%);
+    }
+    .container {
+      width: min(1200px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 1.5rem 0 3.5rem;
+      flex: 1;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: nowrap;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .brand-link img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-purple);
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+    }
+    /* Right Cluster (Desktop Links + Bell + Hamburger) */
+    .nav-right-cluster {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .desktop-nav-links {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .btn-nav-action {
+      padding: 0.45rem 0.9rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: #e6f3ff;
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .btn-nav-action:hover, .btn-nav-action.active {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 700;
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* Hamburger Toggle Button */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      padding: 10px 9px;
+      z-index: 10005;
+      transition: all 0.2s ease;
+    }
+    .nav-toggle:hover {
+      background: rgba(50, 255, 201, 0.12);
+      border-color: var(--accent);
+    }
+    .nav-toggle span {
+      width: 100%;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-toggle.is-active span:nth-child(1) {
+      transform: translateY(6px) rotate(45deg);
+      background: var(--accent);
+    }
+    .nav-toggle.is-active span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav-toggle.is-active span:nth-child(3) {
+      transform: translateY(-6px) rotate(-45deg);
+      background: var(--accent);
+    }
+
+    /* Mobile Cyber Drawer Menu */
+    .mobile-drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      z-index: 99999;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .mobile-drawer-overlay.is-open {
+      display: block;
+      opacity: 1;
+    }
+    .mobile-nav-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(340px, calc(100vw - 2rem));
+      background: linear-gradient(170deg, rgba(8, 22, 42, 0.99), rgba(4, 10, 22, 0.99));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-left: 1px solid rgba(50, 255, 201, 0.3);
+      box-shadow: -15px 0 50px rgba(0, 0, 0, 0.9);
+      z-index: 100000;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1.2rem;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mobile-nav-drawer.is-open {
+      transform: translateX(0);
+    }
+    .mobile-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 1rem;
+    }
+    .btn-close-drawer {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mobile-drawer-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      overflow-y: auto;
+    }
+    .mobile-drawer-link {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+    .mobile-drawer-link:hover, .mobile-drawer-link.active {
+      background: rgba(50, 255, 201, 0.1);
+      border-color: rgba(50, 255, 201, 0.35);
+      transform: translateX(3px);
+    }
+    .mobile-drawer-link .drawer-icon {
+      font-size: 1.3rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(50, 255, 201, 0.1);
+      border: 1px solid rgba(50, 255, 201, 0.2);
+    }
+    .mobile-drawer-link .drawer-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .mobile-drawer-link .drawer-text strong {
+      font-size: 0.88rem;
+      color: #fff;
+    }
+    .mobile-drawer-link .drawer-text small {
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+
+    /* Dev Hero Header */
+    .dev-hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      background: linear-gradient(135deg, rgba(8, 24, 46, 0.7), rgba(4, 12, 24, 0.7));
+      border: 1px solid rgba(50, 255, 201, 0.2);
+      border-radius: 20px;
+      padding: 1.5rem 1.8rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .dev-title-row h1 {
+      font-size: 1.6rem;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .dev-title-row p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+    }
+    .admin-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      color: #d8b4fe;
+    }
+    .admin-pill strong {
+      color: #fff;
+    }
+
+    /* Live Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2.2rem;
+    }
+    .metric-card {
+      background: linear-gradient(160deg, rgba(10, 24, 44, 0.9), rgba(6, 16, 30, 0.92));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 1.3rem 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .metric-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(50, 255, 201, 0.18);
+    }
+    .metric-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.45rem;
+      background: rgba(50, 255, 201, 0.12);
+      border: 1px solid rgba(50, 255, 201, 0.35);
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .metric-info h3 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      font-family: "Chakra Petch", sans-serif;
+      color: #fff;
+      line-height: 1.1;
+    }
+    .metric-info p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+      font-weight: 500;
+    }
+
+    /* Modules Grid & Cards */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .module-card {
+      background: linear-gradient(160deg, rgba(8, 22, 40, 0.95), rgba(4, 12, 24, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 1.8rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .module-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(50, 255, 201, 0.15);
+    }
+    .module-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .module-card-header h2 {
+      font-size: 1.15rem;
+      color: #fff;
+      font-weight: 700;
+    }
+    .module-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .module-card p {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .btn-launch-module {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.88rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+    .btn-launch-module:hover {
+      background: var(--accent);
+      color: #050b14;
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(50, 255, 201, 0.3);
+    }
+
+    /* Breakpoint Rules */
+    @media (max-width: 1024px) {
+      .desktop-nav-links {
+        display: none !important;
+      }
+      .nav-toggle {
+        display: flex !important;
+      }
+      .top-nav {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+    @media (max-width: 640px) {
+      .dev-hero {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .metrics-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .brand-link {
+        font-size: 1rem;
+      }
+      .brand-link img {
+        width: 32px;
+        height: 32px;
+      }
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      .metric-card:last-child {
+        grid-column: auto;
+      }
+    }
+
+    /* Auth Guard Fullscreen Overlay */
+    .auth-guard-overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999999 !important;
+      background: #040a14 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 1.2rem !important;
+      transition: opacity 0.35s ease, visibility 0.35s ease !important;
+    }
+    .auth-guard-overlay.verified {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      display: none !important;
+    }
+    .guard-spinner {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 3.5px solid rgba(50, 255, 201, 0.15);
+      border-top-color: var(--accent);
+      animation: guardSpin 0.75s linear infinite;
+    }
+    @keyframes guardSpin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Guard Fullscreen Overlay -->
+  <div id="authGuardOverlay" class="auth-guard-overlay">
+    <div class="guard-spinner"></div>
+    <div style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; color: var(--accent); font-size: 1.1rem; letter-spacing: 0.5px;">
+      🛡️ VERIFYING DEV ACCESS PERMISSIONS...
+    </div>
+    <small style="color: var(--muted); font-size: 0.82rem;">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบความปลอดภัยสูงสุด กรุณารอสักครู่</small>
+  </div>
+
+  <div class="container">
+    <nav class="top-nav">
+      <a href="/" class="brand-link">
+        <img src="assets/photo/bcxlogo2.png" alt="Logo" />
+        <span>BESTCYNIX DEV DASHBOARD</span>
+      </a>
+
+      <!-- Right Cluster: Desktop Nav + Bell + Hamburger -->
+      <div class="nav-right-cluster">
+        <div class="desktop-nav-links">
+          <a href="/" class="btn-nav-action">🏠 หน้าหลัก</a>
+          <a href="admin-content" class="btn-nav-action">📁 จัดการเนื้อหา CMS</a>
+          <a href="admin-chats" class="btn-nav-action">💬 แชทลูกค้า</a>
+          <a href="admin-users" class="btn-nav-action">👥 ผู้ใช้งาน</a>
+          <a href="admin-join-team" class="btn-nav-action" style="border-color: var(--accent); color: var(--accent);">🚀 จัดการรับสมัคร</a>
+          <a href="profile" class="btn-nav-action">👤 โปรไฟล์</a>
+        </div>
+
+        <!-- Mobile Hamburger Toggle Button -->
+        <button class="nav-toggle" id="adminNavToggle" aria-expanded="false" aria-label="เปิดเมนูนำทาง">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Backdrop Overlay -->
+    <div class="mobile-drawer-overlay" id="adminDrawerOverlay"></div>
+
+    <!-- Mobile Cyber Drawer Menu -->
+    <div class="mobile-nav-drawer" id="adminNavDrawer">
+      <div class="mobile-drawer-header">
+        <span style="font-size: 0.82rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Dev Navigation Menu</span>
+        <button type="button" class="btn-close-drawer" id="adminBtnCloseDrawer">✕</button>
+      </div>
+      <div class="mobile-drawer-items">
+        <a href="/" class="mobile-drawer-link">
+          <span class="drawer-icon">🏠</span>
+          <div class="drawer-text">
+            <strong>หน้าหลักเว็บไซต์ (Home)</strong>
+            <small>bestcynixdev.web.app</small>
+          </div>
+        </a>
+        <a href="admin-dashboard" class="mobile-drawer-link active">
+          <span class="drawer-icon">⚡</span>
+          <div class="drawer-text">
+            <strong>Dev Dashboard</strong>
+            <small>ศูนย์บริหารจัดการหลัก & สถิติ</small>
+          </div>
+        </a>
+        <a href="admin-join-team" class="mobile-drawer-link">
+          <span class="drawer-icon">🚀</span>
+          <div class="drawer-text">
+            <strong>จัดการระบบรับสมัคร (Join Team)</strong>
+            <small>ตำแหน่ง, โควต้า และใบสมัคร</small>
+          </div>
+        </a>
+        <a href="admin-content" class="mobile-drawer-link">
+          <span class="drawer-icon">📁</span>
+          <div class="drawer-text">
+            <strong>จัดการเนื้อหาเว็บ (CMS)</strong>
+            <small>โปรเจกต์, Roadmap และสปอยล์</small>
+          </div>
+        </a>
+        <a href="admin-chats" class="mobile-drawer-link">
+          <span class="drawer-icon">💬</span>
+          <div class="drawer-text">
+            <strong>จัดการแชทลูกค้า (Live Chat)</strong>
+            <small>ตอบข้อความแบบ Real-Time</small>
+          </div>
+        </a>
+        <a href="admin-users" class="mobile-drawer-link">
+          <span class="drawer-icon">👥</span>
+          <div class="drawer-text">
+            <strong>จัดการผู้ใช้งาน (Users)</strong>
+            <small>รายชื่อสมาชิกและสิทธิ์ Admin</small>
+          </div>
+        </a>
+        <a href="profile" class="mobile-drawer-link">
+          <span class="drawer-icon">👤</span>
+          <div class="drawer-text">
+            <strong>โปรไฟล์และการตั้งค่าบัญชี</strong>
+            <small>ข้อมูลส่วนตัว & รหัสผ่าน</small>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Hero Header -->
+    <div class="dev-hero">
+      <div class="dev-title-row">
+        <h1>⚡ BestCyniX Dev Management Center</h1>
+        <p>ศูนย์บริหารจัดการเว็บไซต์ ระบบแชทสดติดต่อลูกค้า และบัญชีผู้ใช้ทั้งหมด</p>
+      </div>
+      <div class="admin-pill">
+        <span>🛡️ บัญชีผู้พัฒนา:</span>
+        <strong id="devEmailLabel">bestcynix@gmail.com</strong>
+      </div>
+    </div>
+
+    <!-- Live Metrics Grid -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon-box">💬</div>
+        <div class="metric-info">
+          <h3 id="statTotalChats">0</h3>
+          <p>ห้องแชทลูกค้าทั้งหมด</p>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon-box" style="background: rgba(234, 179, 8, 0.15); color: #eab308; border-color: rgba(234, 179, 8, 0.4);">⏳</div>
+        <div class="metric-info">
+          <h3 id="statUnansweredChats" style="color: #facc15;">0</h3>
+          <p>รอการตอบกลับ (Unanswered)</p>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon-box" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">👥</div>
+        <div class="metric-info">
+          <h3 id="statTotalUsers">0</h3>
+          <p>สมาชิกในระบบทั้งหมด</p>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon-box" style="background: rgba(255, 112, 166, 0.15); color: #ff70a6; border-color: rgba(255, 112, 166, 0.4);">🚀</div>
+        <div class="metric-info">
+          <h3 id="statTotalApplications" style="color: #ff70a6;">0</h3>
+          <p>ใบสมัครร่วมทีม (Applications)</p>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon-box" style="background: rgba(2, 132, 199, 0.15); color: #38bdf8; border-color: rgba(2, 132, 199, 0.4);">👁️</div>
+        <div class="metric-info">
+          <h3 id="statTotalViews">0</h3>
+          <p>ยอดการเข้าชมเว็บไซต์</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dedicated Module Launchers -->
+    <div class="modules-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+      <!-- 1. Join Team Management Module -->
+      <div class="module-card" style="border-color: rgba(50, 255, 201, 0.45); background: linear-gradient(160deg, rgba(8, 26, 44, 0.95), rgba(4, 12, 22, 0.95));">
+        <div>
+          <div class="module-card-header">
+            <div class="module-icon" style="background: rgba(50, 255, 201, 0.18); color: var(--accent); border: 1px solid rgba(50, 255, 201, 0.45);">🚀</div>
+            <div>
+              <h2>ระบบรับสมัครร่วมทีม (Join Team Management)</h2>
+              <span style="font-size: 0.78rem; color: var(--accent);" id="joinTeamStatusBadge">🟢 เปิดรับสมัครอยู่</span>
+            </div>
+          </div>
+          <p style="margin-top: 1rem;">
+            เปิด/ปิดรับสมัครแบบ Real-Time, จัดการตำแหน่งและโควต้า, จำกัดเกณฑ์อายุตามตำแหน่ง, ปรับแต่งคำถามพิเศษ (Live Preview), ตรวจสอบและดาวน์โหลดใบสมัครผู้สมัคร
+          </p>
+        </div>
+        <a href="admin-join-team" class="btn-launch-module" style="background: linear-gradient(135deg, var(--accent), #0284c7); color: #050b14;">
+          <span>เข้าสู่ระบบจัดการรับสมัคร (Join Team Admin)</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <!-- 2. CMS Content Manager -->
+      <div class="module-card" style="border-color: rgba(50, 255, 201, 0.3);">
+        <div>
+          <div class="module-card-header">
+            <div class="module-icon" style="background: rgba(50, 255, 201, 0.15); color: var(--accent); border: 1px solid rgba(50, 255, 201, 0.4);">📁</div>
+            <div>
+              <h2>จัดการเนื้อหาหน้าเว็บ (CMS Manager)</h2>
+              <span style="font-size: 0.78rem; color: var(--accent);">Dynamic Site Content</span>
+            </div>
+          </div>
+          <p style="margin-top: 1rem;">
+            จัดการโปรเจกต์เด่น 6 อัน, สปอยล์งานใหม่, ตั้งเวลานับถอยหลังเปิดตัว, ล็อกสิทธิ์เฉพาะ DEV, แก้ไขแผนงานในอนาคต, สแต็กเทคโนโลยี และโซเชียลมีเดีย
+          </p>
+        </div>
+        <a href="admin-content" class="btn-launch-module" style="background: linear-gradient(135deg, rgba(50,255,201,0.85), var(--accent-blue));">
+          <span>เข้าสู่ระบบจัดการเนื้อหา (Content CMS)</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <!-- 3. Customer Chat Center -->
+      <div class="module-card">
+        <div>
+          <div class="module-card-header">
+            <div class="module-icon" style="background: rgba(2, 132, 199, 0.15); color: var(--accent-blue); border: 1px solid rgba(2, 132, 199, 0.4);">💬</div>
+            <div>
+              <h2>จัดการข้อความแชทลูกค้า (Live Chat)</h2>
+              <span style="font-size: 0.78rem; color: var(--accent-blue);">Real-Time Sync Active</span>
+            </div>
+          </div>
+          <p style="margin-top: 1rem;">
+            ตอบกลับการสนทนากับลูกค้าแบบ Real-Time, ติดแท็กสถานะ (ด่วน, บั๊ก, บอท), ส่งรูปภาพ, อ้างอิงตอบกลับข้อความ (Quote Reply), และดูโปรไฟล์ลูกค้า
+          </p>
+        </div>
+        <a href="admin-chats" class="btn-launch-module" style="background: linear-gradient(135deg, #0284c7, #0f766e); color: #fff;">
+          <span>เข้าสู่ระบบแชทลูกค้า (Live Chat Manager)</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <!-- 4. User Account Manager -->
+      <div class="module-card">
+        <div>
+          <div class="module-card-header">
+            <div class="module-icon" style="background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.4);">👥</div>
+            <div>
+              <h2>จัดการบัญชีผู้ใช้งาน (User Manager)</h2>
+              <span style="font-size: 0.78rem; color: #d8b4fe;">Database Operations</span>
+            </div>
+          </div>
+          <p style="margin-top: 1rem;">
+            ค้นหารายชื่อผู้ใช้, ดูข้อมูลประวัติ, คัดลอก UID, แก้ไขบทบาท (Admin/User), แก้ไขโปรไฟล์ผู้ใช้, และตรวจสอบสถานะการยืนยันอีเมล
+          </p>
+        </div>
+        <a href="admin-users" class="btn-launch-module" style="background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff;">
+          <span>เข้าสู่ระบบจัดการผู้ใช้ (User Manager)</span>
+          <span>→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 5. Audit & Security Activity Stream with Rich Controls & Pagination -->
+    <div style="margin-top: 2.5rem; background: rgba(10, 24, 42, 0.92); border: 1px solid rgba(50, 255, 201, 0.25); border-radius: 18px; padding: 1.5rem; backdrop-filter: blur(16px); box-shadow: 0 15px 40px rgba(0,0,0,0.5);">
+      <!-- Header Row -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.4rem;">📜</span>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0;">บันทึกกิจกรรมแอดมิน & ความปลอดภัย (Audit Logs)</h2>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+          <span style="font-size: 0.78rem; color: var(--accent); background: rgba(50, 255, 201, 0.1); border: 1px solid rgba(50, 255, 201, 0.25); padding: 0.2rem 0.65rem; border-radius: 999px;">
+            🟢 Live Stream Active
+          </span>
+        </div>
+      </div>
+
+      <!-- Filter, Search & Pagination Controls Bar -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap;">
+        <!-- Left: Search & Action Category Filter -->
+        <div style="display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 280px; flex-wrap: wrap;">
+          <input type="text" id="searchAuditInput" placeholder="🔍 ค้นหากิจกรรม, อีเมล, คำอธิบาย..." style="flex: 1; min-width: 200px; padding: 0.55rem 0.85rem; background: rgba(4, 12, 22, 0.9); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-family: 'Prompt', sans-serif; font-size: 0.85rem; outline: none;" />
+          
+          <select id="filterAuditCategory" style="padding: 0.55rem 0.85rem; background: rgba(4, 12, 22, 0.9); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-family: 'Prompt', sans-serif; font-size: 0.85rem; outline: none; cursor: pointer;">
+            <option value="all">⚡ ทุกประเภทกิจกรรม (All)</option>
+            <option value="auth">🔑 ความปลอดภัย & รหัสผ่าน (Auth)</option>
+            <option value="cms">📁 จัดการเนื้อหาเว็บ (CMS)</option>
+            <option value="join_team">🚀 ระบบรับสมัคร (Join Team)</option>
+            <option value="users">👥 จัดการผู้ใช้ (Users)</option>
+            <option value="delete">🗑️ ลบหรือปฏิเสธ (Delete/Reject)</option>
+          </select>
+        </div>
+
+        <!-- Right: Page Size & Pagination Controls < 0 > -->
+        <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; color: var(--muted);">
+            <span>แสดง:</span>
+            <select id="auditPageSizeSelect" style="padding: 0.35rem 0.55rem; background: rgba(4, 12, 22, 0.9); border: 1px solid var(--border); border-radius: 6px; color: #fff; font-size: 0.8rem; outline: none; cursor: pointer;">
+              <option value="10">10</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <span>รายการ</span>
+          </div>
+
+          <!-- Direct Page Jump Controls < 0 > -->
+          <div style="display: inline-flex; align-items: center; gap: 0.2rem; background: rgba(0,0,0,0.4); padding: 0.2rem 0.4rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+            <button type="button" id="btnAuditPrevPage" style="padding: 0.25rem 0.55rem; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 6px; color: #fff; cursor: pointer; font-size: 0.8rem;" title="หน้าก่อนหน้า">◀</button>
+            <input type="number" id="inputAuditPageIndex" min="1" value="1" style="width: 44px; text-align: center; background: rgba(5,11,22,0.95); border: 1px solid var(--accent); color: #32ffc9; border-radius: 6px; font-weight: 700; font-family: 'Chakra Petch', sans-serif; font-size: 0.85rem; padding: 0.2rem 0;" title="เปลี่ยนหน้าตรงนี้" />
+            <button type="button" id="btnAuditNextPage" style="padding: 0.25rem 0.55rem; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 6px; color: #fff; cursor: pointer; font-size: 0.8rem;" title="หน้าถัดไป">▶</button>
+          </div>
+
+          <span id="auditPageIndicator" style="font-size: 0.78rem; color: var(--muted); white-space: nowrap;">(หน้า 1/1)</span>
+        </div>
+      </div>
+
+      <!-- Audit Logs Table -->
+      <div style="overflow-x: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; background: rgba(0,0,0,0.3);">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--muted); background: rgba(4, 12, 22, 0.8);">
+              <th style="padding: 0.65rem 0.85rem; width: 150px;">เวลา</th>
+              <th style="padding: 0.65rem 0.85rem; width: 170px;">การกระทำ (Action)</th>
+              <th style="padding: 0.65rem 0.85rem; width: 200px;">ผู้ดำเนินการ (Admin)</th>
+              <th style="padding: 0.65rem 0.85rem;">รายละเอียด (Details)</th>
+            </tr>
+          </thead>
+          <tbody id="auditLogsTableBody">
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--muted); padding: 1.5rem;">กำลังโหลดประวัติกิจกรรม...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bottom Status Row -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; font-size: 0.78rem; color: var(--muted); flex-wrap: wrap; gap: 0.5rem;">
+        <span id="auditLogCountSummary">กำลังนับจำนวนรายการ...</span>
+        <button type="button" id="btnRefreshAuditLogs" style="background: none; border: none; color: var(--accent); cursor: pointer; text-decoration: underline;">🔄 รีเฟรชประวัติกิจกรรม</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      databaseURL: "https://bestcynixdev-default-rtdb.asia-southeast1.firebasedatabase.app",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5",
+      projectNumber: "172682556745"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let rawAuditLogs = [];
+    let auditCurrentPage = 1;
+    let auditPageSize = 25;
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.replace("login");
+        return;
+      }
+
+      // Check Dev Admin Permission
+      let isAdmin = (user.email === "bestcynix@gmail.com" || user.email === "admin@email.com");
+      if (!isAdmin) {
+        try {
+          const docSnap = await db.collection("users").doc(user.uid).get();
+          if (docSnap.exists && docSnap.data().role === "admin") {
+            isAdmin = true;
+          }
+        } catch (e) {}
+      }
+
+      if (!isAdmin) {
+        showCyberToast("⛔ ขออภัย คุณไม่มีสิทธิ์เข้าถึง Dev Dashboard (สงวนสิทธิ์เฉพาะบัญชีทีมพัฒนา BestCyniX Dev เท่านั้น)", "", "error");
+        setTimeout(() => { window.location.replace("/"); }, 1500);
+        return;
+      }
+
+      // Permissions 100% verified -> Unlock dashboard view
+      document.getElementById("authGuardOverlay")?.classList.add("verified");
+      document.getElementById("devEmailLabel").textContent = user.email;
+
+      // Realtime Metrics Listeners
+      db.collection("chats").limit(100).onSnapshot((snapshot) => {
+        let total = snapshot.size;
+        let unanswered = 0;
+        snapshot.forEach((doc) => {
+          if (doc.data().status === "unanswered") unanswered++;
+        });
+        document.getElementById("statTotalChats").textContent = total;
+        document.getElementById("statUnansweredChats").textContent = unanswered;
+      }, () => {});
+
+      db.collection("users").limit(150).onSnapshot((snapshot) => {
+        document.getElementById("statTotalUsers").textContent = snapshot.size;
+      }, () => {});
+
+      db.collection("joinTeamApplications").limit(150).onSnapshot((snapshot) => {
+        document.getElementById("statTotalApplications").textContent = snapshot.size;
+      }, () => {});
+
+      db.collection("joinTeamForms").doc("default").onSnapshot((doc) => {
+        const badge = document.getElementById("joinTeamStatusBadge");
+        if (badge) {
+          const cfg = doc.exists ? doc.data() : null;
+          let isOpen = false;
+          if (cfg) {
+            const mode = cfg.statusConfig?.mode || 'manual';
+            if (mode === 'auto') {
+              const now = Date.now();
+              const open = cfg.statusConfig?.autoOpenAt ? new Date(cfg.statusConfig.autoOpenAt).getTime() : null;
+              const close = cfg.statusConfig?.autoCloseAt ? new Date(cfg.statusConfig.autoCloseAt).getTime() : null;
+              isOpen = (!open || now >= open) && (!close || now <= close);
+            } else {
+              isOpen = cfg.isOpen === true;
+            }
+          }
+
+          if (isOpen) {
+            badge.style.color = "var(--accent)";
+            badge.textContent = "🟢 กำลังเปิดรับสมัคร";
+          } else {
+            badge.style.color = "var(--danger)";
+            badge.textContent = "🔴 ปิดรับสมัครแล้ว";
+          }
+        }
+      });
+
+      db.collection("site_stats").doc("metrics").onSnapshot((doc) => {
+        if (doc.exists) {
+          const d = doc.data();
+          document.getElementById("statTotalViews").textContent = (d.pageviews || 0).toLocaleString();
+        }
+      });
+
+      // Realtime Audit Logs Listener
+      loadAuditLogs();
+    });
+
+    const loadAuditLogs = () => {
+      db.collection("auditLogs").orderBy("createdAt", "desc").limit(200).onSnapshot((snapshot) => {
+        rawAuditLogs = snapshot.docs.map(doc => {
+          const d = doc.data();
+          d.id = doc.id;
+          return d;
+        });
+        renderAuditLogsTable();
+      }, (err) => {
+        // Fallback without index
+        db.collection("auditLogs").limit(200).onSnapshot((snapshot) => {
+          rawAuditLogs = snapshot.docs.map(doc => {
+            const d = doc.data();
+            d.id = doc.id;
+            return d;
+          });
+          renderAuditLogsTable();
+        }, () => {});
+      });
+    };
+
+    // Render Audit Logs Table with Search, Filter and Pagination
+    const renderAuditLogsTable = () => {
+      const tbody = document.getElementById("auditLogsTableBody");
+      const search = document.getElementById("searchAuditInput")?.value.toLowerCase().trim() || "";
+      const category = document.getElementById("filterAuditCategory")?.value || "all";
+      if (!tbody) return;
+
+      // 1. Filter
+      let filtered = rawAuditLogs.filter(item => {
+        const act = (item.action || "").toLowerCase();
+        const email = (item.adminEmail || item.adminDisplayName || "").toLowerCase();
+        const summary = (item.summary || "").toLowerCase();
+
+        // Search match
+        const matchesSearch = !search || act.includes(search) || email.includes(search) || summary.includes(search);
+        if (!matchesSearch) return false;
+
+        // Category match
+        if (category === "auth") return act.includes("AUTH") || act.includes("LOGIN") || act.includes("PASSWORD") || act.includes("RESET");
+        if (category === "cms") return act.includes("PROJECT") || act.includes("ROADMAP") || act.includes("STACK") || act.includes("SOCIAL") || act.includes("CMS");
+        if (category === "join_team") return act.includes("APPLICATION") || act.includes("STATUS") || act.includes("FORM") || act.includes("POSITION");
+        if (category === "users") return act.includes("USER") || act.includes("PROFILE") || act.includes("ROLE");
+        if (category === "delete") return act.includes("DELETE") || act.includes("REJECT") || act.includes("CANCEL") || act.includes("REMOVE");
+
+        return true;
+      });
+
+      // 2. Pagination calculation
+      const totalCount = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(totalCount / auditPageSize));
+      if (auditCurrentPage > totalPages) auditCurrentPage = totalPages;
+      if (auditCurrentPage < 1) auditCurrentPage = 1;
+
+      const pageInput = document.getElementById("inputAuditPageIndex");
+      if (pageInput) {
+        pageInput.value = auditCurrentPage;
+        pageInput.max = totalPages;
+      }
+
+      document.getElementById("auditPageIndicator").textContent = `(หน้า ${auditCurrentPage}/${totalPages})`;
+      
+      const startIdx = (auditCurrentPage - 1) * auditPageSize;
+      const endIdx = Math.min(startIdx + auditPageSize, totalCount);
+      const pageItems = filtered.slice(startIdx, endIdx);
+
+      document.getElementById("auditLogCountSummary").textContent = totalCount > 0
+        ? `แสดงรายการที่ ${startIdx + 1} - ${endIdx} จากทั้งหมด ${totalCount} รายการ`
+        : `ไม่พบรายการที่ตรงกับเงื่อนไขค้นหา`;
+
+      if (pageItems.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--muted); padding: 2rem;">ไม่พบประวัติกิจกรรมที่ตรงกับเงื่อนไขการค้นหา/ตัวกรอง</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = pageItems.map(d => {
+        const time = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString("th-TH") : (d.clientTimestamp ? new Date(d.clientTimestamp).toLocaleString("th-TH") : "เมื่อสักครู่");
+        
+        let badgeStyle = "background: rgba(50, 255, 201, 0.12); border: 1px solid rgba(50, 255, 201, 0.4); color: #32ffc9;";
+        if (d.action.includes("REJECT") || d.action.includes("DELETE") || d.action.includes("CANCEL") || d.action.includes("REMOVE")) {
+          badgeStyle = "background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171;";
+        } else if (d.action.includes("APPROVE") || d.action.includes("SUCCESS")) {
+          badgeStyle = "background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80;";
+        } else if (d.action.includes("EXPORT") || d.action.includes("DOWNLOAD")) {
+          badgeStyle = "background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(2, 132, 199, 0.4); color: #38bdf8;";
+        } else if (d.action.includes("RESET") || d.action.includes("PASSWORD")) {
+          badgeStyle = "background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #d8b4fe;";
+        }
+
+        return `
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background 0.15s;">
+            <td style="padding: 0.65rem 0.85rem; color: var(--muted); white-space: nowrap;">${time}</td>
+            <td style="padding: 0.65rem 0.85rem;">
+              <span style="${badgeStyle} padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.74rem; font-weight: 700; font-family: 'Chakra Petch', sans-serif;">
+                ${d.action}
+              </span>
+            </td>
+            <td style="padding: 0.65rem 0.85rem; color: #fff; white-space: nowrap;">${d.adminEmail || d.adminDisplayName || 'Dev Admin'}</td>
+            <td style="padding: 0.65rem 0.85rem; color: #cbd5e1;">${d.summary || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    // Audit Event Handlers
+    document.getElementById("searchAuditInput")?.addEventListener("input", () => {
+      auditCurrentPage = 1;
+      renderAuditLogsTable();
+    });
+
+    document.getElementById("filterAuditCategory")?.addEventListener("change", () => {
+      auditCurrentPage = 1;
+      renderAuditLogsTable();
+    });
+
+    document.getElementById("auditPageSizeSelect")?.addEventListener("change", (e) => {
+      auditPageSize = parseInt(e.target.value, 10) || 25;
+      auditCurrentPage = 1;
+      renderAuditLogsTable();
+    });
+
+    document.getElementById("btnAuditPrevPage")?.addEventListener("click", () => {
+      if (auditCurrentPage > 1) {
+        auditCurrentPage--;
+        renderAuditLogsTable();
+      }
+    });
+
+    document.getElementById("btnAuditNextPage")?.addEventListener("click", () => {
+      auditCurrentPage++;
+      renderAuditLogsTable();
+    });
+
+    document.getElementById("inputAuditPageIndex")?.addEventListener("change", (e) => {
+      const p = parseInt(e.target.value, 10);
+      if (!isNaN(p)) {
+        auditCurrentPage = p;
+        renderAuditLogsTable();
+      }
+    });
+
+    document.getElementById("btnRefreshAuditLogs")?.addEventListener("click", loadAuditLogs);
+
+    // Mobile Cyber Drawer Toggle Logic
+    const adminNavToggle = document.getElementById("adminNavToggle");
+    const adminNavDrawer = document.getElementById("adminNavDrawer");
+    const adminDrawerOverlay = document.getElementById("adminDrawerOverlay");
+    const adminBtnCloseDrawer = document.getElementById("adminBtnCloseDrawer");
+
+    const toggleAdminDrawer = (open) => {
+      const isOpen = open !== undefined ? open : !adminNavDrawer.classList.contains("is-open");
+      adminNavDrawer.classList.toggle("is-open", isOpen);
+      adminDrawerOverlay.classList.toggle("is-open", isOpen);
+      adminNavToggle.classList.toggle("is-active", isOpen);
+      adminNavToggle.setAttribute("aria-expanded", isOpen);
+    };
+
+    adminNavToggle?.addEventListener("click", () => toggleAdminDrawer());
+    adminBtnCloseDrawer?.addEventListener("click", () => toggleAdminDrawer(false));
+    adminDrawerOverlay?.addEventListener("click", () => toggleAdminDrawer(false));
+  </script>
+
+  <footer class="site-footer"></footer>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+  <script src="js/audit-logger.js?v=20260826_22"></script>
+</body>
+</html>

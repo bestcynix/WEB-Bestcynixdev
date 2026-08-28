@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เอกสารสัญญาการร่วมทีม • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js?v=20260826_22"></script>
+
+  <style>
+    :root {
+      --bg: #030812;
+      --card-bg: #ffffff;
+      --accent: #0284c7;
+      --accent-green: #16a34a;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: #e2e8f0;
+      font-family: "Prompt", "Sarabun", sans-serif;
+      line-height: 1.65;
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    /* Screen Nav & Toolbar */
+    .screen-toolbar {
+      background: rgba(10, 24, 42, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      padding: 0.8rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+    .toolbar-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 1.05rem;
+    }
+    .toolbar-brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #32ffc9;
+    }
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .btn-action {
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-family: 'Prompt', sans-serif;
+    }
+    .btn-sign {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+    .btn-sign:hover { background: #059669; }
+    .btn-print {
+      background: #0284c7;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    }
+    .btn-print:hover { background: #0369a1; }
+    .btn-copy {
+      background: rgba(50, 255, 201, 0.12);
+      border: 1px solid rgba(50, 255, 201, 0.4);
+      color: #32ffc9;
+    }
+    .btn-copy:hover { background: #32ffc9; color: #050b14; }
+    .btn-back {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-back:hover { background: rgba(255, 255, 255, 0.15); }
+
+    /* Contract A4 Paper Container */
+    .contract-page-wrap {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .contract-sheet {
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+      padding: 44px 50px;
+      font-family: "Sarabun", "Prompt", sans-serif;
+      position: relative;
+    }
+
+    /* Contract Header */
+    .ctr-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .ctr-logo-area {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .ctr-logo-area img {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 2px solid #0284c7;
+    }
+    .ctr-org-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      font-family: "Chakra Petch", sans-serif;
+      line-height: 1.2;
+    }
+    .ctr-org-sub {
+      font-size: 0.84rem;
+      color: #64748b;
+      margin-top: 0.15rem;
+    }
+    .ctr-ref-box {
+      text-align: right;
+    }
+    .ctr-ref-no {
+      font-family: "Chakra Petch", monospace;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0284c7;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 0.3rem;
+    }
+    .ctr-date {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .ctr-title-block {
+      text-align: center;
+      margin-bottom: 1.8rem;
+    }
+    .ctr-main-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .ctr-main-subtitle {
+      font-size: 0.9rem;
+      color: #475569;
+      margin-top: 0.2rem;
+    }
+
+    /* Applicant Profile Card inside Contract (Clean Spacing & Layout) */
+    .ctr-profile-grid {
+      display: grid;
+      grid-template-columns: 135px 1fr;
+      gap: 1.5rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.4rem;
+      margin-bottom: 1.8rem;
+      align-items: flex-start;
+    }
+    .ctr-photo-box {
+      width: 135px;
+      height: 165px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+    }
+    .ctr-photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ctr-info-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      font-size: 0.88rem;
+    }
+    .ctr-info-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem 1.6rem;
+    }
+    .ctr-info-item {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+    .ctr-info-item .lbl {
+      color: #64748b;
+      font-weight: 600;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    .ctr-info-item .val {
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+    .ctr-info-item .val.highlight {
+      color: #0284c7;
+    }
+
+    /* Social chips with Authentic Brand SVGs */
+    .ctr-social-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    .ctr-social-chip {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      padding: 0.22rem 0.65rem;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .ctr-social-chip svg {
+      flex-shrink: 0;
+    }
+    .ctr-social-chip.discord {
+      border-color: #c7d2fe;
+      color: #4338ca;
+      background: #eef2ff;
+    }
+    .ctr-social-chip.discord svg { fill: #5865F2; }
+
+    .ctr-social-chip.facebook {
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+      background: #eff6ff;
+    }
+    .ctr-social-chip.facebook svg { fill: #1877F2; }
+
+    .ctr-social-chip.email {
+      border-color: #bae6fd;
+      color: #0369a1;
+      background: #f0f9ff;
+    }
+    .ctr-social-chip.email svg { stroke: #0284c7; }
+
+    .ctr-social-chip.phone {
+      border-color: #bbf7d0;
+      color: #15803d;
+      background: #f0fdf4;
+    }
+    .ctr-social-chip.phone svg { stroke: #16a34a; }
+
+    /* Clean Modern Contract Sections (No broken borders) */
+    .ctr-section {
+      margin-bottom: 1.5rem;
+    }
+    .ctr-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+      background: #f1f5f9;
+      border-left: 3.5px solid #0284c7;
+      padding: 0.4rem 0.75rem;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .ctr-section-body {
+      font-size: 0.87rem;
+      color: #334155;
+      line-height: 1.75;
+      padding: 0 0.5rem;
+    }
+    .ctr-section-body p { margin-bottom: 0.6rem; text-align: justify; }
+    .ctr-section-body ul { padding-left: 1.2rem; margin-bottom: 0.6rem; }
+    .ctr-section-body li { margin-bottom: 0.35rem; }
+
+    /* Custom Questions in Contract */
+    .ctr-qa-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #0284c7;
+      padding: 0.65rem 0.95rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 0.65rem;
+      font-size: 0.85rem;
+    }
+    .ctr-qa-card .q { font-weight: 700; color: #0f172a; margin-bottom: 0.2rem; }
+    .ctr-qa-card .a { color: #334155; }
+
+    /* Signatures Block */
+    .ctr-sign-block {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2.5rem;
+      padding-top: 1.8rem;
+      border-top: 1.5px solid #cbd5e1;
+      page-break-inside: avoid;
+    }
+    .ctr-sign-col {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .sign-space {
+      height: 75px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      margin-bottom: 0.4rem;
+      font-family: 'Brush Script MT', cursive, sans-serif;
+      font-size: 1.4rem;
+      color: #0369a1;
+      width: 100%;
+    }
+    .applicant-sig-img {
+      max-height: 68px;
+      max-width: 220px;
+      object-fit: contain;
+    }
+    .sign-line {
+      border-top: 1px dashed #64748b;
+      margin: 0 auto 0.4rem auto;
+      width: 80%;
+    }
+    .sign-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .sign-role {
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+    .signed-badge-seal {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.74rem;
+      color: #15803d;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      margin-top: 0.35rem;
+      font-weight: 600;
+    }
+
+    /* Signature Modal */
+    .sig-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100000;
+      background: rgba(3, 8, 18, 0.85);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.2rem;
+    }
+    .sig-modal.is-open { display: flex; }
+    .sig-card {
+      background: linear-gradient(160deg, #09182d, #040c18);
+      border: 1px solid rgba(50, 255, 201, 0.35);
+      border-radius: 18px;
+      padding: 1.8rem;
+      width: min(560px, 95vw);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85);
+      color: #e6f3ff;
+      font-family: 'Prompt', sans-serif;
+    }
+    .sig-canvas-wrap {
+      background: #ffffff;
+      border: 2px dashed #0284c7;
+      border-radius: 12px;
+      position: relative;
+      margin: 1rem 0;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    .sig-canvas-wrap canvas {
+      display: block;
+      width: 100%;
+      height: 180px;
+      border-radius: 10px;
+    }
+    .sig-canvas-hint {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #94a3b8;
+      font-size: 0.88rem;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Page Breaks for Multi-Page Contracts */
+    .ctr-page-break {
+      page-break-after: always;
+      break-after: page;
+      margin: 2rem 0;
+      border-bottom: 2px dashed #cbd5e1;
+    }
+    @media screen {
+      .ctr-page-break {
+        display: block;
+        text-align: center;
+        position: relative;
+        padding-top: 1rem;
+      }
+      .ctr-page-break::after {
+        content: '📄 — สิ้นสุดหน้าสัญญา / ขึ้นหน้าถัดไป —';
+        font-size: 0.76rem;
+        color: #94a3b8;
+        background: #fff;
+        padding: 0 0.5rem;
+        position: relative;
+        top: -0.7rem;
+      }
+    }
+
+    /* Print Specific Styling */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+      }
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+      .screen-toolbar, .no-print, .sig-modal {
+        display: none !important;
+      }
+      .contract-page-wrap {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .contract-sheet {
+        box-shadow: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+      }
+      .ctr-page-break {
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .ctr-page-break::after {
+        display: none !important;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+</head>
+<body>
+
+  <!-- Top Toolbar (Hidden when printing) -->
+  <header class="screen-toolbar no-print">
+    <a href="/" class="toolbar-brand">
+      <img src="assets/photo/bcxlogo2.png" alt="Logo" />
+      <span>BESTCYNIX DEV CONTRACT</span>
+    </a>
+    <div class="toolbar-actions">
+      <button type="button" class="btn-action btn-sign" id="btnTopSignContract" style="display:none;">✍️ ลงลายมือชื่อดิจิทัล</button>
+      <button type="button" class="btn-action btn-print" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
+      <button type="button" class="btn-action btn-copy" id="btnCopyContractLink">📋 คัดลอกลิงก์สัญญา</button>
+      <a href="profile" class="btn-action btn-back">👤 โปรไฟล์ของฉัน</a>
+      <a href="join-team" class="btn-action btn-back">🚀 หน้าสมัคร</a>
+      <a href="/" class="btn-action btn-back">🏠 หน้าหลัก</a>
+    </div>
+  </header>
+
+  <div class="contract-page-wrap">
+    <!-- Loading State -->
+    <div id="ctrLoading" style="text-align: center; padding: 4rem 1rem; color: #8aa9c7;">
+      <div style="width: 48px; height: 48px; border: 3px solid rgba(50,255,201,0.2); border-top-color: #32ffc9; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1.2rem auto;"></div>
+      <div style="font-family: 'Chakra Petch', sans-serif; font-size: 1.15rem; color: #32ffc9; font-weight: 700;">กำลังโหลดข้อมูลสัญญาอิเล็กทรอนิกส์...</div>
+    </div>
+
+    <!-- Error State -->
+    <div id="ctrError" style="display: none; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; padding: 2rem; text-align: center; color: #fca5a5;">
+      <h3 style="font-size: 1.3rem; margin-bottom: 0.6rem; color: #f87171;">⚠️ ไม่พบเอกสารสัญญา</h3>
+      <p id="ctrErrorMsg">กรุณาตรวจสอบรหัสอ้างอิงสัญญา หรือติดต่อทีมงาน Dev</p>
+      <div style="margin-top: 1.2rem;">
+        <a href="join-team" class="btn-action btn-back" style="display: inline-flex;">🚀 กลับหน้าสมัครร่วมทีม</a>
+      </div>
+    </div>
+
+    <!-- Main Contract Sheet -->
+    <article class="contract-sheet" id="ctrSheet" style="display: none;">
+      <!-- Header -->
+      <div class="ctr-header">
+        <div class="ctr-logo-area">
+          <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Dev" />
+          <div>
+            <div class="ctr-org-name" id="ctrCommunityName">BESTCYNIX DEV</div>
+            <div class="ctr-org-sub">Software Development & Community Platform</div>
+          </div>
+        </div>
+        <div class="ctr-ref-box">
+          <div class="ctr-ref-no" id="ctrRefNo">BCX-CTR-2026-0000</div>
+          <div class="ctr-date" id="ctrDateText">วันที่ทำสัญญา: -</div>
+        </div>
+      </div>
+
+      <!-- Void / Cancellation Banner -->
+      <div id="ctrVoidBanner" style="display:none;background:#fef2f2;border:2px solid #ef4444;border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.5rem;text-align:center;">
+        <div style="font-size:1.1rem;font-weight:800;color:#dc2626;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
+          ⛔ สัญญาฉบับนี้ถูกยกเลิกอย่างเป็นทางการ (VOIDED / CANCELLED)
+        </div>
+        <div style="font-size:0.86rem;color:#7f1d1d;margin-top:0.3rem;" id="ctrVoidReasonText"></div>
+      </div>
+
+      <!-- Title Block -->
+      <div class="ctr-title-block">
+        <h1 class="ctr-main-title" id="ctrDocTitle">สัญญาการร่วมทีมและข้อตกลงการรักษาความลับ</h1>
+        <p class="ctr-main-subtitle" id="ctrDocSubtitle">Team Membership, Non-Disclosure & Intellectual Property Agreement</p>
+      </div>
+
+      <!-- Applicant Details Grid (Structured Clean Spacing) -->
+      <div class="ctr-profile-grid">
+        <div class="ctr-photo-box">
+          <img id="ctrApplicantPhoto" src="assets/photo/bcxlogo2.png" alt="รูปถ่ายผู้สมัคร" />
+        </div>
+        <div class="ctr-info-details">
+          <div class="ctr-info-row">
+            <div class="ctr-info-item">
+              <span class="lbl">ชื่อ:</span>
+              <span class="val" id="ctrFirstName">-</span>
+            </div>
+            <div class="ctr-info-item">
+              <span class="lbl">นามสกุล:</span>
+              <span class="val" id="ctrLastName">-</span>
+            </div>
+            <div class="ctr-info-item">
+              <span class="lbl">ชื่อเล่น:</span>
+              <span class="val" id="ctrNickname">-</span>
+            </div>
+          </div>
+
+          <div class="ctr-info-row">
+            <div class="ctr-info-item">
+              <span class="lbl">ตำแหน่งที่ได้รับ:</span>
+              <span class="val highlight" id="ctrPosition">-</span>
+            </div>
+            <div class="ctr-info-item">
+              <span class="lbl">เพศสภาพ:</span>
+              <span class="val" id="ctrGender">-</span>
+            </div>
+          </div>
+
+          <div class="ctr-info-row">
+            <div class="ctr-info-item">
+              <span class="lbl">อายุ:</span>
+              <span class="val" id="ctrAge">-</span>
+            </div>
+            <div class="ctr-info-item">
+              <span class="lbl">วันเกิด:</span>
+              <span class="val" id="ctrDob">-</span>
+            </div>
+            <div class="ctr-info-item">
+              <span class="lbl">อุปกรณ์ / OS:</span>
+              <span class="val" id="ctrDevice">-</span>
+            </div>
+          </div>
+
+          <div class="ctr-info-row">
+            <div class="ctr-info-item" style="width: 100%;">
+              <span class="lbl">วันและเวลาที่สะดวก:</span>
+              <span class="val" id="ctrDaysTime">-</span>
+            </div>
+          </div>
+
+          <div class="ctr-info-row" style="align-items: flex-start; margin-top: 0.15rem;">
+            <div class="ctr-info-item" style="width: 100%; flex-direction: column; gap: 0.3rem;">
+              <span class="lbl">ช่องทางติดต่อ:</span>
+              <div class="ctr-social-chips" id="ctrSocialChips">
+                <span class="ctr-social-chip">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contract Clauses Container (Dynamically rendered from CMS or Standard default) -->
+      <div id="ctrClausesContainer">
+        <div class="ctr-section">
+          <div class="ctr-section-title">ข้อ 1. วัตถุประสงค์และบทบาทหน้าที่ (Roles & Objectives)</div>
+          <div class="ctr-section-body">
+            <p>สัญญาฉบับนี้จัดทำขึ้นระหว่าง <strong>BestCyniX Dev</strong> (ซึ่งต่อไปนี้เรียกว่า "ทีม") ฝ่ายหนึ่ง กับผู้มีรายชื่อระบุข้างต้น (ซึ่งต่อไปนี้เรียกว่า "สมาชิก") อีกฝ่ายหนึ่ง โดยสมาชิกตกลงเข้าร่วมปฏิบัติหน้าที่ในตำแหน่งที่ได้รับมอบหมายด้วยความตั้งใจ ซื่อสัตย์สุจริต และเคารพต่อกฎระเบียบของทีม</p>
+          </div>
+        </div>
+
+        <div class="ctr-section">
+          <div class="ctr-section-title">ข้อ 2. การรักษาความลับและทรัพย์สินทางปัญญา (NDA & IP Rights)</div>
+          <div class="ctr-section-body">
+            <p>สมาชิกตกลงที่จะรักษาความลับของข้อมูล รหัสต้นฉบับ (Source Code), โครงสร้างฐานข้อมูล, API Tokens, กุญแจความปลอดภัย และข้อมูลใดๆ ที่เป็นความลับของทีม โดยจะไม่นำไปเปิดเผย เผยแพร่ ดัดแปลง หรือแจกจ่ายต่อบุคคลภายนอกโดยไม่ได้รับความยินยอมเป็นลายลักษณ์อักษรจากทีม</p>
+            <p>ผลงาน ซอฟต์แวร์ และเอกสารทั้งหมดที่สมาชิกได้ร่วมพัฒนาขึ้นภายใต้โครงการของ BestCyniX Dev ถือเป็นทรัพย์สินทางปัญญาร่วมของทีม</p>
+          </div>
+        </div>
+
+        <div class="ctr-section">
+          <div class="ctr-section-title">ข้อ 3. การคุ้มครองข้อมูลส่วนบุคคล (PDPA Compliance)</div>
+          <div class="ctr-section-body">
+            <p>ทั้งสองฝ่ายตกลงปฏิบัติตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 โดยทีมจะจัดเก็บและประมวลผลข้อมูลส่วนบุคคลของสมาชิกเฉพาะเพื่อประโยชน์ในการบริหารจัดการ การประสานงาน และการยืนยันตัวตนเท่านั้น</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom QA Section (Dynamically populated from applicant answers) -->
+      <div class="ctr-section" id="ctrCustomQASection" style="display:none;">
+        <div class="ctr-section-title" id="ctrCustomQATitle">ข้อ 4. ข้อมูลและข้อตกลงเพิ่มเติมเฉพาะบุคคล (Applicant Statements)</div>
+        <div class="ctr-section-body" id="ctrCustomQAList"></div>
+      </div>
+
+      <!-- Signatures Block -->
+      <div class="ctr-sign-block">
+        <!-- Dev Signature -->
+        <div class="ctr-sign-col">
+          <div class="sign-space">
+            <span style="font-family: 'Brush Script MT', cursive; font-size: 1.6rem; color: #0284c7;">BestCyniX Dev</span>
+          </div>
+          <div class="sign-line"></div>
+          <div class="sign-name">BestCyniX Dev Representative</div>
+          <div class="sign-role">ผู้แทน / ผู้บริหาร BestCyniX Dev</div>
+          <div class="signed-badge-seal">🛡️ ได้รับการรับรองอย่างเป็นทางการ</div>
+        </div>
+
+        <!-- Applicant Signature -->
+        <div class="ctr-sign-col" id="applicantSignColumn">
+          <div class="sign-space" id="ctrApplicantSignSpace">
+            <button type="button" class="btn-action btn-sign" id="btnInlineSign" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">✍️ ลงลายมือชื่อ</button>
+          </div>
+          <div class="sign-line"></div>
+          <div class="sign-name" id="ctrApplicantPrintName">-</div>
+          <div class="sign-role">ผู้สมัคร / สมาชิกผู้ให้คำมั่นสัญญา</div>
+          <div id="ctrApplicantSignedSeal" style="display: none;"></div>
+        </div>
+      </div>
+
+    </article>
+  </div>
+
+  <!-- Digital Signature Modal -->
+  <div class="sig-modal" id="signatureModal">
+    <div class="sig-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.6rem;">
+        <h3 style="font-size: 1.15rem; color: #32ffc9; display: flex; align-items: center; gap: 0.4rem;">
+          ✍️ ลงลายมือชื่อดิจิทัล (Digital Signature)
+        </h3>
+        <button type="button" id="btnCloseSigModal" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+
+      <p style="font-size: 0.86rem; color: #cbd5e1; margin-bottom: 0.6rem;">
+        ใช้นิ้วหรือเมาส์วาดลายเซ็นของคุณลงในกรอบด้านล่างนี้ เพื่อยืนยันและส่งสัญญากลับมายังทีมงาน Dev
+      </p>
+
+      <!-- Signature Canvas Wrap -->
+      <div class="sig-canvas-wrap" id="sigCanvasWrap">
+        <canvas id="sigCanvas" width="500" height="180"></canvas>
+        <span class="sig-canvas-hint" id="sigCanvasHint">✍️ วาดลายมือชื่อของคุณที่นี่</span>
+      </div>
+
+      <!-- Canvas Controls -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 0.82rem; color: #94a3b8;">สีปากกา:</span>
+          <button type="button" class="btn-action" id="btnColorBlue" style="background: #0284c7; color: #fff; padding: 0.2rem 0.6rem; font-size: 0.75rem; border-radius: 6px;">น้ำเงิน</button>
+          <button type="button" class="btn-action" id="btnColorBlack" style="background: #0f172a; border: 1px solid #64748b; color: #fff; padding: 0.2rem 0.6rem; font-size: 0.75rem; border-radius: 6px;">ดำ</button>
+        </div>
+        <button type="button" class="btn-action" id="btnClearSig" style="background: rgba(239,68,68,0.15); border: 1px solid #ef4444; color: #f87171; padding: 0.3rem 0.75rem; font-size: 0.8rem;">🗑️ ล้างลายเซ็น</button>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <label style="font-size: 0.84rem; color: #94a3b8; display: block; margin-bottom: 0.3rem;">ชื่อ-นามสกุล ผู้ให้คำมั่นสัญญา:</label>
+        <input type="text" id="inputSignerName" style="width: 100%; background: rgba(5,11,22,0.9); border: 1px solid rgba(50,255,201,0.3); border-radius: 8px; color: #fff; padding: 0.55rem 0.8rem; font-family: 'Prompt', sans-serif; font-size: 0.9rem;" placeholder="พิมพ์ชื่อ-นามสกุลของคุณเพื่อยืนยัน" />
+      </div>
+
+      <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #cbd5e1; margin-bottom: 1.2rem; cursor: pointer;">
+        <input type="checkbox" id="chkAgreeContract" style="margin-top: 3px; accent-color: #32ffc9;" />
+        <span>ข้าพเจ้าได้อ่าน เข้าใจ และยอมรับข้อตกลงและเงื่อนไขทั้งหมดในสัญญาฉบับนี้อย่างถูกต้องและสมบูรณ์</span>
+      </label>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.6rem;">
+        <button type="button" class="btn-action btn-back" id="btnCancelSig">ยกเลิก</button>
+        <button type="button" class="btn-action btn-sign" id="btnSubmitSignature">✍️ บันทึกและส่งสัญญากลับให้ Dev</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+  <script>
+    (function () {
+      'use strict';
+      const $ = (id) => document.getElementById(id);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const appId = urlParams.get('id') || urlParams.get('ref');
+
+      let currentAppDoc = null;
+      let currentAppDocId = null;
+      let penColor = '#0284c7';
+      let hasDrawn = false;
+
+      if (!appId) {
+        $('ctrLoading').style.display = 'none';
+        $('ctrError').style.display = 'block';
+        $('ctrErrorMsg').textContent = 'ไม่พบรหัสอ้างอิงใบสมัครใน URL (เช่น ?id=app_xxx)';
+        return;
+      }
+
+      // Copy Contract Link
+      $('btnCopyContractLink')?.addEventListener('click', () => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          showCyberToast('📋 คัดลอกลิงก์สัญญาเรียบร้อยแล้ว!', '', 'success');
+        }).catch(() => {
+          showCyberToast('คัดลอกลิงก์สัญญานี้:', window.location.href, 'info');
+        });
+      });
+
+      // Canvas Signature Pad Logic
+      const canvas = $('sigCanvas');
+      const ctx = canvas?.getContext('2d');
+      let isDrawing = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      const initCanvas = () => {
+        if (!canvas || !ctx) return;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * (window.devicePixelRatio || 1);
+        canvas.height = rect.height * (window.devicePixelRatio || 1);
+        ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = penColor;
+      };
+
+      const getCanvasPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: clientX - rect.left,
+          y: clientY - rect.top
+        };
+      };
+
+      const startDrawing = (e) => {
+        isDrawing = true;
+        hasDrawn = true;
+        $('sigCanvasHint').style.display = 'none';
+        const pos = getCanvasPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+      };
+
+      const draw = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const pos = getCanvasPos(e);
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        lastX = pos.x;
+        lastY = pos.y;
+      };
+
+      const stopDrawing = () => { isDrawing = false; };
+
+      canvas?.addEventListener('mousedown', startDrawing);
+      canvas?.addEventListener('mousemove', draw);
+      window.addEventListener('mouseup', stopDrawing);
+
+      canvas?.addEventListener('touchstart', startDrawing, { passive: false });
+      canvas?.addEventListener('touchmove', draw, { passive: false });
+      window.addEventListener('touchend', stopDrawing);
+
+      $('btnClearSig')?.addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasDrawn = false;
+        $('sigCanvasHint').style.display = 'block';
+      });
+
+      $('btnColorBlue')?.addEventListener('click', () => {
+        penColor = '#0284c7';
+        if (ctx) ctx.strokeStyle = penColor;
+      });
+      $('btnColorBlack')?.addEventListener('click', () => {
+        penColor = '#0f172a';
+        if (ctx) ctx.strokeStyle = penColor;
+      });
+
+      // Signature Modal Triggers
+      const openSigModal = () => {
+        $('signatureModal')?.classList.add('is-open');
+        setTimeout(initCanvas, 100);
+      };
+      const closeSigModal = () => {
+        $('signatureModal')?.classList.remove('is-open');
+      };
+
+      $('btnTopSignContract')?.addEventListener('click', openSigModal);
+      $('btnInlineSign')?.addEventListener('click', openSigModal);
+      $('btnCloseSigModal')?.addEventListener('click', closeSigModal);
+      $('btnCancelSig')?.addEventListener('click', closeSigModal);
+
+      // Submit Signature
+      $('btnSubmitSignature')?.addEventListener('click', async () => {
+        if (!hasDrawn) {
+          showCyberToast('กรุณาวาดลายเซ็นก่อนส่งสัญญา', '', 'warning');
+          return;
+        }
+        const signerName = $('inputSignerName')?.value.trim();
+        if (!signerName) {
+          showCyberToast('กรุณาระบุชื่อ-นามสกุลเพื่อยืนยัน', '', 'warning');
+          return;
+        }
+        if (!$('chkAgreeContract')?.checked) {
+          showCyberToast('กรุณากดยอมรับข้อตกลงและเงื่อนไขในสัญญา', '', 'warning');
+          return;
+        }
+
+        const btn = $('btnSubmitSignature');
+        btn.disabled = true;
+        btn.textContent = '⏳ กำลังบันทึกสัญญา...';
+
+        try {
+          const sigDataUrl = canvas.toDataURL('image/png');
+          const db = firebase.firestore();
+          const auth = firebase.auth();
+          const currentUser = auth.currentUser;
+
+          const signedPayload = {
+            contract: {
+              sent: true,
+              signed: true,
+              signatureDataUrl: sigDataUrl,
+              signerName: signerName,
+              signedAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            status: 'approved'
+          };
+
+          if (currentUser) {
+            signedPayload.applicantUid = currentUser.uid;
+            signedPayload.userId = currentUser.uid;
+            signedPayload.applicantEmail = currentUser.email;
+          }
+
+          await db.collection('joinTeamApplications').doc(currentAppDocId).set(signedPayload, { merge: true });
+
+          // Notify Dev Team
+          await db.collection('joinTeamNotifications').add({
+            type: 'contract_signed',
+            applicationId: currentAppDocId,
+            applicantName: signerName,
+            positionName: currentAppDoc?.positionName || '',
+            url: '/contract?id=' + currentAppDocId,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            read: false
+          });
+
+          // Notify User
+          if (currentUser) {
+            try {
+              await db.collection('users').doc(currentUser.uid).collection('notifications').add({
+                title: '✍️ เซ็นสัญญาการร่วมทีมสำเร็จเรียบร้อย',
+                message: 'คุณได้ลงลายมือชื่อและส่งสัญญาตำแหน่ง "' + (currentAppDoc?.positionName || '') + '" ให้กับทีมงานแล้ว',
+                type: 'contract_signed',
+                url: '/contract?id=' + currentAppDocId,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                read: false
+              });
+            } catch (e) {}
+          }
+
+          showCyberToast('✓ บันทึกลายเซ็นและส่งสัญญากลับให้ Dev สำเร็จแล้ว!', '', 'success');
+          closeSigModal();
+          loadContractData();
+        } catch (err) {
+          showCyberToast('เกิดข้อผิดพลาดในการบันทึกสัญญา', err.message, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '✍️ บันทึกและส่งสัญญากลับให้ Dev';
+        }
+      });
+
+      // SVG Icon Helpers for Social Links
+      const getBrandSvgIcon = (platform) => {
+        const p = platform.toLowerCase();
+        if (p.includes('discord')) {
+          return '<svg width="15" height="15" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>';
+        }
+        if (p.includes('facebook')) {
+          return '<svg width="15" height="15" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>';
+        }
+        if (p.includes('email') || p.includes('mail')) {
+          return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+        }
+        if (p.includes('phone') || p.includes('tel')) {
+          return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+        }
+        return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
+      };
+
+      // Load Contract & Dynamic Clauses
+      const loadContractData = async () => {
+        try {
+          const db = firebase.firestore();
+          let docSnap = await db.collection('joinTeamApplications').doc(appId).get();
+
+          if (!docSnap.exists) {
+            const qSnap = await db.collection('joinTeamApplications').where('contractRefNo', '==', appId).limit(1).get();
+            if (!qSnap.empty) docSnap = qSnap.docs[0];
+          }
+
+          if (!docSnap || !docSnap.exists) {
+            $('ctrLoading').style.display = 'none';
+            $('ctrError').style.display = 'block';
+            $('ctrErrorMsg').textContent = 'ไม่พบข้อมูลใบสมัครสำหรับรหัส: ' + appId;
+            return;
+          }
+
+          currentAppDocId = docSnap.id;
+          const app = docSnap.data();
+          currentAppDoc = app;
+          const a = app.applicant || {};
+
+          // Auto-link logged-in user if not already linked
+          firebase.auth().onAuthStateChanged(async (u) => {
+            if (u && !app.applicantUid) {
+              try {
+                await db.collection('joinTeamApplications').doc(currentAppDocId).update({
+                  applicantUid: u.uid,
+                  userId: u.uid,
+                  applicantEmail: u.email
+                });
+              } catch (e) {}
+            }
+          });
+
+          // Fetch Form Config for Dynamic Clauses & Title
+          try {
+            const formSnap = await db.collection('joinTeamForms').doc('default').get();
+            if (formSnap.exists) {
+              const cfg = formSnap.data();
+              if (cfg.communityName) $('ctrCommunityName').textContent = cfg.communityName;
+              if (cfg.contractTitle) $('ctrDocTitle').textContent = cfg.contractTitle;
+              if (cfg.contractSubtitle) $('ctrDocSubtitle').textContent = cfg.contractSubtitle;
+
+              // Dynamic Contract Clauses
+              if (Array.isArray(cfg.contractClauses) && cfg.contractClauses.length > 0) {
+                const clausesWrap = $('ctrClausesContainer');
+                clausesWrap.innerHTML = cfg.contractClauses.map((c, idx) => {
+                  const brkClass = c.pageBreak ? 'ctr-page-break' : '';
+                  const cTitle = c.title || ('ข้อ ' + (idx + 1) + '. ข้อตกลง');
+                  const pList = (c.content || '').split('\n\n').map(p => '<p>' + p.replace(/\n/g, '<br/>') + '</p>').join('');
+                  return '<div class="ctr-section ' + brkClass + '">' +
+                    '<div class="ctr-section-title">' + cTitle + '</div>' +
+                    '<div class="ctr-section-body">' + pList + '</div>' +
+                  '</div>';
+                }).join('');
+              }
+            }
+          } catch (e) {}
+
+          // Position Key Helper
+          const getPosKey = (name = '') => {
+            const n = name.trim().toLowerCase();
+            if (n.includes('dev') || n.includes('developer') || n.includes('พัฒนา') || n.includes('โปรแกรมเมอร์')) return 'Dev';
+            if (n.includes('staff') || n.includes('สตาฟ') || n.includes('ทีมงาน')) return 'Staff';
+            if (n.includes('mod') || n.includes('ผู้ดูแล') || n.includes('moderator')) return 'Mod';
+            if (n.includes('admin') || n.includes('แอดมิน')) return 'Admin';
+            if (n.includes('design') || n.includes('กราฟิก') || n.includes('graphic') || n.includes('ui')) return 'Designer';
+            if (n.includes('content') || n.includes('คอนเทนต์') || n.includes('creator')) return 'Content';
+            if (n.includes('translate') || n.includes('แปล')) return 'Translator';
+            const eng = name.replace(/[^a-zA-Z0-9]/g, '');
+            return eng ? eng.slice(0, 8) : 'Staff';
+          };
+
+          // Position-based structured Ref No: BCX-CTR-[Position]-[Year]-[000001]
+          let refNo = app.contractRefNo;
+          const posKey = getPosKey(app.positionName || 'Staff');
+          const contractYear = (app.createdAt?.toDate ? app.createdAt.toDate() : new Date()).getFullYear();
+
+          if (!refNo || !refNo.includes('-' + posKey + '-')) {
+            // Count existing contracts for this position
+            try {
+              const allAppsSnap = await db.collection('joinTeamApplications').get();
+              let count = 0;
+              allAppsSnap.forEach(d => {
+                const dData = d.data();
+                if (getPosKey(dData.positionName) === posKey) count++;
+              });
+              const countFormatted = String(Math.max(1, count)).padStart(6, '0');
+              refNo = 'BCX-CTR-' + posKey + '-' + contractYear + '-' + countFormatted;
+              // Save updated refNo back to doc
+              db.collection('joinTeamApplications').doc(currentAppDocId).update({ contractRefNo: refNo }).catch(() => {});
+            } catch (e) {
+              refNo = 'BCX-CTR-' + posKey + '-' + contractYear + '-000001';
+            }
+          }
+          $('ctrRefNo').textContent = refNo;
+
+          // Check if Voided
+          const isVoided = Boolean(app.contract && app.contract.voided) || app.status === 'cancelled';
+          if (isVoided) {
+            $('ctrVoidBanner').style.display = 'block';
+            const voidDateStr = app.contract?.voidedAt?.toDate ? app.contract.voidedAt.toDate().toLocaleDateString('th-TH', { dateStyle: 'medium' }) : '';
+            $('ctrVoidReasonText').textContent = (app.contract?.voidReason || 'สัญญาฉบับนี้ถูกยกเลิกโดยทีมงาน') + (voidDateStr ? ' (' + voidDateStr + ')' : '');
+          }
+
+          // Date
+          const createdAtDate = app.createdAt?.toDate ? app.createdAt.toDate() : new Date();
+          const dateStr = createdAtDate.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+          $('ctrDateText').textContent = 'วันที่ทำสัญญา: ' + dateStr;
+
+          // Personal Details (Separated into clean structured fields)
+          $('ctrFirstName').textContent = a.firstName || '-';
+          $('ctrLastName').textContent = a.lastName || '-';
+          $('ctrNickname').textContent = a.nickname || '-';
+          $('ctrPosition').textContent = app.positionName || '-';
+          $('ctrAge').textContent = a.age ? (a.age.years + ' ปี') : '-';
+          $('ctrDob').textContent = a.dob || '-';
+          $('ctrGender').textContent = a.gender || '-';
+          $('ctrDevice').textContent = (a.platform || '-') + (a.deviceOS ? (' (' + a.deviceOS + ')') : '');
+          $('ctrDaysTime').textContent = ((a.availableDays || []).join(', ') || '-') + (a.availableTimeStart ? (' [' + a.availableTimeStart + ' - ' + (a.availableTimeEnd || '?') + ' น.]') : '');
+
+          // Social Links (Rendered as individual clean chips with authentic SVG icons)
+          const socials = a.socialLinks || {};
+          const socialEntries = Object.entries(socials).filter(([_, v]) => Boolean(v));
+          const chipsWrap = $('ctrSocialChips');
+          if (socialEntries.length > 0) {
+            chipsWrap.innerHTML = socialEntries.map(([k, v]) => {
+              const kLow = k.toLowerCase();
+              const svgIcon = getBrandSvgIcon(k);
+              let chipClass = '';
+              if (kLow.includes('discord')) chipClass = 'discord';
+              else if (kLow.includes('facebook')) chipClass = 'facebook';
+              else if (kLow.includes('email') || kLow.includes('mail')) chipClass = 'email';
+              else if (kLow.includes('phone') || kLow.includes('tel')) chipClass = 'phone';
+              return '<span class="ctr-social-chip ' + chipClass + '">' + svgIcon + ' <strong>' + k.toUpperCase() + ':</strong> ' + v + '</span>';
+            }).join('');
+          } else {
+            chipsWrap.innerHTML = '<span class="ctr-social-chip">-</span>';
+          }
+
+          // Photo
+          if (a.photoURL) {
+            $('ctrApplicantPhoto').src = a.photoURL;
+          }
+
+          // Custom Questions & Answers
+          const customAnswers = app.customAnswers || {};
+          const customKeys = Object.keys(customAnswers);
+          if (customKeys.length > 0) {
+            $('ctrCustomQASection').style.display = 'block';
+            $('ctrCustomQAList').innerHTML = customKeys.map(k => {
+              const val = customAnswers[k];
+              const ansText = Array.isArray(val) ? val.join(', ') : (val || '-');
+              return '<div class="ctr-qa-card">' +
+                '<div class="q">คำถาม: ' + k + '</div>' +
+                '<div class="a">คำตอบ: ' + ansText + '</div>' +
+              '</div>';
+            }).join('');
+          }
+
+          // Signature Block Rendering
+          const fullName = ((a.firstName || '') + ' ' + (a.lastName || '')).trim() || a.nickname || 'ผู้สมัคร';
+          $('ctrApplicantPrintName').textContent = '( ' + fullName + ' )';
+          $('inputSignerName').value = fullName;
+
+          const isSigned = app.contract && app.contract.signed && app.contract.signatureDataUrl;
+          if (isSigned) {
+            $('btnTopSignContract').style.display = 'none';
+            $('ctrApplicantSignSpace').innerHTML = '<img src="' + app.contract.signatureDataUrl + '" alt="Digital Signature" class="applicant-sig-img" />';
+            const signDate = app.contract.signedAt?.toDate ? app.contract.signedAt.toDate() : new Date();
+            const signDateStr = signDate.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + signDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            $('ctrApplicantSignedSeal').style.display = 'block';
+            $('ctrApplicantSignedSeal').innerHTML = '<div class="signed-badge-seal">✅ เซ็นชื่อกำกับสัญญาเรียบร้อยแล้ว (' + signDateStr + ' น.)</div>';
+          } else {
+            $('btnTopSignContract').style.display = 'inline-flex';
+            $('ctrApplicantSignSpace').innerHTML = '<button type="button" class="btn-action btn-sign" id="btnInlineSign" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">✍️ ลงลายมือชื่อดิจิทัล</button>';
+            $('btnInlineSign')?.addEventListener('click', openSigModal);
+            $('ctrApplicantSignedSeal').style.display = 'none';
+          }
+
+          // Reveal Contract Sheet
+          $('ctrLoading').style.display = 'none';
+          $('ctrSheet').style.display = 'block';
+
+        } catch (err) {
+          $('ctrLoading').style.display = 'none';
+          $('ctrError').style.display = 'block';
+          $('ctrErrorMsg').textContent = 'เกิดข้อผิดพลาดในการโหลดสัญญา: ' + err.message;
+        }
+      };
+
+      if (typeof firebase !== 'undefined') {
+        loadContractData();
+      } else {
+        window.addEventListener('DOMContentLoaded', loadContractData);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+  <title>นโยบายและการจัดการคุกกี้ (Cookie Policy & Settings) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-710F6F2YG5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-710F6F2YG5');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.85);
+      --accent: #32ffc9;
+      --accent-blue: #0284c7;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      line-height: 1.7;
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(2, 132, 199, 0.22), transparent 45%),
+        radial-gradient(circle at 80% 80%, rgba(50, 255, 201, 0.14), transparent 45%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      width: min(960px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 2.5rem 0;
+      flex: 1;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .brand-link img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+    .btn-back {
+      padding: 0.5rem 1.2rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+    .btn-back:hover {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+    .doc-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .doc-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(50, 255, 201, 0.15);
+      border: 1px solid rgba(50, 255, 201, 0.4);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+    h1 {
+      font-size: 2.1rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .doc-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    h2 {
+      color: var(--accent);
+      font-size: 1.35rem;
+      margin: 1.8rem 0 0.8rem;
+    }
+    p, li {
+      color: #d1e5f8;
+      font-size: 0.96rem;
+      margin-bottom: 0.8rem;
+    }
+
+    /* Cookie Category Cards with Switches */
+    .cookie-switch-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin: 1.5rem 0 2.5rem;
+    }
+    .cookie-switch-card {
+      background: rgba(14, 34, 58, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+      transition: all 0.25s ease;
+    }
+    .cookie-switch-card:hover {
+      border-color: rgba(50, 255, 201, 0.4);
+      background: rgba(16, 40, 68, 0.75);
+    }
+    .cookie-info {
+      flex: 1;
+    }
+    .cookie-title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .cookie-title-row h3 {
+      font-size: 1.08rem;
+      color: #fff;
+      margin: 0;
+    }
+    .necessity-pill {
+      font-size: 0.74rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .pill-required {
+      background: rgba(50, 255, 201, 0.15);
+      border: 1px solid rgba(50, 255, 201, 0.4);
+      color: var(--accent);
+    }
+    .pill-optional {
+      background: rgba(2, 132, 199, 0.18);
+      border: 1px solid rgba(2, 132, 199, 0.4);
+      color: #38bdf8;
+    }
+
+    /* Toggle Switch Component */
+    .switch-wrap {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+    .switch-wrap input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.18);
+      transition: .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: 34px;
+      border: 1px solid var(--border);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(50, 255, 201, 0.4);
+    }
+    input:checked + .slider:before {
+      transform: translateX(24px);
+      background-color: #071426;
+    }
+    input:disabled + .slider {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Action Buttons */
+    .cookie-save-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+    .btn-save-cookie {
+      padding: 0.75rem 1.6rem;
+      background: var(--accent);
+      border: none;
+      color: #071426;
+      border-radius: 10px;
+      font-family: "Prompt", sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(50, 255, 201, 0.3);
+      transition: all 0.25s ease;
+    }
+    .btn-save-cookie:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px var(--accent);
+    }
+    .btn-accept-all {
+      padding: 0.75rem 1.4rem;
+      background: rgba(2, 132, 199, 0.25);
+      border: 1px solid rgba(2, 132, 199, 0.5);
+      color: #e0f2fe;
+      border-radius: 10px;
+      font-family: "Prompt", sans-serif;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-accept-all:hover {
+      background: rgba(2, 132, 199, 0.45);
+      color: #fff;
+    }
+
+    /* Cookie Table */
+    .cookie-table-wrap {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+    .cookie-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      background: rgba(8, 20, 36, 0.8);
+      min-width: 680px;
+    }
+    .cookie-table th {
+      padding: 0.9rem 1rem;
+      background: rgba(14, 32, 54, 0.9);
+      border-bottom: 1px solid var(--border);
+      color: var(--accent);
+      text-align: left;
+      font-weight: 600;
+    }
+    .cookie-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: #d8eaff;
+    }
+    .cookie-table tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .quick-links-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .quick-link-chip {
+      padding: 0.4rem 0.9rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .quick-link-chip:hover {
+      background: rgba(50, 255, 201, 0.12);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      background: rgba(4, 11, 20, 0.8);
+    }
+    #saveAlert {
+      display: none;
+      padding: 0.8rem 1.2rem;
+      background: rgba(50, 255, 201, 0.15);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      animation: fadeIn .3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+</head>
+<body>
+  <div class="container">
+    <nav class="top-nav">
+      <a href="/" class="brand-link">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
+        <span>BestCyniX Dev</span>
+      </a>
+      <a href="/" class="btn-back">← กลับสู่หน้าหลัก</a>
+    </nav>
+
+    <article class="doc-card">
+      <header class="doc-header">
+        <span class="doc-badge">Cookie Preference Center</span>
+        <h1>🍪 นโยบายและการตั้งค่าคุกกี้ (Cookie Policy)</h1>
+        <div class="doc-meta">มีผลบังคับใช้ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 • ปรับปรุงปี 2026</div>
+      </header>
+
+      <section>
+        <h2>1. คุกกี้คืออะไร?</h2>
+        <p>คุกกี้ (Cookies) และเทคโนโลยีการจัดเก็บข้อมูลในเครื่อง (เช่น LocalStorage / SessionStorage) คือไฟล์ข้อความขนาดเล็กที่ถูกบันทึกลงในเบราว์เซอร์หรืออุปกรณ์ของท่านเมื่อเข้าชมเว็บไซต์ เพื่อช่วยให้เว็บไซต์ทำงานได้อย่างถูกต้อง จดจำสถานะการเข้าสู่ระบบ บันทึกความต้องการ และช่วยพัฒนาประสบการณ์การใช้งานให้ดียิ่งขึ้น</p>
+      </section>
+
+      <section>
+        <h2>2. ปรับแต่งและเลือกเปิด-ปิดคุกกี้ (Cookie Preferences)</h2>
+        <p>ท่านสามารถเลือกเปิดหรือปิดการทำงานของคุกกี้แต่ละหมวดหมู่ได้ตามความสมัครใจ (ยกเว้นคุกกี้ที่จำเป็นอย่างยิ่งซึ่งระบบจำเป็นต้องใช้งานเพื่อให้เว็บไซต์ทำงานได้):</p>
+
+        <div class="cookie-switch-list">
+          <!-- Category 1: Necessary -->
+          <div class="cookie-switch-card">
+            <div class="cookie-info">
+              <div class="cookie-title-row">
+                <h3>1. คุกกี้ที่จำเป็นอย่างยิ่ง (Strictly Necessary Cookies)</h3>
+                <span class="necessity-pill pill-required">จำเป็น • บังคับเปิดเสมอ</span>
+              </div>
+              <p>คุกกี้หมวดนี้มีความสำคัญต่อการรักษาความปลอดภัย การยืนยันตัวตนสมาชิก (Authentication State), ป้องกันการโจมตีทางไซเบอร์ และการบันทึกสถานะการยินยอม PDPA ของท่าน หากไม่มีคุกกี้ส่วนนี้เว็บไซต์จะไม่สามารถทำงานได้</p>
+            </div>
+            <label class="switch-wrap">
+              <input type="checkbox" id="chkNecessary" checked disabled />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Category 2: Functionality -->
+          <div class="cookie-switch-card">
+            <div class="cookie-info">
+              <div class="cookie-title-row">
+                <h3>2. คุกกี้เพื่อการทำงานและจดจำการตั้งค่า (Functionality & Preferences Cookies)</h3>
+                <span class="necessity-pill pill-optional">เลือกเปิด/ปิดได้</span>
+              </div>
+              <p>ช่วยจดจำการตั้งค่าการแสดงผล การค้นหาโปรเจกต์ ตัวกรองที่ท่านเลือก การจดจำเซสชันอัตโนมัติ (Remember Me) เพื่อให้ท่านไม่ต้องตั้งค่าใหม่ทุกครั้งที่เข้าชม</p>
+            </div>
+            <label class="switch-wrap">
+              <input type="checkbox" id="chkFunctional" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Category 3: Analytics -->
+          <div class="cookie-switch-card">
+            <div class="cookie-info">
+              <div class="cookie-title-row">
+                <h3>3. คุกกี้เพื่อการวิเคราะห์และประสิทธิภาพ (Analytics & Performance Cookies)</h3>
+                <span class="necessity-pill pill-optional">เลือกเปิด/ปิดได้</span>
+              </div>
+              <p>ช่วยให้เราเข้าใจพฤติกรรมผู้ใช้งาน เช่น หน้าเว็บที่เข้าชมบ่อย ข้อผิดพลาดที่เกิดขึ้น เพื่อนำมาปรับปรุงความเร็วและความเสถียรของเซิร์ฟเวอร์ ข้อมูลทั้งหมดจะถูกรวบรวมในรูปแบบที่ไม่ระบุตัวตน (Anonymized Data)</p>
+            </div>
+            <label class="switch-wrap">
+              <input type="checkbox" id="chkAnalytics" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- Category 4: Live Chat & Communication -->
+          <div class="cookie-switch-card">
+            <div class="cookie-info">
+              <div class="cookie-title-row">
+                <h3>4. คุกกี้เพื่อการติดต่อและแชทสด (Live Chat & Communication Cookies)</h3>
+                <span class="necessity-pill pill-optional">เลือกเปิด/ปิดได้</span>
+              </div>
+              <p>ใช้สำหรับเชื่อมต่อห้องสนทนาสด (Live Web Chat) กับฐานข้อมูล Cloud Firestore ช่วยเก็บประวัติการสนทนาชั่วคราวและแจ้งเตือนข้อความใหม่จากทีมพัฒนา</p>
+            </div>
+            <label class="switch-wrap">
+              <input type="checkbox" id="chkChat" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="cookie-save-row">
+          <button type="button" class="btn-save-cookie" id="btnSavePreferences">💾 บันทึกการตั้งค่าของฉัน</button>
+          <button type="button" class="btn-accept-all" id="btnAcceptAllCookies">ยอมรับคุกกี้ทั้งหมด</button>
+          <button type="button" class="btn-accept-all" style="background: rgba(255,255,255,0.06); border-color: var(--border);" id="btnEssentialOnly">ปฏิเสธคุกกี้เสริม (ใช้เฉพาะที่จำเป็น)</button>
+        </div>
+
+        <div id="saveAlert">✅ บันทึกการตั้งค่าคุกกี้เรียบร้อยแล้ว! ระบบจะนำการตั้งค่านี้ไปใช้กับทุกหน้าของเว็บไซต์</div>
+      </section>
+
+      <section>
+        <h2>3. ตารางรายละเอียดคุกกี้ที่ใช้งานบนเว็บไซต์ (Cookie Directory Table)</h2>
+        <p>ตารางแสดงข้อมูลคุกกี้และ LocalStorage ที่ระบบอาจจัดเก็บบนอุปกรณ์ของท่าน:</p>
+
+        <div class="cookie-table-wrap">
+          <table class="cookie-table">
+            <thead>
+              <tr>
+                <th>ชื่อคุกกี้ / Storage Key</th>
+                <th>ผู้ให้บริการ</th>
+                <th>วัตถุประสงค์การใช้งาน</th>
+                <th>ระยะเวลาจัดเก็บ</th>
+                <th>ความจำเป็น</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>firebase:authUser:*</code></td>
+                <td>Firebase Auth (Google)</td>
+                <td>เก็บสถานะการเข้าสู่ระบบและความปลอดภัยของสมาชิก</td>
+                <td>จนกว่าจะออกจากระบบ</td>
+                <td><span class="necessity-pill pill-required">จำเป็น</span></td>
+              </tr>
+              <tr>
+                <td><code>bestcynix_pdpa_consent</code></td>
+                <td>BestCyniX Dev</td>
+                <td>บันทึกสถานะการยอมรับข้อกำหนด PDPA และการตั้งค่าคุกกี้</td>
+                <td>1 ปี</td>
+                <td><span class="necessity-pill pill-required">จำเป็น</span></td>
+              </tr>
+              <tr>
+                <td><code>bestcynix_cookie_settings</code></td>
+                <td>BestCyniX Dev</td>
+                <td>บันทึกตัวเลือกเปิด-ปิดคุกกี้ตามหมวดหมู่ของผู้ใช้</td>
+                <td>1 ปี</td>
+                <td><span class="necessity-pill pill-required">จำเป็น</span></td>
+              </tr>
+              <tr>
+                <td><code>bestcynix_anon_chat_id</code></td>
+                <td>BestCyniX Dev</td>
+                <td>เชื่อมโยงห้องแชทสดสำหรับผู้เยี่ยมชมที่ยังไม่ได้ล็อกอิน</td>
+                <td>30 วัน</td>
+                <td><span class="necessity-pill pill-optional">เลือกได้</span></td>
+              </tr>
+              <tr>
+                <td><code>_ga, _ga_*</code></td>
+                <td>Google Analytics</td>
+                <td>วิเคราะห์สถิติการเข้าชมเว็บและประสิทธิภาพระบบ</td>
+                <td>2 ปี</td>
+                <td><span class="necessity-pill pill-optional">เลือกได้</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="quick-links-bar">
+        <a href="privacy" class="quick-link-chip">🛡️ นโยบายความเป็นส่วนตัว (Privacy Policy)</a>
+        <a href="terms" class="quick-link-chip">📜 ข้อตกลงการใช้งาน (Terms of Service)</a>
+        <a href="pdpa" class="quick-link-chip">⚖️ ข้อมูลกฎหมาย PDPA 2562</a>
+        <a href="http-errors" class="quick-link-chip">📖 สารบัญ HTTP Status Codes</a>
+        <a href="sitemap.xml" class="quick-link-chip" target="_blank">🗺️ Sitemap.xml</a>
+        <a href="/" class="quick-link-chip">🏠 หน้าหลัก BestCyniX Dev</a>
+      </div>
+    </article>
+  </div>
+
+  <footer>
+    <p>© 2021 - 2026 BestCyniX Dev • Skyline V1 Creator • ข้อมูลคุ้มครองตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
+  </footer>
+
+  <script>
+    const chkFunctional = document.getElementById("chkFunctional");
+    const chkAnalytics = document.getElementById("chkAnalytics");
+    const chkChat = document.getElementById("chkChat");
+    const btnSavePreferences = document.getElementById("btnSavePreferences");
+    const btnAcceptAllCookies = document.getElementById("btnAcceptAllCookies");
+    const btnEssentialOnly = document.getElementById("btnEssentialOnly");
+    const saveAlert = document.getElementById("saveAlert");
+
+    // Load saved settings
+    const loadSettings = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem("bestcynix_cookie_settings") || "{}");
+        if (saved.functional !== undefined) chkFunctional.checked = saved.functional;
+        if (saved.analytics !== undefined) chkAnalytics.checked = saved.analytics;
+        if (saved.chat !== undefined) chkChat.checked = saved.chat;
+      } catch (e) {
+        console.warn("Load cookie settings fallback");
+      }
+    };
+
+    const saveSettings = (functional, analytics, chat) => {
+      const settings = {
+        necessary: true,
+        functional: functional,
+        analytics: analytics,
+        chat: chat,
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem("bestcynix_cookie_settings", JSON.stringify(settings));
+      localStorage.setItem("bestcynix_pdpa_consent", "custom");
+
+      if (saveAlert) {
+        saveAlert.style.display = "block";
+        setTimeout(() => { saveAlert.style.display = "none"; }, 4000);
+      }
+    };
+
+    if (btnSavePreferences) {
+      btnSavePreferences.addEventListener("click", () => {
+        saveSettings(chkFunctional.checked, chkAnalytics.checked, chkChat.checked);
+      });
+    }
+
+    if (btnAcceptAllCookies) {
+      btnAcceptAllCookies.addEventListener("click", () => {
+        chkFunctional.checked = true;
+        chkAnalytics.checked = true;
+        chkChat.checked = true;
+        saveSettings(true, true, true);
+      });
+    }
+
+    if (btnEssentialOnly) {
+      btnEssentialOnly.addEventListener("click", () => {
+        chkFunctional.checked = false;
+        chkAnalytics.checked = false;
+        chkChat.checked = false;
+        saveSettings(false, false, false);
+      });
+    }
+
+    loadSettings();
+  </script>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "visperhost",
+    "name": "VISPER HOST",
+    "subTitle": "Cloud VPS & Game Server Hosting ชั้นนำ",
+    "badge": "🚀 เซิร์ฟเวอร์ในไทย ปิงต่ำ",
+    "description": "บริการ Cloud VPS, โฮสติ้งรัน Discord BOT (Node.js / Python / Java) และ Game Server (Minecraft, FiveM) สปีดแรง ปิงต่ำในไทย เสถียร 24/7 มีระบบกัน DDoS เหมาะสำหรับบอทและเซิร์ฟเวอร์เกม",
+    "logo": "assets/photo/visperhost.webp",
+    "url": "https://client.visperhost.net/order/forms/a/MTM4OTM=",
+    "ctaText": "🚀 ไปยังหน้าสั่งซื้อ Visper Host →",
+    "hintText": "💡 สั่งซื้อผ่านลิงก์นี้เพื่อรับสิทธิประโยชน์และสนับสนุนทีมงาน BestCyniX Dev",
+    "features": [
+      "⚡ รันบอท Discord 24/7",
+      "🎮 Minecraft & FiveM",
+      "🛡️ ป้องกัน DDoS 99.9%",
+      "💰 ราคาสุดคุ้ม ซัพพอร์ตไว"
+    ],
+    "category": "vps_game",
+    "active": true,
+    "order": 1,
+    "createdAt": "2026-08-26T12:51:10.715Z"
+  },
+  {
+    "id": "hostinger",
+    "name": "HOSTINGER",
+    "subTitle": "Global Cloud, Web & VPS Hosting ระดับโลก",
+    "badge": "🎁 ส่วนลด 20% สำหรับแพ็กเกจแรก",
+    "description": "ผู้ให้บริการเว็บโฮสติ้งและคลาวด์ชั้นนำระดับสากล มีผู้ใช้งานกว่า 120,000+ คนทั่วโลก พร้อมฟรีโดเมน, ฟรีอีเมลธุรกิจ, ระบบ Cloud VPS ความเร็วสูงด้วยชิป AMD EPYC และเครื่องมือ AI Website Builder",
+    "logo": "assets/photo/hostinger.png",
+    "url": "https://www.hostinger.com/?REFERRALCODE=F1OBESTCYBFK",
+    "ctaText": "🎁 ไปยังหน้าสั่งซื้อ Hostinger (รับส่วนลด 20%) →",
+    "hintText": "💡 เพื่อนของคุณประหยัด 20% และช่วยสนับสนุนทีมงาน BestCyniX Dev",
+    "features": [
+      "🌐 ฟรีโดเมน + ฟรี SSL",
+      "💻 VPS ชิป AMD EPYC",
+      "🤖 AI Website Builder",
+      "✉️ อีเมลธุรกิจไม่จำกัด"
+    ],
+    "category": "global_cloud",
+    "active": true,
+    "order": 2,
+    "createdAt": "2026-08-26T12:51:10.727Z"
+  }
+]

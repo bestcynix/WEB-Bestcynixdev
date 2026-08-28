@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+  <title>ข้อตกลงและเงื่อนไขการใช้บริการ (Terms of Service) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-710F6F2YG5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-710F6F2YG5');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050b14;
+      --card-bg: rgba(10, 24, 42, 0.85);
+      --accent: #32ffc9;
+      --accent-blue: #0284c7;
+      --text: #e6f3ff;
+      --muted: #8aa9c7;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Prompt", sans-serif;
+      line-height: 1.7;
+      background-image: 
+        radial-gradient(circle at 85% 15%, rgba(2, 132, 199, 0.2), transparent 45%),
+        radial-gradient(circle at 15% 85%, rgba(50, 255, 201, 0.12), transparent 40%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      width: min(940px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 2.5rem 0;
+      flex: 1;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .brand-link img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+    .btn-back {
+      padding: 0.5rem 1.2rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+    .btn-back:hover {
+      background: var(--accent);
+      color: #050b14;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+    .doc-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .doc-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(2, 132, 199, 0.2);
+      border: 1px solid rgba(2, 132, 199, 0.5);
+      color: #38bdf8;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+    h1 {
+      font-size: 2.1rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .doc-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    h2 {
+      color: var(--accent);
+      font-size: 1.35rem;
+      margin: 1.8rem 0 0.8rem;
+    }
+    p, li {
+      color: #d1e5f8;
+      font-size: 0.96rem;
+      margin-bottom: 0.8rem;
+    }
+    ul, ol {
+      padding-left: 1.4rem;
+      margin-bottom: 1.2rem;
+    }
+    .quick-links-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .quick-link-chip {
+      padding: 0.4rem 0.9rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .quick-link-chip:hover {
+      background: rgba(50, 255, 201, 0.12);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      background: rgba(4, 11, 20, 0.8);
+    }
+  </style>
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+</head>
+<body>
+  <div class="container">
+    <nav class="top-nav">
+      <a href="/" class="brand-link">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
+        <span>BestCyniX Dev</span>
+      </a>
+      <a href="/" class="btn-back">← กลับสู่หน้าหลัก</a>
+    </nav>
+
+    <article class="doc-card">
+      <header class="doc-header">
+        <span class="doc-badge">User Agreement</span>
+        <h1>ข้อตกลงและเงื่อนไขการใช้บริการ (Terms of Service)</h1>
+        <div class="doc-meta">มีผลบังคับใช้ตั้งแต่วันที่ 1 มกราคม 2024 • ปรับปรุงล่าสุด: ปี 2026</div>
+      </header>
+
+      <section>
+        <h2>1. การยอมรับข้อตกลง</h2>
+        <p>การเข้าถึง ใช้งานเว็บไซต์ BestCyniX Dev, การสมัครสมาชิก, การใช้งานระบบแชทสด หรือการเพิ่มบอท Discord (SkyLineBOT #0194) เข้าสู่เซิร์ฟเวอร์ ถือว่าท่านได้อ่าน ทำความเข้าใจ และตกลงที่จะผูกพันตามข้อตกลงและเงื่อนไขนี้ทั้งหมด หากท่านไม่ยอมรับเงื่อนไข โปรดระงับการใช้งานระบบทันที</p>
+      </section>
+
+      <section>
+        <h2>2. บัญชีผู้ใช้ ความรับผิดชอบ และความปลอดภัย</h2>
+        <ul>
+          <li>ผู้ใช้ต้องให้ข้อมูลที่ถูกต้องและเป็นความจริงในการสมัครสมาชิก</li>
+          <li>ผู้ใช้มีหน้าที่รับผิดชอบในการรักษาความปลอดภัยของรหัสผ่านและบัญชีของตนเอง</li>
+          <li>ห้ามใช้บัญชีของผู้อื่นโดยไม่ได้รับอนุญาต หรือพยายามเข้าถึงระบบในส่วนที่ไม่มีสิทธิ์</li>
+          <li>หากตรวจพบการกระทำที่ต้องสงสัยหรือบัญชีถูกบุกรุก ผู้ใช้ต้องแจ้งทีมพัฒนาทันทีผ่านระบบแชทสดหรืออีเมล</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>3. กฎเกณฑ์การใช้งานที่ยอมรับได้ (Acceptable Use Policy)</h2>
+        <p>ผู้ใช้งานตกลงว่าจะไม่กระทำการใดๆ ดังต่อไปนี้:</p>
+        <ol>
+          <li>ส่งข้อความแสปม โฆษณาที่ไม่ได้รับอนุญาต หรือข้อความที่เข้าข่ายคุกคาม ข่มขู่ หรือลามกอนาจารในระบบแชทสด</li>
+          <li>พยายามโจมตีระบบ (DDoS, Injection, Brute Force), แฮก, หรือค้นหาช่องโหว่เพื่อสร้างความเสียหายต่อเซิร์ฟเวอร์</li>
+          <li>ใช้บอท Discord หรือ API ในทางที่ละเมิดข้อกำหนดการให้บริการของ Discord (Discord Developer Terms of Service)</li>
+          <li>แอบอ้างเป็นทีมงาน BestCyniX Dev หรือหลอกลวงผู้ใช้งานรายอื่น</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>4. ทรัพย์สินทางปัญญาและลิขสิทธิ์</h2>
+        <p>ซอร์สโค้ด, ตราสัญลักษณ์ (Logo), รูปภาพกราฟิก, ระบบบอท SkyLineBOT, และเนื้อหาทั้งหมดบนเว็บไซต์นี้ เป็นทรัพย์สินทางปัญญาของ BestCyniX Dev ห้ามทำซ้ำ ดัดแปลง คัดลอก หรือนำไปใช้ในเชิงพาณิชย์โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษรจากผู้พัฒนา</p>
+      </section>
+
+      <section>
+        <h2>5. การจำกัดความรับผิดชอบ (Limitation of Liability)</h2>
+        <p>บริการทั้งหมดจัดทำขึ้น "ตามสภาพที่เป็นอยู่" (As-Is Basis) ทีมพัฒนาพยายามอย่างเต็มที่เพื่อให้ระบบมีความเสถียร ปลอดภัย และพร้อมใช้งานตลอดเวลา แต่ไม่สามารถรับประกันได้ว่าจะไม่มีข้อผิดพลาดหรือการหยุดชะงักชั่วคราวอันเนื่องมาจากการบำรุงรักษาหรือเหตุสุดวิสัยภายนอก</p>
+      </section>
+
+      <section>
+        <h2>6. การยกเลิกและระงับบัญชี (Account Termination)</h2>
+        <p>ทีมพัฒนามีสิทธิ์ในการตักเตือน ระงับการใช้งานชั่วคราว หรือลบบัญชีผู้ใช้ถาวรทันทีโดยไม่ต้องแจ้งล่วงหน้า หากพบว่ามีการละเมิดข้อตกลงการใช้งานหรือพยายามสร้างความเสียหายต่อระบบ</p>
+      </section>
+
+      <div class="quick-links-bar">
+        <a href="privacy" class="quick-link-chip">🛡️ นโยบายความเป็นส่วนตัว (Privacy Policy)</a>
+        <a href="cookies" class="quick-link-chip">🍪 นโยบายและตั้งค่าคุกกี้ (Cookie Policy)</a>
+        <a href="pdpa" class="quick-link-chip">📜 ข้อมูลกฎหมาย PDPA 2562</a>
+        <a href="http-errors" class="quick-link-chip">📖 สารบัญ HTTP Status Codes</a>
+        <a href="sitemap.xml" class="quick-link-chip" target="_blank">🗺️ Sitemap.xml</a>
+        <a href="/" class="quick-link-chip">🏠 หน้าหลัก BestCyniX Dev</a>
+      </div>
+    </article>
+  </div>
+
+  <footer>
+    <p>© 2021 - 2026 BestCyniX Dev • Skyline V1 Creator • ข้อมูลคุ้มครองตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</p>
+  </footer>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+</body>
+</html>

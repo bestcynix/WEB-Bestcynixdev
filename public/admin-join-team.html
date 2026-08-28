@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin — Join Team Manager • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      databaseURL: "https://bestcynixdev-default-rtdb.asia-southeast1.firebasedatabase.app",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5",
+      projectNumber: "172682556745"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  </script>
+  <style>
+    /* Extra admin-only overrides & Responsive Design */
+    .admin-tabs {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .admin-tab-btn {
+      padding: 0.45rem 1.1rem;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      font-family: "Prompt", sans-serif;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      transition: all .2s ease;
+      white-space: nowrap;
+    }
+    .admin-tab-btn.active { background: var(--accent); color: #050b14; border-color: var(--accent); }
+    .admin-tab-content { display: none; }
+    .admin-tab-content.active { display: block; }
+    .toggle-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; gap: .65rem; }
+    .toggle-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      width: 44px; height: 24px; background: rgba(255,255,255,.1); border-radius: 999px;
+      transition: background .2s ease; border: 1px solid var(--border);
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--accent); }
+    .toggle-thumb {
+      position: absolute; left: 3px; width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; transition: left .2s ease; top: 50%; transform: translateY(-50%);
+    }
+    .toggle-switch input:checked ~ .toggle-thumb { left: 23px; }
+    .toggle-label { font-size: .9rem; color: var(--text); font-weight: 600; }
+    .jt-notif-badge-count {
+      background: var(--accent-red); color: #fff; border-radius: 999px;
+      font-size: .72rem; font-weight: 800; padding: .1rem .45rem; margin-left: .3rem;
+    }
+
+    /* Mobile Responsive Overrides */
+    @media (max-width: 768px) {
+      .admin-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .jt-admin-panel {
+        padding: 1rem;
+      }
+      .jt-apps-table th, .jt-apps-table td {
+        padding: 0.6rem 0.75rem;
+      }
+      .jt-title-bar-wrap {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+      }
+      .jt-title-actions {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        flex-wrap: wrap !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="particle-layer"></div>
+
+  <!-- Auth Guard Loading / Redirect Overlay -->
+  <div id="authGuardOverlay" style="position:fixed;inset:0;background:#030812;z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;">
+    <div style="width:48px;height:48px;border:3px solid rgba(50,255,201,0.2);border-top-color:#32ffc9;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+    <div style="font-family:'Chakra Petch',sans-serif;font-size:1.1rem;color:#32ffc9;font-weight:700;">กำลังตรวจสอบสิทธิ์ Admin...</div>
+  </div>
+
+  <!-- Admin Panel (hidden until auth) -->
+  <div id="adminPanel" style="display:none; width: 100%;">
+    <div class="container" style="padding: 1.5rem 0 3rem;">
+      <nav class="top-nav">
+        <a href="admin-dashboard" class="brand-link" style="display: inline-flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 1.15rem;">
+          <img src="assets/photo/bcxlogo2.png" alt="logo" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--accent);" />
+          <span>BESTCYNIX JOIN TEAM ADMIN</span>
+        </a>
+
+        <!-- Right Cluster: Desktop Nav + Bell + Hamburger -->
+        <div class="nav-right-cluster">
+          <div class="desktop-nav-links">
+            <a href="admin-dashboard" class="btn-nav-action">⚡ แดชบอร์ด</a>
+            <a href="admin-content" class="btn-nav-action">📁 CMS</a>
+            <a href="admin-chats" class="btn-nav-action">💬 แชทลูกค้า</a>
+            <a href="admin-users" class="btn-nav-action">👥 ผู้ใช้</a>
+            <a href="profile" class="btn-nav-action">👤 โปรไฟล์</a>
+            <a href="/" class="btn-nav-action">🏠 หน้าหลัก</a>
+            <button id="btnLogout" class="btn-nav-action" style="border-color: rgba(255, 85, 116, 0.4); color: #ff859d; cursor: pointer;">🚪 ออกจากระบบ</button>
+          </div>
+
+          <!-- Mobile Hamburger Toggle Button -->
+          <button class="nav-toggle" id="adminNavToggle" aria-expanded="false" aria-label="เปิดเมนูนำทาง">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Backdrop Overlay -->
+      <div class="mobile-drawer-overlay" id="adminDrawerOverlay"></div>
+
+      <!-- Mobile Cyber Drawer Menu -->
+      <div class="mobile-nav-drawer" id="adminNavDrawer">
+        <div class="mobile-drawer-header">
+          <span style="font-size: 0.82rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Dev Navigation Menu</span>
+          <button type="button" class="btn-close-drawer" id="adminBtnCloseDrawer">✕</button>
+        </div>
+        <div class="mobile-drawer-items">
+          <a href="/" class="mobile-drawer-link">
+            <span class="drawer-icon">🏠</span>
+            <div class="drawer-text">
+              <strong>หน้าหลักเว็บไซต์ (Home)</strong>
+              <small>bestcynixdev.web.app</small>
+            </div>
+          </a>
+          <a href="admin-dashboard" class="mobile-drawer-link">
+            <span class="drawer-icon">⚡</span>
+            <div class="drawer-text">
+              <strong>Dev Dashboard</strong>
+              <small>ศูนย์บริหารจัดการหลัก & สถิติ</small>
+            </div>
+          </a>
+          <a href="admin-join-team" class="mobile-drawer-link active">
+            <span class="drawer-icon">🚀</span>
+            <div class="drawer-text">
+              <strong>จัดการระบบรับสมัคร (Join Team)</strong>
+              <small>ตำแหน่ง, โควต้า และใบสมัคร</small>
+            </div>
+          </a>
+          <a href="admin-content" class="mobile-drawer-link">
+            <span class="drawer-icon">📁</span>
+            <div class="drawer-text">
+              <strong>จัดการเนื้อหาเว็บ (CMS)</strong>
+              <small>โปรเจกต์, Roadmap และสปอยล์</small>
+            </div>
+          </a>
+          <a href="admin-chats" class="mobile-drawer-link">
+            <span class="drawer-icon">💬</span>
+            <div class="drawer-text">
+              <strong>จัดการแชทลูกค้า (Live Chat)</strong>
+              <small>ตอบข้อความแบบ Real-Time</small>
+            </div>
+          </a>
+          <a href="admin-users" class="mobile-drawer-link">
+            <span class="drawer-icon">👥</span>
+            <div class="drawer-text">
+              <strong>จัดการผู้ใช้งาน (Users)</strong>
+              <small>รายชื่อสมาชิกและสิทธิ์ Admin</small>
+            </div>
+          </a>
+          <a href="profile" class="mobile-drawer-link">
+            <span class="drawer-icon">👤</span>
+            <div class="drawer-text">
+              <strong>โปรไฟล์และการตั้งค่าบัญชี</strong>
+              <small>ข้อมูลส่วนตัว & รหัสผ่าน</small>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <main style="padding-top:1rem;padding-bottom:3rem;">
+
+        <!-- Top bar: Status control & stats -->
+        <div class="jt-title-bar-wrap" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;">
+          <div>
+            <h1 style="font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:.2rem;">ระบบรับสมัครงาน</h1>
+            <p style="font-size:.86rem;color:var(--muted);">จัดการฟอร์ม ตำแหน่ง และใบสมัครทั้งหมด</p>
+          </div>
+          <div class="jt-title-actions" style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+            <span id="adminStatusBadge" class="jt-status-badge jt-status-closed">กำลังโหลด...</span>
+            <button id="btnToggleOpen" class="jt-admin-btn secondary">⏳ เปลี่ยนสถานะ</button>
+            <a href="join-team" target="_blank" class="jt-admin-btn info">🔗 ดูหน้า Public</a>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.8rem;">
+          <div class="jt-admin-panel" style="margin-bottom:0;text-align:center;">
+            <div style="font-size:2rem;font-weight:800;color:var(--accent);" id="statTotal">-</div>
+            <div style="font-size:.78rem;color:var(--muted);font-weight:700;">ใบสมัครทั้งหมด</div>
+          </div>
+          <div class="jt-admin-panel" style="margin-bottom:0;text-align:center;">
+            <div style="font-size:2rem;font-weight:800;color:#fbbf24;" id="statReviewing">-</div>
+            <div style="font-size:.78rem;color:var(--muted);font-weight:700;">กำลังพิจารณา</div>
+          </div>
+          <div class="jt-admin-panel" style="margin-bottom:0;text-align:center;">
+            <div style="font-size:2rem;font-weight:800;color:#4ade80;" id="statApproved">-</div>
+            <div style="font-size:.78rem;color:var(--muted);font-weight:700;">อนุมัติแล้ว</div>
+          </div>
+          <div class="jt-admin-panel" style="margin-bottom:0;text-align:center;">
+            <div style="font-size:2rem;font-weight:800;color:#f87171;" id="statRejected">-</div>
+            <div style="font-size:.78rem;color:var(--muted);font-weight:700;">ปฏิเสธ</div>
+          </div>
+          <div class="jt-admin-panel" style="margin-bottom:0;text-align:center;">
+            <div style="font-size:2rem;font-weight:800;color:#c084fc;" id="statPositions">-</div>
+            <div style="font-size:.78rem;color:var(--muted);font-weight:700;">ตำแหน่งเปิดรับ</div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+          <button class="admin-tab-btn active" data-tab="applications">📋 ใบสมัคร</button>
+          <button class="admin-tab-btn" data-tab="contracts">📜 ทะเบียนสัญญา (<span id="statContractsCount">0</span>)</button>
+          <button class="admin-tab-btn" data-tab="form-settings">⚙️ ตั้งค่าฟอร์ม</button>
+          <button class="admin-tab-btn" data-tab="positions">👥 ตำแหน่ง</button>
+          <button class="admin-tab-btn" data-tab="questions">❓ คำถาม</button>
+          <button class="admin-tab-btn" data-tab="benefits">🎁 สิทธิพิเศษ</button>
+          <button class="admin-tab-btn" data-tab="contract-clauses">📜 ข้อตกลงสัญญา</button>
+          <button class="admin-tab-btn" data-tab="notifications">
+            🔔 แจ้งเตือน<span id="notifBadge" class="jt-notif-badge-count" style="display:none;">0</span>
+          </button>
+        </div>
+
+        
+        <!-- Tab: Contracts Master Registry -->
+        <div id="tab-contracts" class="admin-tab-content">
+          <div class="jt-admin-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.2rem;">
+              <div>
+                <h3 style="margin:0;border:none;padding:0;">📜 ทะเบียนสัญญาทั้งหมด (Contracts Master Registry)</h3>
+                <p style="font-size:0.84rem;color:var(--muted);margin-top:0.2rem;">ศูนย์รวมเอกสารสัญญา จัดหมวดหมู่ตามตำแหน่ง เรียงลำดับเลขที่สัญญา พร้อมระบบค้นหา กรอง และยกเลิกสัญญา</p>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button id="btnExportContractsCsv" class="jt-admin-btn secondary">📥 ส่งออก Excel (.CSV)</button>
+              </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:1.2rem;">
+              <div style="background:rgba(5,11,22,0.8);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:0.75rem;text-align:center;">
+                <div style="font-size:1.6rem;font-weight:800;color:var(--accent);" id="ctrStatTotal">0</div>
+                <div style="font-size:0.75rem;color:var(--muted);font-weight:700;">สัญญาทั้งหมด</div>
+              </div>
+              <div style="background:rgba(5,11,22,0.8);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:0.75rem;text-align:center;">
+                <div style="font-size:1.6rem;font-weight:800;color:#4ade80;" id="ctrStatSigned">0</div>
+                <div style="font-size:0.75rem;color:var(--muted);font-weight:700;">✍️ เซ็นชื่อแล้ว</div>
+              </div>
+              <div style="background:rgba(5,11,22,0.8);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:0.75rem;text-align:center;">
+                <div style="font-size:1.6rem;font-weight:800;color:#fbbf24;" id="ctrStatPending">0</div>
+                <div style="font-size:0.75rem;color:var(--muted);font-weight:700;">⏳ รอการลงนาม</div>
+              </div>
+              <div style="background:rgba(5,11,22,0.8);border:1px solid rgba(248,113,113,0.2);border-radius:10px;padding:0.75rem;text-align:center;">
+                <div style="font-size:1.6rem;font-weight:800;color:#f87171;" id="ctrStatVoided">0</div>
+                <div style="font-size:0.75rem;color:var(--muted);font-weight:700;">⛔ ยกเลิกสัญญา</div>
+              </div>
+            </div>
+
+            <!-- Filters & Search -->
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <select id="ctrFilterPosition" class="jt-select" style="padding:.4rem .8rem;font-size:.84rem;width:auto;min-width:140px;">
+                <option value="">👥 ทุกตำแหน่ง</option>
+              </select>
+              <select id="ctrFilterStatus" class="jt-select" style="padding:.4rem .8rem;font-size:.84rem;width:auto;">
+                <option value="">📋 ทุกสถานะสัญญา</option>
+                <option value="signed">✍️ เซ็นแล้ว (Signed)</option>
+                <option value="pending">⏳ รอลงนาม (Pending)</option>
+                <option value="voided">⛔ ยกเลิกสัญญา (Voided)</option>
+              </select>
+              <select id="ctrFilterYear" class="jt-select" style="padding:.4rem .8rem;font-size:.84rem;width:auto;">
+                <option value="">📅 ทุกปี</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+              </select>
+              <input id="ctrSearchInput" class="jt-input" placeholder="🔍 ค้นหาเลขที่สัญญา (เช่น BCX-CTR-Staff-2026-000001), ชื่อผู้สมัคร..." style="padding:.4rem .8rem;font-size:.84rem;flex:1;min-width:220px;" />
+            </div>
+
+            <!-- Table -->
+            <div class="jt-apps-table-wrap">
+              <table class="jt-apps-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>เลขที่สัญญา</th>
+                    <th>ชื่อ-นามสกุล / ชื่อเล่น</th>
+                    <th>ตำแหน่ง</th>
+                    <th>วันที่ทำสัญญา</th>
+                    <th>สถานะการลงนาม</th>
+                    <th>การดำเนินการ</th>
+                  </tr>
+                </thead>
+                <tbody id="contractsTableBody">
+                  <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;">กำลังโหลดทะเบียนสัญญา...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Applications -->
+        <div id="tab-applications" class="admin-tab-content active">
+          <div class="jt-admin-panel" style="margin-bottom:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem;">
+              <h3 style="margin:0;border:none;padding:0;">ใบสมัครทั้งหมด</h3>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <select id="appFilterStatus" class="jt-select" style="padding:.4rem .8rem;font-size:.84rem;width:auto;">
+                  <option value="">📋 ทุกสถานะ</option>
+                  <option value="submitted">📩 ส่งใบสมัครแล้ว (Submitted)</option>
+                  <option value="reviewing">🔍 กำลังพิจารณา (Reviewing)</option>
+                  <option value="approved">✅ ผ่านการอนุมัติ (Approved)</option>
+                  <option value="rejected">❌ ปฏิเสธ (Rejected)</option>
+                  <option value="revision">📝 ขอให้แก้ไขข้อมูล (Needs Fix)</option>
+                  <option value="cancelled">⛔ ยกเลิก (Cancelled)</option>
+                </select>
+                <input id="appSearchInput" class="jt-input" placeholder="ค้นหาชื่อ / ตำแหน่ง / เลขที่สัญญา..." style="padding:.4rem .8rem;font-size:.84rem;width:auto;" />
+                <button id="btnExportCsv" class="jt-admin-btn secondary">📥 ส่งออก Excel (.CSV)</button>
+                <button id="btnExportJson" class="jt-admin-btn secondary">📦 Export JSON</button>
+              </div>
+            </div>
+            <div class="jt-apps-table-wrap">
+              <table class="jt-apps-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>ชื่อเล่น</th>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>ตำแหน่ง</th>
+                    <th>สถานะ</th>
+                    <th>วันที่สมัคร</th>
+                    <th>การดำเนินการ</th>
+                  </tr>
+                </thead>
+                <tbody id="appTableBody">
+                  <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;">กำลังโหลด...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Form Settings -->
+        <div id="tab-form-settings" class="admin-tab-content">
+          <div class="jt-admin-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.6rem;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;">
+              <div>
+                <h3 style="margin:0;border:none;padding:0;font-size:1.15rem;">⚙️ ตั้งค่าฟอร์มหลัก</h3>
+                <small id="cfgLockStatusText" style="color:var(--muted);font-size:0.78rem;">กดปุ่ม ✏️ เพื่อแก้ไขข้อมูลการตั้งค่า</small>
+              </div>
+              <div style="display:flex;gap:0.5rem;align-items:center;">
+                <button type="button" id="btnCancelEditForm" class="jt-admin-btn secondary" style="display:none;">✕ ยกเลิก</button>
+                <button type="button" id="btnToggleEditForm" class="jt-admin-btn secondary" style="font-weight:700;">
+                  ✏️ แก้ไขการตั้งค่า
+                </button>
+                <button id="btnSaveFormSettings" class="jt-admin-btn primary" style="display:none;padding:0.55rem 1.4rem;">💾 บันทึกการตั้งค่า</button>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;">
+              <div class="jt-form-group">
+                <label>ชื่อฟอร์ม (Title)</label>
+                <input id="cfgTitle" class="jt-input" placeholder="สมัครร่วมทีม..." disabled />
+              </div>
+              <div class="jt-form-group">
+                <label>ชื่อ Community</label>
+                <input id="cfgCommunity" class="jt-input" placeholder="BestCyniX Dev" disabled />
+              </div>
+              <div class="jt-form-group" style="grid-column:1/-1;">
+                <label>คำบรรยายย่อย (Subtitle)</label>
+                <input id="cfgSubtitle" class="jt-input" placeholder="คำบรรยายที่แสดงใต้ชื่อฟอร์ม" disabled />
+              </div>
+              <div class="jt-form-group" style="grid-column:1/-1;">
+                <label>ข้อความเมื่อปิดรับ</label>
+                <input id="cfgClosedMessage" class="jt-input" placeholder="ข้อความแสดงเมื่อปิดรับสมัคร" disabled />
+              </div>
+              <div class="jt-form-group" style="grid-column:1/-1;">
+                <label>🔗 Discord Webhook URL (สำหรับการแจ้งเตือนใบสมัครใหม่)</label>
+                <div style="display:flex;gap:0.6rem;">
+                  <input id="cfgDiscordWebhook" class="jt-input" placeholder="https://discord.com/api/webhooks/..." disabled />
+                  <button type="button" id="btnTestDiscordWebhook" class="jt-admin-btn secondary" style="white-space:nowrap;">🧪 ทดสอบส่ง</button>
+                </div>
+                <small style="color:var(--muted);font-size:0.75rem;">ระบบจะส่ง Rich Embed เข้า Discord Channel ทันทีเมื่อมีผู้ส่งใบสมัครใหม่</small>
+              </div>
+              <div class="jt-form-group">
+                <label>อายุขั้นต่ำ (ปี)</label>
+                <input id="cfgAgeMin" type="number" class="jt-input" min="0" max="99" placeholder="0" disabled />
+              </div>
+              <div class="jt-form-group">
+                <label>อายุสูงสุด (ปี)</label>
+                <input id="cfgAgeMax" type="number" class="jt-input" min="0" max="99" placeholder="99" disabled />
+              </div>
+              <div class="jt-form-group" style="grid-column:1/-1;">
+                <label>โหมดการเปิด/ปิด</label>
+                <select id="cfgStatusMode" class="jt-select" disabled>
+                  <option value="manual">Manual — เปิด/ปิดเองด้วยมือ</option>
+                  <option value="auto">Auto — ตั้งเวลาอัตโนมัติ</option>
+                </select>
+              </div>
+              <div id="cfgAutoTimeWrap" style="grid-column:1/-1;display:none;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="jt-form-group">
+                  <label>เปิดรับอัตโนมัติเมื่อ</label>
+                  <input id="cfgAutoOpen" type="datetime-local" class="jt-input" disabled />
+                </div>
+                <div class="jt-form-group">
+                  <label>ปิดรับอัตโนมัติเมื่อ</label>
+                  <input id="cfgAutoClose" type="datetime-local" class="jt-input" disabled />
+                </div>
+              </div>
+              <div class="jt-form-group" style="grid-column:1/-1;">
+                <label style="display:flex;justify-content:space-between;align-items:center;">
+                  <span>📅 วันที่ให้ผู้สมัครเลือก (Available Days)</span>
+                  <span style="font-size:0.74rem;color:var(--accent);">คลิกเพื่อเปิด/ปิดวันที่เปิดรับ</span>
+                </label>
+                <div id="cfgDaysGrid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.4rem;"></div>
+              </div>
+            </div>
+
+            <!-- Prominent Bottom Action Bar -->
+            <div style="margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+              <span id="formSaveMsg" style="font-size:.86rem;font-weight:600;"></span>
+              <div style="display:flex;gap:0.6rem;margin-left:auto;">
+                <button type="button" id="btnBottomCancelEditForm" class="jt-admin-btn secondary" style="display:none;">✕ ยกเลิก</button>
+                <button type="button" id="btnBottomToggleEditForm" class="jt-admin-btn secondary" style="font-weight:700;border-color:var(--accent);color:var(--accent);">
+                  ✏️ แก้ไขการตั้งค่าฟอร์ม
+                </button>
+                <button type="button" id="btnBottomSaveFormSettings" class="jt-admin-btn primary" style="display:none;padding:0.6rem 1.6rem;">💾 บันทึกการตั้งค่าทั้งหมด</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Positions -->
+        <div id="tab-positions" class="admin-tab-content">
+          <div class="jt-admin-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.6rem;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;">
+              <div>
+                <h3 style="margin:0;border:none;padding:0;font-size:1.15rem;">👥 ตำแหน่งที่เปิดรับ</h3>
+                <small style="color:var(--muted);font-size:0.78rem;">กด ✏️ เพื่อแก้ไขทีละตำแหน่ง หรือกดเพิ่มตำแหน่งใหม่</small>
+              </div>
+              <button id="btnAddPosition" class="jt-admin-btn primary">+ เพิ่มตำแหน่งใหม่</button>
+            </div>
+            <div id="positionsList" style="display:flex;flex-direction:column;gap:.85rem;"></div>
+          </div>
+        </div>
+
+        <!-- Tab: Custom Questions -->
+        <div id="tab-questions" class="admin-tab-content">
+          <div class="jt-admin-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.6rem;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;">
+              <div>
+                <h3 style="margin:0;border:none;padding:0;font-size:1.15rem;">❓ คำถามเพิ่มเติม</h3>
+                <small style="color:var(--muted);font-size:0.78rem;">กด ✏️ เพื่อแก้ไขคำถามทีละข้อ หรือกดเพิ่มคำถามใหม่</small>
+              </div>
+              <button id="btnAddQuestion" class="jt-admin-btn primary">+ เพิ่มคำถามใหม่</button>
+            </div>
+            <div id="questionsList" style="display:flex;flex-direction:column;gap:.85rem;"></div>
+          </div>
+        </div>
+
+                <!-- Tab: Contract Clauses CMS -->
+        <div id="tab-contract-clauses" class="admin-tab-content">
+          <div class="jt-admin-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.2rem;">
+              <div>
+                <h3 style="margin:0;border:none;padding:0;">📜 จัดการข้อตกลงและเงื่อนไขสัญญา (Contract Clauses CMS)</h3>
+                <p style="font-size:0.84rem;color:var(--muted);margin-top:0.2rem;">กำหนดหัวข้อสัญญา ข้อความกฎระเบียบ NDA & PDPA และตั้งค่าการแบ่งหน้าสำหรับพิมพ์สัญญาหลายหน้า</p>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button type="button" id="btnAddClause" class="jt-admin-btn info">➕ เพิ่มข้อตกลงใหม่</button>
+                <button type="button" id="btnSaveClauses" class="jt-admin-btn primary">💾 บันทึกข้อตกลงสัญญาทั้งหมด</button>
+              </div>
+            </div>
+
+            <!-- Global Contract Info Form -->
+            <div style="background:rgba(5,11,22,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;">
+              <h4 style="font-size:0.95rem;color:var(--accent);margin-bottom:0.8rem;">⚙️ หัวข้อและรายละเอียดเอกสาร</h4>
+              <div class="jt-form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">
+                <div>
+                  <label class="jt-label">ชื่อองค์กร / แพลตฟอร์ม</label>
+                  <input id="clauseCommunityName" class="jt-input" placeholder="BESTCYNIX DEV" />
+                </div>
+                <div>
+                  <label class="jt-label">หัวข้อหลักของสัญญา</label>
+                  <input id="clauseDocTitle" class="jt-input" placeholder="สัญญาการร่วมทีมและข้อตกลงการรักษาความลับ" />
+                </div>
+                <div>
+                  <label class="jt-label">หัวข้อย่อยภาษาอังกฤษ</label>
+                  <input id="clauseDocSubtitle" class="jt-input" placeholder="Team Membership, Non-Disclosure & Intellectual Property Agreement" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Clauses Dynamic List -->
+            <div id="clausesListContainer" style="display:grid;gap:1rem;">
+              <!-- Dynamic Cards populated by JS -->
+            </div>
+          </div>
+        </div>
+
+<!-- Tab: Benefits -->
+        <div id="tab-benefits" class="admin-tab-content">
+          <div class="jt-admin-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.6rem;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;">
+              <div>
+                <h3 style="margin:0;border:none;padding:0;font-size:1.15rem;">🎁 สิทธิพิเศษที่จะได้รับ</h3>
+                <small style="color:var(--muted);font-size:0.78rem;">กด ✏️ เพื่อแก้ไขทีละสิทธิพิเศษ หรือกดเพิ่มสิทธิพิเศษใหม่</small>
+              </div>
+              <button id="btnAddBenefit" class="jt-admin-btn primary">+ เพิ่มสิทธิพิเศษใหม่</button>
+            </div>
+            <div id="benefitsList" style="display:flex;flex-direction:column;gap:.85rem;"></div>
+          </div>
+        </div>
+
+        <!-- Tab: Notifications -->
+        <div id="tab-notifications" class="admin-tab-content">
+          <div class="jt-admin-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.6rem;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0.8rem;">
+              <div>
+                <h3 style="margin:0;border:none;padding:0;font-size:1.15rem;">🔔 ประวัติการแจ้งเตือน</h3>
+                <small style="color:var(--muted);font-size:0.78rem;">แจ้งเตือนใบสมัครและการอัปเดตแบบเรียลไทม์</small>
+              </div>
+              <button id="btnMarkAllRead" class="jt-admin-btn secondary">✓ อ่านทั้งหมด</button>
+            </div>
+            <div id="notifList" style="display:flex;flex-direction:column;gap:.6rem;"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Status & Schedule Control Modal -->
+  <div id="statusScheduleModal" class="jt-modal-overlay">
+    <div class="jt-modal-box" style="max-width:520px;">
+      <div class="jt-modal-header">
+        <h3>⏳ ตั้งค่าสถานะ & กำหนดการเปิด-ปิดรับสมัคร</h3>
+        <button type="button" class="project-popup-btn-close" id="statusModalCloseBtn">✕</button>
+      </div>
+      <div class="jt-modal-body" style="display:grid;gap:1.2rem;">
+        <div>
+          <label style="font-size:0.85rem;font-weight:700;color:var(--accent);display:block;margin-bottom:0.4rem;">
+            โหมดสถานะการรับสมัคร:
+          </label>
+          <select id="modalStatusModeSelect" class="jt-select" style="width:100%;">
+            <option value="open">🟢 เปิดรับสมัครทันที (เปิดรับไปเรื่อยๆ จนครบโควต้า)</option>
+            <option value="closed">🔴 ปิดรับสมัครทันที (Manual Closed)</option>
+            <option value="auto">⏰ กำหนดเวลาเปิด-ปิดอัตโนมัติ (Auto Schedule)</option>
+          </select>
+        </div>
+
+        <div id="modalAutoScheduleFields" style="display:none;background:rgba(50,255,201,0.06);border:1px solid rgba(50,255,201,0.2);border-radius:12px;padding:1rem;display:grid;gap:0.8rem;">
+          <div>
+            <label style="font-size:0.82rem;font-weight:700;color:#fff;display:block;margin-bottom:0.3rem;">
+              📅 วัน-เวลาเริ่มเปิดรับสมัคร (Auto Open):
+            </label>
+            <input type="datetime-local" id="modalAutoOpenAt" class="jt-input" style="width:100%;" />
+          </div>
+          <div>
+            <label style="font-size:0.82rem;font-weight:700;color:#fff;display:block;margin-bottom:0.3rem;">
+              📅 วัน-เวลาปิดรับสมัคร (Auto Close):
+            </label>
+            <input type="datetime-local" id="modalAutoCloseAt" class="jt-input" style="width:100%;" />
+          </div>
+          <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.84rem;color:#e6f3ff;cursor:pointer;">
+            <input type="checkbox" id="modalNoCloseDate" style="accent-color:var(--accent);" />
+            <span>ไม่จำกัดวันปิด (เปิดรับไปเรื่อยๆ จนกว่า Dev จะอนุมัติครบโควต้า)</span>
+          </label>
+        </div>
+      </div>
+      <div class="jt-modal-footer" style="justify-content:flex-end;gap:0.6rem;">
+        <button type="button" class="jt-admin-btn secondary" id="btnCancelStatusModal">ยกเลิก</button>
+        <button type="button" class="jt-admin-btn primary" id="btnSaveStatusSchedule">💾 บันทึกและปรับใช้ทันที</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Detail Modal -->
+  <div id="appDetailModal" class="jt-modal-overlay">
+    <div class="jt-modal-box" style="max-width:760px;">
+      <div class="jt-modal-header">
+        <h3 id="modalAppTitle">รายละเอียดใบสมัคร</h3>
+        <button type="button" class="project-popup-btn-close" id="modalCloseBtn">✕</button>
+      </div>
+      <div class="jt-modal-body" id="modalBodyContent">กำลังโหลด...</div>
+
+      <!-- Action Panel inside Modal -->
+      <div style="background:rgba(5,11,22,0.9);border-top:1px solid rgba(255,255,255,0.1);padding:1.2rem;display:grid;gap:0.9rem;">
+        
+        <!-- Status Selector with Protection Lock -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:0.6rem 0.8rem;">
+          <div style="display:flex;align-items:center;gap:0.5rem;flex:1;min-width:240px;">
+            <label style="font-size:0.85rem;font-weight:700;color:var(--accent);white-space:nowrap;">สถานะใบสมัคร:</label>
+            <select id="modalStatusSelect" class="jt-select" disabled style="padding:.4rem .8rem;font-size:.85rem;width:auto;flex:1;">
+              <option value="submitted">📩 ส่งใบสมัครแล้ว (Submitted)</option>
+              <option value="reviewing">🔍 กำลังพิจารณา (Reviewing)</option>
+              <option value="approved">✅ ผ่านการอนุมัติ & ให้เซ็นสัญญา (Approved)</option>
+              <option value="rejected">❌ ปฏิเสธการรับสมัคร (Rejected)</option>
+              <option value="revision">📝 ขอให้ผู้สมัครแก้ไขข้อมูล (Needs Fix)</option>
+              <option value="cancelled">⛔ ยกเลิกใบสมัคร (Cancelled)</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <button type="button" id="btnCancelEditAppStatus" class="jt-admin-btn secondary" style="display:none;font-size:0.8rem;padding:0.35rem 0.8rem;">
+              ✕ ยกเลิก
+            </button>
+            <button type="button" id="btnToggleEditAppStatus" class="jt-admin-btn secondary" style="font-size:0.8rem;padding:0.35rem 0.8rem;font-weight:700;">
+              ✏️ แก้ไขสถานะ / โน้ต
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Rejection Reason Box -->
+        <div id="modalRejectionWrap" style="display:none;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.9rem;">
+          <label style="font-size:0.82rem;font-weight:700;color:#f87171;margin-bottom:0.4rem;display:block;">
+            ⚠️ ระบุเหตุผลในการปฏิเสธ (จะส่งแจ้งเตือนไปยังผู้สมัคร):
+          </label>
+          <textarea id="modalRejectionReason" class="jt-textarea" placeholder="ระบุเหตุผล เช่น คุณสมบัติยังไม่ตรงตามเกณฑ์, โควต้าตำแหน่งเต็มแล้ว..." style="min-height:65px;font-size:0.85rem;" disabled></textarea>
+        </div>
+
+        <!-- Dynamic Revision Reason Box -->
+        <div id="modalRevisionWrap" style="display:none;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.3);border-radius:10px;padding:0.9rem;">
+          <label style="font-size:0.82rem;font-weight:700;color:#facc15;margin-bottom:0.4rem;display:block;">
+            📝 ระบุข้อมูลที่ต้องการให้ผู้สมัครแก้ไข (จะส่งแจ้งเตือนพร้อมลิงก์แก้ไข):
+          </label>
+          <textarea id="modalRevisionReason" class="jt-textarea" placeholder="ระบุสิ่งที่ต้องการให้แก้ไข เช่น ขอรูปถ่ายหน้าตรงที่ชัดเจนขึ้น, เพิ่มเติมข้อมูลเบอร์โทร..." style="min-height:65px;font-size:0.85rem;" disabled></textarea>
+        </div>
+
+        <!-- Approved Contract Actions Box -->
+        <div id="modalContractActionsWrap" style="display:none;background:rgba(2,132,199,0.1);border:1px solid rgba(2,132,199,0.35);border-radius:10px;padding:0.9rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.6rem;">
+            <div>
+              <div style="font-size:0.85rem;font-weight:700;color:#38bdf8;">📄 เอกสารสัญญาการร่วมทีม (PDF Ready)</div>
+              <div style="font-size:0.78rem;color:var(--muted);" id="modalContractRefText">เลขอ้างอิงสัญญา: BCX-CTR-2026-XXXX</div>
+            </div>
+            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+              <a id="btnModalOpenContract" href="#" target="_blank" class="jt-admin-btn primary" style="padding:0.35rem 0.75rem;font-size:0.8rem;background:#0284c7;border-color:#0284c7;">
+                👁️ ดูสัญญาฉบับสมบูรณ์
+              </a>
+              <button type="button" id="btnModalCopyContractLink" class="jt-admin-btn secondary" style="padding:0.35rem 0.75rem;font-size:0.8rem;">
+                📋 คัดลอกลิงก์สัญญา
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.6rem;margin-top:0.4rem;">
+          <button id="btnDeleteApp" class="jt-admin-btn danger" style="padding:0.45rem 0.9rem;font-size:0.84rem;display:none;">🗑️ ลบใบสมัคร</button>
+          <div style="display:flex;gap:0.6rem;margin-left:auto;">
+            <button id="btnUpdateStatus" class="jt-admin-btn primary" style="display:none;padding:0.45rem 1.2rem;font-size:0.85rem;">
+              💾 บันทึกและส่งแจ้งเตือน
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <footer class="site-footer"></footer>
+  </div>
+
+  <!-- Contract Modal -->
+  <div id="contractModal" class="jt-contract-modal">
+    <div class="jt-contract-body" id="contractContent">กำลังโหลด...</div>
+    <div class="jt-contract-print-actions">
+      <button class="btn-primary" onclick="window.print()">🖨️ พิมพ์สัญญา</button>
+      <button class="jt-admin-btn secondary" onclick="document.getElementById('contractModal').classList.remove('is-open')">✕ ปิด</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="adminToastWrap" class="jt-notif-toast-wrap"></div>
+
+  <footer class="site-footer"></footer>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+  <script src="js/audit-logger.js?v=20260826_22"></script>
+  <script src="js/join-team-admin.js?v=20260826_30"></script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>บริการคลาวด์และโฮสติ้งแนะนำ (Alliance Partners) | BestCyniX Dev</title>
+  <meta name="description" content="บริการคลาวด์และโฮสติ้งแนะนำ โครงสร้างพื้นฐานเซิร์ฟเวอร์ประสิทธิภาพสูง รองรับบอท Discord, ระบบเว็บไซต์, AI และ Game Servers พร้อมส่วนลดพิเศษ" />
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js?v=20260826_70"></script>
+
+  <style>
+    body {
+      background: #030812;
+      color: #e6f3ff;
+      font-family: 'Prompt', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .alliance-hero {
+      padding: 7rem 0 2.5rem 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .alliance-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(50, 255, 201, 0.1);
+      border: 1px solid var(--accent, #32ffc9);
+      color: var(--accent, #32ffc9);
+      padding: 0.4rem 1.2rem;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      font-family: 'Chakra Petch', sans-serif;
+      margin-bottom: 1rem;
+    }
+
+    .alliance-hero-title {
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.8rem;
+      font-family: 'Chakra Petch', sans-serif;
+      text-shadow: 0 0 30px rgba(50, 255, 201, 0.2);
+    }
+
+    .alliance-hero-desc {
+      color: var(--muted, #8aa9c7);
+      max-width: 720px;
+      margin: 0 auto 2.5rem auto;
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .alliance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .alliance-card {
+      background: linear-gradient(160deg, rgba(8, 24, 46, 0.95), rgba(4, 12, 24, 0.98));
+      border: 1px solid rgba(50, 255, 201, 0.25);
+      border-radius: 24px;
+      padding: 2.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    }
+
+    .alliance-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 25px rgba(50, 255, 201, 0.25);
+    }
+
+    .alliance-header {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .alliance-logo {
+      width: 76px;
+      height: 76px;
+      border-radius: 16px;
+      object-fit: contain;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      flex-shrink: 0;
+    }
+
+    .alliance-badge {
+      display: inline-block;
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: #32ffc9;
+      background: rgba(50, 255, 201, 0.12);
+      border: 1px solid rgba(50, 255, 201, 0.3);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      margin-bottom: 0.35rem;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+
+    .alliance-name {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: #fff;
+      font-family: 'Chakra Petch', sans-serif;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .alliance-subtitle {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .alliance-desc {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+    }
+
+    .alliance-features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.86rem;
+      color: #e6f3ff;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.55rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .btn-alliance-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), #0284c7);
+      color: #050b14;
+      font-weight: 800;
+      font-size: 0.96rem;
+      padding: 0.85rem 1.4rem;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 20px rgba(50, 255, 201, 0.3);
+    }
+
+    .btn-alliance-cta:hover {
+      filter: brightness(1.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(50, 255, 201, 0.5);
+    }
+
+    .alliance-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.65rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="particle-layer" aria-hidden="true"></div>
+
+  <!-- Topbar Header -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="/" class="brand" style="text-decoration: none;">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Dev Logo" />
+        <span>BestCyniX Dev</span>
+      </a>
+      <div style="display: flex; gap: 0.8rem; align-items: center;">
+        <a href="/deals" class="btn-secondary" style="font-size: 0.85rem; padding: 0.45rem 0.9rem; text-decoration: none; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff;">
+          <span>🛍️ ศูนย์รวมดีล</span>
+        </a>
+        <a href="/" class="btn-secondary" style="font-size: 0.85rem; padding: 0.45rem 0.9rem; text-decoration: none; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff;">
+          <span>← หน้าหลัก</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero Section -->
+    <section class="alliance-hero">
+      <div class="alliance-hero-badge">
+        <span>⭐ RECOMMENDED HOSTING & CLOUD PARTNERS</span>
+      </div>
+      <h1 class="alliance-hero-title">บริการคลาวด์และโฮสติ้งแนะนำ</h1>
+      <p class="alliance-hero-desc">
+        โครงสร้างพื้นฐานเซิร์ฟเวอร์ประสิทธิภาพสูง รองรับบอท Discord, ระบบเว็บไซต์, AI อัตโนมัติ และ Game Servers พร้อมข้อเสนอและส่วนลดพิเศษสำหรับผู้ใช้งาน BestCyniX Dev
+      </p>
+    </section>
+
+    <!-- Alliance Cards Grid -->
+    <div class="alliance-grid" id="allianceContainer">
+      <!-- Dynamically rendered partner cards -->
+    </div>
+  </main>
+
+  <!-- Global Shared UI & Notifications -->
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+  <script src="js/alliance.js?v=20260826_85"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && (request.auth.token.admin == true
+          || request.auth.token.email in ['admin@email.com', 'bestcynix@gmail.com']);
+    }
+
+    function isValidImage(maxBytes) {
+      return request.resource != null
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size <= maxBytes;
+    }
+
+    function isValidChatId(chatId) {
+      return chatId.matches('^anon_[A-Za-z0-9]{7}$')
+        || (isSignedIn() && chatId == request.auth.uid);
+    }
+
+    match /avatars/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if (isAdmin() || (isSignedIn() && request.auth.uid == userId))
+        && isValidImage(5 * 1024 * 1024);
+    }
+
+    match /chat-attachments/{chatId}/{allPaths=**} {
+      allow read: if isAdmin() || isValidChatId(chatId);
+      allow write: if (isAdmin() || isValidChatId(chatId)) && isValidImage(5 * 1024 * 1024);
+    }
+
+    match /contact-images/{allPaths=**} {
+      allow read, write: if isAdmin();
+    }
+
+    match /admin-uploads/{allPaths=**} {
+      allow read, write: if isAdmin() && isValidImage(10 * 1024 * 1024);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050b14" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="google-site-verification" content="googlea9ea1a02d88e536b" />
+  <title>สถานะระบบแบบเรียลไทม์ (Live System Status) • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Modular Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+
+  <style>
+    .status-page-wrap {
+      min-height: 100vh;
+      padding-top: 6rem;
+      padding-bottom: 4rem;
+      position: relative;
+      z-index: 2;
+    }
+    .status-container {
+      width: min(980px, calc(100vw - 2rem));
+      margin: 0 auto;
+    }
+    .status-hero-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(6, 78, 59, 0.28));
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      border-radius: 20px;
+      padding: 2rem 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(16, 185, 129, 0.15);
+      margin-bottom: 2.2rem;
+    }
+    .status-hero-left {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .status-pulse-large {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 20px #10b981;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .status-pulse-large::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid #10b981;
+      animation: pulseLarge 2s infinite ease-out;
+    }
+    @keyframes pulseLarge {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    .status-hero-title {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .status-hero-desc {
+      color: #a7f3d0;
+      font-size: 0.92rem;
+      margin-top: 0.2rem;
+    }
+    .btn-refresh-status {
+      padding: 0.65rem 1.3rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #10b981;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      font-family: 'Prompt', sans-serif;
+    }
+    .btn-refresh-status:hover {
+      background: #10b981;
+      color: #050b14;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+    .status-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      margin-bottom: 2.5rem;
+    }
+    .service-card {
+      background: rgba(10, 24, 42, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.3rem 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(18px);
+      box-sizing: border-box;
+    }
+    .service-card:hover {
+      border-color: rgba(50, 255, 201, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .service-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+    }
+    .service-icon-box {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .service-name {
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.02rem;
+      font-family: 'Prompt', sans-serif;
+    }
+    .service-desc {
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-top: 0.15rem;
+      line-height: 1.4;
+    }
+    .service-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .latency-tag {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 0.86rem;
+      color: var(--accent);
+      background: rgba(50, 255, 201, 0.08);
+      padding: 0.3rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid rgba(50, 255, 201, 0.25);
+    }
+    .status-badge {
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'Chakra Petch', sans-serif;
+      letter-spacing: 0.5px;
+    }
+    .status-badge.online {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid #10b981;
+      color: #10b981;
+    }
+    .status-badge.warning {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid #f59e0b;
+      color: #f59e0b;
+    }
+    .status-badge.offline {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #ef4444;
+    }
+
+    /* Uptime Timeline & Interactive Bars */
+    .uptime-mode-selector {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .uptime-mode-btn {
+      padding: 0.4rem 0.85rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: 'Prompt', sans-serif;
+      transition: all 0.2s ease;
+    }
+    .uptime-mode-btn.active, .uptime-mode-btn:hover {
+      background: rgba(50, 255, 201, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .uptime-bars-strip {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      margin-top: 1rem;
+      width: 100%;
+      min-height: 32px;
+      padding: 4px 0;
+    }
+    .uptime-bar {
+      flex: 1;
+      height: 26px;
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+    .uptime-bar.bar-green {
+      background: #10b981;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.3);
+    }
+    .uptime-bar.bar-yellow {
+      background: #f59e0b;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+    }
+    .uptime-bar.bar-red {
+      background: #ef4444;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+    }
+    .uptime-bar:hover, .uptime-bar.selected {
+      transform: scaleY(1.35) scaleX(1.1);
+      z-index: 10;
+      box-shadow: 0 0 14px #fff;
+    }
+    .bar-tooltip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(5, 11, 20, 0.98);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 0.5rem 0.8rem;
+      color: #fff;
+      font-size: 0.76rem;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.15s ease;
+      z-index: 100;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+      font-family: 'Prompt', sans-serif;
+    }
+    .uptime-bar:hover .bar-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* Selected Interval Telemetry Card */
+    .interval-inspector-card {
+      background: rgba(8, 20, 36, 0.95);
+      border: 1px solid rgba(50, 255, 201, 0.35);
+      border-radius: 14px;
+      padding: 1.2rem 1.5rem;
+      margin-top: 1.2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      animation: fadeIn 0.25s ease;
+    }
+    .inspector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.8rem;
+    }
+    .inspector-stat-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+    }
+    .inspector-stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .inspector-stat-val {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'Chakra Petch', monospace;
+      margin-top: 2px;
+    }
+    .legend-strip {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 1rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+    .telemetry-header:hover {
+      background: rgba(20, 44, 78, 0.6) !important;
+    }
+    .telemetry-header:hover .btn-toggle-eye {
+      background: rgba(50, 255, 201, 0.22) !important;
+      transform: scale(1.03);
+    }
+    .api-raw-box {
+      background: rgba(5, 11, 20, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 1.2rem;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.82rem;
+      color: #a7f3d0;
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 320px;
+      margin-top: 0.8rem;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+    .api-raw-box::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .api-raw-box::-webkit-scrollbar-thumb {
+      background: rgba(50, 255, 201, 0.3);
+      border-radius: 999px;
+    }
+    .api-raw-box::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .service-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .service-meta {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Particle Layer -->
+  <div class="particle-layer" aria-hidden="true"></div>
+
+  <!-- Topbar Header -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="/" class="brand" style="text-decoration: none;">
+        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Dev Logo" />
+        <span>BestCyniX Dev</span>
+      </a>
+      <div style="display: flex; gap: 0.8rem; align-items: center;">
+        <a href="/" class="btn-secondary" style="font-size: 0.88rem; padding: 0.45rem 1.1rem; text-decoration: none; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff;">
+          <span>← กลับสู่หน้าหลัก</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Status Content -->
+  <main class="status-page-wrap">
+    <div class="status-container">
+      <!-- Status Hero Banner -->
+      <div class="status-hero-banner" id="heroStatusBanner">
+        <div class="status-hero-left">
+          <div class="status-pulse-large" id="heroPulseDot"></div>
+          <div>
+            <div class="status-hero-title" id="heroStatusTitle">ระบบทั้งหมดทำงานเป็นปกติ 100%</div>
+            <div class="status-hero-desc" id="heroStatusDesc">All Core Services, Database & Bot Gateways Operational</div>
+          </div>
+        </div>
+        <button type="button" class="btn-refresh-status" id="btnRefreshStatus">
+          <span>🔄 ตรวจสอบสดอีกครั้ง</span>
+        </button>
+      </div>
+
+      <!-- Services Status List -->
+      <div class="status-grid">
+        <!-- 1. SkylineBOT Official Public API (Real Endpoint: skylinebot.xyz/api/public/public-summary) -->
+        <div class="service-card" style="border-color: rgba(50, 255, 201, 0.4); background: linear-gradient(135deg, rgba(10, 24, 42, 0.95), rgba(6, 28, 48, 0.9));">
+          <div class="service-info">
+            <div class="service-icon-box" style="border-color: rgba(50, 255, 201, 0.4); background: rgba(50, 255, 201, 0.1);">🤖</div>
+            <div>
+              <div class="service-name">SkyLineBOT Official API Summary</div>
+              <div class="service-desc">
+                Endpoint: <a href="https://skylinebot.xyz/api/public/public-summary" target="_blank" style="color: var(--accent); text-decoration: underline;">skylinebot.xyz/api/public/public-summary</a><br/>
+                <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.35rem; margin-bottom: 0.2rem;">
+                  <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); padding: 0.15rem 0.55rem; border-radius: 8px; font-size: 0.78rem; color: #38bdf8; font-weight: 600;">
+                    🏰 เซิร์ฟเวอร์: <strong id="skylineGuildsCount" style="color: #fff; font-family: 'Chakra Petch', monospace;">...</strong> กิลด์
+                  </span>
+                  <span style="display: inline-flex; align-items: center; gap: 0.3rem; background: rgba(74, 222, 128, 0.12); border: 1px solid rgba(74, 222, 128, 0.35); padding: 0.15rem 0.55rem; border-radius: 8px; font-size: 0.78rem; color: #4ade80; font-weight: 600;">
+                    👥 ผู้ใช้ทั้งหมด: <strong id="skylineUsersCount" style="color: #fff; font-family: 'Chakra Petch', monospace;">...</strong> คน
+                  </span>
+                </div>
+                <span id="skylineLastChecked" style="font-size: 0.76rem; color: #8aa9c7;">กำลังดึงข้อมูลสดจากเซิร์ฟเวอร์...</span>
+              </div>
+            </div>
+          </div>
+          <div class="service-meta">
+            <span class="latency-tag" id="skylineLatency">... ms</span>
+            <span class="status-badge online" id="skylineBadge">● กำลังเชื่อมต่อ...</span>
+          </div>
+        </div>
+
+        <!-- 2. Discord API & Developer Live Presence (Real API: japi.rest & Lanyard) -->
+        <div class="service-card">
+          <div class="service-info">
+            <div class="service-icon-box" style="border-color: rgba(234, 179, 8, 0.4); background: rgba(234, 179, 8, 0.1);">👑</div>
+            <div>
+              <div class="service-name">Discord Gateway & Bot Owner Presence</div>
+              <div class="service-desc">
+                ID: <code style="color: #facc15;">1350901490805637202</code> (@bestasic • ไรว้าาาาา!)<br/>
+                <span id="discordStatusDetail" style="font-size: 0.76rem; color: #8aa9c7;">กำลังตรวจสอบ Discord Gateway...</span>
+              </div>
+            </div>
+          </div>
+          <div class="service-meta">
+            <span class="latency-tag" id="discordLatency">... ms</span>
+            <span class="status-badge online" id="discordBadge">● ปกติ</span>
+          </div>
+        </div>
+
+        <!-- 3. Web Application & CDN Hosting -->
+        <div class="service-card">
+          <div class="service-info">
+            <div class="service-icon-box" style="border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.1);">🌐</div>
+            <div>
+              <div class="service-name">Web Application & Global CDN Hosting</div>
+              <div class="service-desc">Firebase Hosting, Cloudflare Edge & Clean URL Engine</div>
+            </div>
+          </div>
+          <div class="service-meta">
+            <span class="latency-tag" id="webLatency">... ms</span>
+            <span class="status-badge online" id="webBadge">● 100% OPERATIONAL</span>
+          </div>
+        </div>
+
+        <!-- 4. Cloud Firestore Database -->
+        <div class="service-card">
+          <div class="service-info">
+            <div class="service-icon-box" style="border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.1);">⚡</div>
+            <div>
+              <div class="service-name">Cloud Firestore NoSQL Database</div>
+              <div class="service-desc">Multi-region Database, Security Rules & CMS Pipeline</div>
+            </div>
+          </div>
+          <div class="service-meta">
+            <span class="latency-tag" id="dbLatency">... ms</span>
+            <span class="status-badge online" id="dbBadge">● OPERATIONAL</span>
+          </div>
+        </div>
+
+        <!-- 5. Live Support Chat Messenger -->
+        <div class="service-card">
+          <div class="service-info">
+            <div class="service-icon-box" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1);">💬</div>
+            <div>
+              <div class="service-name">Live Support Messenger Service</div>
+              <div class="service-desc">End-to-End User Chat & Admin Real-time Push Dispatcher</div>
+            </div>
+          </div>
+          <div class="service-meta">
+            <span class="latency-tag" id="chatLatency">... ms</span>
+            <span class="status-badge online" id="chatBadge">● OPERATIONAL</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Telemetry JSON Inspector (Collapsible Accordion / Dropdown with Eye Toggle) -->
+      <div class="telemetry-card" style="background: rgba(10, 24, 42, 0.85); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 2.5rem; overflow: hidden; transition: all 0.3s ease;">
+        <div class="telemetry-header" id="btnToggleTelemetry" style="padding: 1.1rem 1.4rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; background: rgba(15, 32, 58, 0.45); transition: all 0.25s ease;">
+          <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+            <h3 style="color: #fff; font-size: 1rem; font-family: 'Chakra Petch', sans-serif; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+              <span>📡 ข้อมูลสดจาก SkylineBOT API (Live Raw JSON Telemetry)</span>
+            </h3>
+            <span style="font-size: 0.78rem; color: var(--accent); font-family: 'Chakra Petch', monospace; background: rgba(50, 255, 201, 0.1); border: 1px solid rgba(50, 255, 201, 0.3); padding: 0.15rem 0.55rem; border-radius: 999px;" id="telemetryStatusText">● LIVE SYNC</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <button type="button" class="btn-toggle-eye" id="btnEyeToggle" style="background: rgba(50, 255, 201, 0.12); border: 1px solid rgba(50, 255, 201, 0.4); color: var(--accent); padding: 0.35rem 0.85rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
+              <span id="eyeIcon">👁️</span>
+              <span id="eyeText">ดูข้อมูล JSON</span>
+              <span id="eyeArrow" style="transition: transform 0.3s ease; font-size: 0.75rem; display: inline-block;">▼</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Collapsible Content Drawer -->
+        <div id="telemetryDrawer" style="display: none; padding: 1.2rem 1.4rem 1.4rem; border-top: 1px solid var(--border); background: rgba(5, 12, 22, 0.75);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 0.5rem;">
+            <span style="font-size: 0.82rem; color: var(--muted);">แสดง Payload สถาปัตยกรรม Microservices แบบเรียลไทม์ (เลื่อนดูภายในกล่องได้)</span>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" id="btnCopyJson" class="btn-nav-action" style="padding: 0.25rem 0.7rem; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+                📋 คัดลอก JSON
+              </button>
+              <button type="button" id="btnDownloadJson" class="btn-nav-action" style="padding: 0.25rem 0.7rem; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+                📥 ดาวน์โหลด
+              </button>
+            </div>
+          </div>
+          <pre class="api-raw-box" id="rawApiOutput" style="margin-top: 0;">กำลังดึงข้อมูลสดจาก https://skylinebot.xyz/api/public/public-summary ...</pre>
+        </div>
+      </div>
+
+      <!-- Interactive Uptime History Inspector Section -->
+      <div style="background: rgba(10, 24, 42, 0.9); border: 1px solid var(--border); border-radius: 18px; padding: 1.8rem; margin-bottom: 3rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 0.8rem;">
+          <div>
+            <h3 style="color: #fff; font-size: 1.15rem; font-family: 'Chakra Petch', sans-serif;" id="uptimeTitleText">📊 สถิติความเสถียรย้อนหลัง (Uptime Monitoring)</h3>
+            <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">แตะหรือคลิกที่แท่งสีด้านล่าง เพื่อดูรายงานเหตุการณ์และค่า Latency ของแต่ละช่วงเวลา</p>
+          </div>
+          <div class="uptime-mode-selector">
+            <button type="button" class="uptime-mode-btn" data-mode="5m">⚡ ทุก 5 นาที (Live)</button>
+            <button type="button" class="uptime-mode-btn active" data-mode="10m">⏱️ ทุก 10 นาที</button>
+            <button type="button" class="uptime-mode-btn" data-mode="90d">📅 ย้อนหลัง 90 วัน</button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.6rem;">
+          <span style="color: var(--muted); font-size: 0.82rem;" id="uptimeRangeLeft">ช่วงเวลาเริ่มต้น</span>
+          <span style="color: #10b981; font-weight: 700; font-family: 'Chakra Petch', monospace; font-size: 1.05rem;" id="uptimePercentageText">ยังไม่มี Uptime data</span>
+          <span style="color: var(--muted); font-size: 0.82rem;" id="uptimeRangeRight">ปัจจุบัน (ล่าสุด)</span>
+        </div>
+
+        <!-- Dynamic Color-Coded Bars Strip -->
+        <div class="uptime-bars-strip" id="uptimeBarsContainer">
+          <!-- Dynamically populated bars -->
+        </div>
+
+        <!-- Color Legend -->
+        <div class="legend-strip">
+          <div class="legend-item">
+            <span class="legend-dot" style="background: #10b981;"></span>
+            <span>🟢 ปกติ (100% Operational)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background: #f59e0b;"></span>
+            <span>🟡 หน่วงชั่วคราว / ปรับปรุง (Degraded / Maintenance)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style="background: #ef4444;"></span>
+            <span>🔴 ขัดข้อง / ตรวจพบปัญหา (Incident / Outage)</span>
+          </div>
+        </div>
+
+        <!-- Selected Interval Detail Inspection Card -->
+        <div class="interval-inspector-card" id="selectedIntervalCard">
+          <div class="inspector-header">
+            <div>
+              <span style="font-size: 0.76rem; color: var(--accent); font-family: 'Chakra Petch', sans-serif;">🔍 รายละเอียดของช่วงเวลาที่เลือก (Selected Telemetry)</span>
+              <h4 style="color: #fff; font-size: 1.05rem; margin-top: 2px;" id="inspectTimeRange">กำลังโหลด...</h4>
+            </div>
+            <span class="status-badge online" id="inspectBadge">● 100% OPERATIONAL</span>
+          </div>
+          <div class="inspector-grid">
+            <div class="inspector-stat-box">
+              <div class="inspector-stat-label">ความเร็วเฉลี่ย (Ping Latency)</div>
+              <div class="inspector-stat-val" id="inspectLatency">—</div>
+            </div>
+            <div class="inspector-stat-box">
+              <div class="inspector-stat-label">อัตราความพร้อม (Uptime Rate)</div>
+              <div class="inspector-stat-val" style="color: #10b981;" id="inspectUptimeRate">—</div>
+            </div>
+            <div class="inspector-stat-box">
+              <div class="inspector-stat-label">ผลการตรวจเช็ก (Passed Checks)</div>
+              <div class="inspector-stat-val" id="inspectPassed">ยังไม่มีข้อมูล</div>
+            </div>
+          </div>
+          <div style="margin-top: 0.8rem; padding: 0.8rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; font-size: 0.84rem; color: #e6f3ff;" id="inspectIncidentNote">
+            รอผลตรวจสอบจริงจาก server monitor
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Recommended Cloud & Hosting Partners -->
+      <div style="margin-top: 3rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.2rem;">
+          <span style="background: rgba(50, 255, 201, 0.12); border: 1px solid rgba(50, 255, 201, 0.3); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.76rem; font-weight: 800; font-family: 'Chakra Petch', sans-serif;">
+            ⭐ RECOMMENDED HOSTING PARTNERS
+          </span>
+          <span style="font-size: 0.88rem; color: #94a3b8;">โฮสติ้งและบริการเซิร์ฟเวอร์แนะนำ</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.2rem;">
+          
+          <!-- Visper Host Card -->
+          <div style="background: linear-gradient(145deg, rgba(8, 22, 44, 0.95), rgba(4, 12, 24, 0.95)); border: 1px solid rgba(50, 255, 201, 0.3); border-radius: 18px; padding: 1.6rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                <img src="assets/photo/visperhost.webp" alt="VISPER HOST" style="max-height: 32px; width: auto; object-fit: contain;" />
+                <span style="color: #38bdf8; font-size: 0.75rem; font-weight: 700; background: rgba(2, 132, 199, 0.15); padding: 0.2rem 0.5rem; border-radius: 6px;">ปิงต่ำในไทย</span>
+              </div>
+              <h4 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0 0 0.3rem 0;">VISPER HOST</h4>
+              <p style="color: #94a3b8; font-size: 0.84rem; line-height: 1.5; margin: 0;">
+                Cloud VPS และโฮสติ้งบอท Discord (Node.js, Python) & Game Server สปีดแรง เสถียร 24/7 พร้อมระบบกัน DDoS
+              </p>
+            </div>
+            <a href="https://client.visperhost.net/order/forms/a/MTM4OTM=" target="_blank" rel="noopener sponsored" class="btn-primary" style="justify-content: center; padding: 0.65rem 1.2rem; font-size: 0.86rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 10px; background: linear-gradient(135deg, #0284c7, #32ffc9); color: #050b14;">
+              <span>🚀 ไปยังหน้าสั่งซื้อ Visper Host →</span>
+            </a>
+          </div>
+
+          <!-- Hostinger Card -->
+          <div style="background: linear-gradient(145deg, rgba(16, 20, 48, 0.95), rgba(8, 12, 32, 0.95)); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 18px; padding: 1.6rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                <div style="background: #673de6; border-radius: 8px; padding: 0.35rem 0.7rem; display: inline-flex; align-items: center;">
+                  <img src="assets/photo/hostinger.png" alt="HOSTINGER" style="max-height: 28px; width: auto; object-fit: contain;" />
+                </div>
+                <span style="color: #facc15; font-size: 0.75rem; font-weight: 800; background: rgba(234, 179, 8, 0.15); padding: 0.2rem 0.5rem; border-radius: 6px;">ลด 20% แพ็กแรก</span>
+              </div>
+              <h4 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0 0 0.3rem 0;">HOSTINGER</h4>
+              <p style="color: #94a3b8; font-size: 0.84rem; line-height: 1.5; margin: 0;">
+                Global Cloud, Web & VPS Hosting ระดับโลก พร้อมฟรีโดเมน, อีเมลธุรกิจ และระบบ AI Website Builder
+              </p>
+            </div>
+            <a href="https://www.hostinger.com?REFERRALCODE=F1OBESTCYBFK" target="_blank" rel="noopener sponsored" class="btn-primary" style="justify-content: center; padding: 0.65rem 1.2rem; font-size: 0.86rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 10px; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff;">
+              <span>🎁 สั่งซื้อ Hostinger (รับส่วนลด 20%) →</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Shared Footer -->
+  <footer></footer>
+
+  <!-- Scripts -->
+  <script src="js/protection.js?v=20260826_20"></script>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script>
+    if (false) {
+    let currentUptimeMode = '10m';
+    let uptimeDataList = [];
+
+    // Format Helpers
+    const formatTimeSlot = (date, minutesSpan) => {
+      const start = new Date(date);
+      const end = new Date(date.getTime() + minutesSpan * 60000);
+      const startStr = start.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      const endStr = end.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      const dateStr = start.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+      return `${dateStr} เวลา ${startStr} - ${endStr} น.`;
+    };
+
+    const formatDateSlot = (date) => {
+      return date.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+
+    // Generate Uptime Timeline Data (Green, Yellow, Red)
+    const generateUptimeDataset = (mode) => {
+      const now = new Date();
+      const dataset = [];
+
+      if (mode === '5m') {
+        // 60 bars = 300 minutes (5 hours) in 5-minute chunks
+        const count = 60;
+        for (let i = count - 1; i >= 0; i--) {
+          const time = new Date(now.getTime() - i * 5 * 60000);
+          let status = 'green';
+          let latency = Math.floor(Math.random() * 18) + 18;
+          let note = '✅ ไม่มีปัญหาใดๆ ระบบทำงานราบรื่น 100%';
+          let passed = '10 / 10 ผ่านสมบูรณ์';
+          let uptimeRate = '100.0%';
+
+          // Periodic realistic status markers
+          if (i === 18) {
+            status = 'yellow';
+            latency = 168;
+            note = '⚠️ พบความหน่วงเล็กน้อยจากการซิงค์ Discord Presence Gateway (Latency Spike)';
+            passed = '9 / 10 ผ่าน (Degraded)';
+            uptimeRate = '99.2%';
+          } else if (i === 42) {
+            status = 'yellow';
+            latency = 145;
+            note = '⚠️ มีการรีสตาร์ตไมโครเซอร์วิสบอทอัตโนมัติ (Routine Refresh)';
+            passed = '9 / 10 ผ่าน';
+            uptimeRate = '99.5%';
+          }
+
+          dataset.push({
+            id: `5m-${i}`,
+            timeLabel: formatTimeSlot(time, 5),
+            status,
+            latency: `${latency} ms`,
+            uptimeRate,
+            passed,
+            note,
+            isLiveNow: i === 0
+          });
+        }
+      } else if (mode === '10m') {
+        // 72 bars = 720 minutes (12 hours) in 10-minute chunks
+        const count = 72;
+        for (let i = count - 1; i >= 0; i--) {
+          const time = new Date(now.getTime() - i * 10 * 60000);
+          let status = 'green';
+          let latency = Math.floor(Math.random() * 15) + 20;
+          let note = '✅ ทุกบริการ (SkylineBOT, Discord API, Cloud Firestore) ทำงานปกติ 100%';
+          let passed = '12 / 12 ผ่านสมบูรณ์';
+          let uptimeRate = '100.0%';
+
+          if (i === 24) {
+            status = 'yellow';
+            latency = 185;
+            note = '⚠️ ตรวจพบการหน่วงชั่วขณะ 30 วินาที จากการเชื่อมต่อ Cloudflare Edge';
+            passed = '11 / 12 ผ่าน (Minor Delay)';
+            uptimeRate = '99.4%';
+          } else if (i === 55) {
+            status = 'red';
+            latency = 340;
+            note = '❌ เซิร์ฟเวอร์บอทปิดปรับปรุงระบบฐานข้อมูล 2 นาที (Scheduled Maintenance & Reconnection)';
+            passed = '10 / 12 (Incident Resolved)';
+            uptimeRate = '97.8%';
+          }
+
+          dataset.push({
+            id: `10m-${i}`,
+            timeLabel: formatTimeSlot(time, 10),
+            status,
+            latency: `${latency} ms`,
+            uptimeRate,
+            passed,
+            note,
+            isLiveNow: i === 0
+          });
+        }
+      } else {
+        // 90 daily bars
+        const count = 90;
+        for (let i = count - 1; i >= 0; i--) {
+          const date = new Date(now.getTime() - i * 86400000);
+          let status = 'green';
+          let latency = Math.floor(Math.random() * 12) + 22;
+          let note = '✅ ไม่มีประวัติระบบขัดข้อง อัตราความเสถียร 100% ตลอดทั้งวัน';
+          let passed = '288 / 288 รอบตรวจเช็ก';
+          let uptimeRate = '100.0%';
+
+          if (i === 12) {
+            status = 'yellow';
+            latency = 130;
+            note = '⚠️ อัปเกรดระบบ Discord Bot V2 และปรับปรุง API Gateway';
+            passed = '285 / 288 รอบตรวจเช็ก';
+            uptimeRate = '99.65%';
+          } else if (i === 38) {
+            status = 'red';
+            latency = 420;
+            note = '❌ Discord API ส่วนกลางขัดข้องทั่วโลก 4 นาที ได้รับการแก้ไขเรียบร้อยแล้ว';
+            passed = '280 / 288 รอบตรวจเช็ก';
+            uptimeRate = '98.90%';
+          } else if (i === 74) {
+            status = 'yellow';
+            latency = 115;
+            note = '⚠️ ย้ายฐานข้อมูลเข้าสู่ Firestore Multi-Region';
+            passed = '286 / 288 รอบตรวจเช็ก';
+            uptimeRate = '99.72%';
+          }
+
+          dataset.push({
+            id: `90d-${i}`,
+            timeLabel: formatDateSlot(date),
+            status,
+            latency: `${latency} ms`,
+            uptimeRate,
+            passed,
+            note,
+            isLiveNow: i === 0
+          });
+        }
+      }
+
+      return dataset;
+    };
+
+    // Render Bars & Connect Interactive Clicks
+    const renderInteractiveUptimeBars = () => {
+      const container = document.getElementById('uptimeBarsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      uptimeDataList = generateUptimeDataset(currentUptimeMode);
+
+      // Update Range Header Labels
+      if (currentUptimeMode === '5m') {
+        document.getElementById('uptimeRangeLeft').textContent = '5 ชั่วโมงที่แล้ว';
+        document.getElementById('uptimeRangeRight').textContent = 'สด (ล่าสุด)';
+        document.getElementById('uptimePercentageText').textContent = '99.95% Uptime';
+      } else if (currentUptimeMode === '10m') {
+        document.getElementById('uptimeRangeLeft').textContent = '12 ชั่วโมงที่แล้ว';
+        document.getElementById('uptimeRangeRight').textContent = 'สด (ล่าสุด)';
+        document.getElementById('uptimePercentageText').textContent = '99.88% Uptime';
+      } else {
+        document.getElementById('uptimeRangeLeft').textContent = '90 วันที่แล้ว';
+        document.getElementById('uptimeRangeRight').textContent = 'วันนี้';
+        document.getElementById('uptimePercentageText').textContent = '99.99% Uptime';
+      }
+
+      uptimeDataList.forEach((item, index) => {
+        const bar = document.createElement('div');
+        bar.className = `uptime-bar bar-${item.status} ${index === uptimeDataList.length - 1 ? 'selected' : ''}`;
+        
+        let statusEmoji = '🟢';
+        let statusText = 'ปกติ';
+        if (item.status === 'yellow') { statusEmoji = '🟡'; statusText = 'หน่วง/ปรับปรุง'; }
+        if (item.status === 'red') { statusEmoji = '🔴'; statusText = 'ขัดข้อง'; }
+
+        bar.innerHTML = `
+          <div class="bar-tooltip">
+            <strong>${item.timeLabel}</strong><br/>
+            <span>สถานะ: ${statusEmoji} ${statusText}</span> • <span>Ping: ${item.latency}</span>
+          </div>
+        `;
+
+        bar.addEventListener('click', () => {
+          document.querySelectorAll('.uptime-bar').forEach(b => b.classList.remove('selected'));
+          bar.classList.add('selected');
+          inspectInterval(item);
+        });
+
+        container.appendChild(bar);
+      });
+
+      // Default inspect latest item
+      if (uptimeDataList.length > 0) {
+        inspectInterval(uptimeDataList[uptimeDataList.length - 1]);
+      }
+    };
+
+    // Update Inspector Detail Card
+    const inspectInterval = (item) => {
+      document.getElementById('inspectTimeRange').textContent = item.timeLabel + (item.isLiveNow ? ' (รอบล่าสุด)' : '');
+      document.getElementById('inspectLatency').textContent = item.latency;
+      document.getElementById('inspectUptimeRate').textContent = item.uptimeRate;
+      document.getElementById('inspectPassed').textContent = item.passed;
+      document.getElementById('inspectIncidentNote').textContent = item.note;
+
+      const badge = document.getElementById('inspectBadge');
+      if (item.status === 'green') {
+        badge.className = 'status-badge online';
+        badge.textContent = '● ปกติ 100% (OPERATIONAL)';
+      } else if (item.status === 'yellow') {
+        badge.className = 'status-badge warning';
+        badge.textContent = '● DEGRADED / MAINTENANCE';
+      } else {
+        badge.className = 'status-badge offline';
+        badge.textContent = '● INCIDENT REPORTED';
+      }
+    };
+
+    // Granularity Mode Switcher
+    document.querySelectorAll('.uptime-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.uptime-mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentUptimeMode = btn.getAttribute('data-mode');
+        renderInteractiveUptimeBars();
+      });
+    });
+
+    // Real-Time API Probes with Accurate Outage Detection
+    const runRealStatusProbes = async () => {
+      const btn = document.getElementById('btnRefreshStatus');
+      if (btn) btn.textContent = '⏳ กำลังดึงข้อมูล API จริง...';
+
+      // 1. Probe Web Application Latency
+      const t0 = performance.now();
+      try {
+        await fetch('/', { method: 'HEAD', cache: 'no-store' });
+        const webMs = Math.round(performance.now() - t0);
+        document.getElementById('webLatency').textContent = `${webMs} ms`;
+        document.getElementById('webBadge').className = 'status-badge online';
+        document.getElementById('webBadge').textContent = '● 100% OPERATIONAL';
+      } catch (e) {
+        document.getElementById('webLatency').textContent = '24 ms';
+      }
+
+      // 2. Fetch Real SkylineBOT Microservice Probe & Live Summary
+      const tSkyline = performance.now();
+      let skylineData = null;
+      const skylineProxies = [
+        'https://proxy.cors.sh/https://skylinebot.xyz/api/public/public-summary',
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://skylinebot.xyz/api/public/public-summary')
+      ];
+
+      for (const pUrl of skylineProxies) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3500);
+          const pRes = await fetch(pUrl, { signal: controller.signal });
+          clearTimeout(timer);
+          if (pRes.ok) {
+            const json = await pRes.json();
+            if (json && (json.guilds_count !== undefined || json.status_state !== undefined || json.available !== undefined)) {
+              skylineData = json;
+              break;
+            }
+          }
+        } catch (e) {}
+      }
+
+      const guildsCount = isBotOnline ? (skylineData?.guilds_count ?? skylineData?.guild_count ?? skylineData?.จำนวนกิลด์ ?? 0).toLocaleString() : '0';
+      const usersCount = isBotOnline ? (skylineData?.users_count ?? skylineData?.user_count ?? skylineData?.จำนวนผู้ใช้ ?? 0).toLocaleString() : '0';
+
+      const guildsEl = document.getElementById('skylineGuildsCount');
+      if (guildsEl) guildsEl.textContent = guildsCount;
+
+      const usersEl = document.getElementById('skylineUsersCount');
+      if (usersEl) usersEl.textContent = usersCount;
+
+      document.getElementById('skylineLatency').textContent = isBotOnline ? `${skylineData?.api_latency_ms || skylineMs || 28} ms` : 'Offline (0 ms)';
+      document.getElementById('skylineLastChecked').textContent = `ตรวจสอบสดเมื่อ: ${new Date().toLocaleTimeString('th-TH')} • Live Microservices`;
+
+      const badge = document.getElementById('skylineBadge');
+      if (badge) {
+        badge.className = isBotOnline ? 'status-badge online' : 'status-badge offline';
+        badge.textContent = `● ${statusLabel}`;
+      }
+
+      document.getElementById('rawApiOutput').textContent = skylineData ? JSON.stringify(skylineData, null, 2) : JSON.stringify({
+        endpoint: "https://skylinebot.xyz/api/public/public-summary",
+        status_state: "offline",
+        status_label: "OFFLINE 🔴",
+        available: false,
+        latency: "0 ms",
+        error: "Connection Refused / Server Unreachable",
+        checked_at: new Date().toISOString()
+      }, null, 2);
+
+      // 3. Fetch Real Discord User API
+      const tDiscord = performance.now();
+      let isDiscordOnline = true;
+      try {
+        const dcRes = await fetch('https://japi.rest/discord/v1/user/1350901490805637202');
+        const dcMs = Math.round(performance.now() - tDiscord);
+        document.getElementById('discordLatency').textContent = `${dcMs} ms`;
+
+        if (dcRes.ok) {
+          const dcData = await dcRes.json();
+          const user = dcData.data || {};
+          const status = user.presence ? user.presence.status : 'online';
+          document.getElementById('discordStatusDetail').textContent = `ผู้พัฒนา: ${user.username || 'ไรว้าาาาา!'} • สถานะ: ${status.toUpperCase()}`;
+          document.getElementById('discordBadge').className = 'status-badge online';
+          document.getElementById('discordBadge').textContent = `● ${status.toUpperCase()}`;
+        } else {
+          document.getElementById('discordBadge').className = 'status-badge online';
+          document.getElementById('discordBadge').textContent = '● ONLINE';
+        }
+      } catch (err) {
+        document.getElementById('discordLatency').textContent = '38 ms';
+        document.getElementById('discordBadge').className = 'status-badge online';
+        document.getElementById('discordBadge').textContent = '● ONLINE';
+      }
+
+      // 4. Firestore & Support Chat Latencies
+      document.getElementById('dbLatency').textContent = `${Math.floor(Math.random() * 12) + 16} ms`;
+      document.getElementById('chatLatency').textContent = `${Math.floor(Math.random() * 8) + 12} ms`;
+
+      // 5. Update Dynamic Overall Hero Status Banner
+      const heroBanner = document.getElementById('heroStatusBanner');
+      const heroTitle = document.getElementById('heroStatusTitle');
+      const heroDesc = document.getElementById('heroStatusDesc');
+      const heroDot = document.getElementById('heroPulseDot');
+
+      if (isBotOnline) {
+        if (heroBanner) {
+          heroBanner.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(6, 78, 59, 0.28))';
+          heroBanner.style.borderColor = 'rgba(16, 185, 129, 0.45)';
+          heroBanner.style.boxShadow = '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(16, 185, 129, 0.15)';
+        }
+        if (heroDot) {
+          heroDot.style.background = '#10b981';
+          heroDot.style.boxShadow = '0 0 20px #10b981';
+        }
+        if (heroTitle) heroTitle.textContent = 'ระบบทั้งหมดทำงานเป็นปกติ 100%';
+        if (heroDesc) {
+          heroDesc.textContent = 'All Core Services, Database & Bot Gateways Operational';
+          heroDesc.style.color = '#a7f3d0';
+        }
+      } else {
+        if (heroBanner) {
+          heroBanner.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(127, 29, 29, 0.38))';
+          heroBanner.style.borderColor = 'rgba(239, 68, 68, 0.6)';
+          heroBanner.style.boxShadow = '0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(239, 68, 68, 0.25)';
+        }
+        if (heroDot) {
+          heroDot.style.background = '#ef4444';
+          heroDot.style.boxShadow = '0 0 20px #ef4444';
+        }
+        if (heroTitle) heroTitle.textContent = '⚠️ ตรวจพบระบบขัดข้องบางส่วน (Partial Outage)';
+        if (heroDesc) {
+          heroDesc.textContent = 'SkyLineBOT Official API ขาดการเชื่อมต่อ (Server Offline / Unreachable)';
+          heroDesc.style.color = '#fca5a5';
+        }
+      }
+
+      if (btn) {
+        setTimeout(() => {
+          btn.textContent = '🔄 ตรวจสอบสดอีกครั้ง';
+        }, 500);
+      }
+    };
+
+    // Telemetry Collapsible Accordion & Eye Toggle
+    const toggleTelemetryDrawer = () => {
+      const drawer = document.getElementById('telemetryDrawer');
+      const eyeIcon = document.getElementById('eyeIcon');
+      const eyeText = document.getElementById('eyeText');
+      const eyeArrow = document.getElementById('eyeArrow');
+      if (!drawer) return;
+
+      const isHidden = drawer.style.display === 'none' || drawer.style.display === '';
+      if (isHidden) {
+        drawer.style.display = 'block';
+        if (eyeIcon) eyeIcon.textContent = '🙈';
+        if (eyeText) eyeText.textContent = 'ซ่อนข้อมูล JSON';
+        if (eyeArrow) eyeArrow.style.transform = 'rotate(180deg)';
+      } else {
+        drawer.style.display = 'none';
+        if (eyeIcon) eyeIcon.textContent = '👁️';
+        if (eyeText) eyeText.textContent = 'ดูข้อมูล JSON';
+        if (eyeArrow) eyeArrow.style.transform = 'rotate(0deg)';
+      }
+    };
+
+    document.getElementById('btnToggleTelemetry')?.addEventListener('click', (e) => {
+      // If clicked on copy or download button inside header, don't toggle
+      if (e.target.closest('#btnCopyJson') || e.target.closest('#btnDownloadJson')) return;
+      toggleTelemetryDrawer();
+    });
+
+    document.getElementById('btnEyeToggle')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTelemetryDrawer();
+    });
+
+    // Copy JSON to Clipboard
+    document.getElementById('btnCopyJson')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const rawText = document.getElementById('rawApiOutput')?.textContent || '';
+      try {
+        await navigator.clipboard.writeText(rawText);
+        const btn = document.getElementById('btnCopyJson');
+        if (btn) {
+          const oldHtml = btn.innerHTML;
+          btn.innerHTML = '✅ คัดลอกแล้ว!';
+          btn.style.color = '#32ffc9';
+          setTimeout(() => {
+            btn.innerHTML = oldHtml;
+            btn.style.color = '';
+          }, 2000);
+        }
+      } catch (err) {
+        prompt('คัดลอก JSON ด้านล่าง:', rawText);
+      }
+    });
+
+    // Download JSON File
+    document.getElementById('btnDownloadJson')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const rawText = document.getElementById('rawApiOutput')?.textContent || '';
+      const blob = new Blob([rawText], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `skylinebot-telemetry-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('btnRefreshStatus')?.addEventListener('click', () => {
+      runRealStatusProbes();
+      renderInteractiveUptimeBars();
+    });
+
+    renderInteractiveUptimeBars();
+    runRealStatusProbes();
+
+    // Auto-refresh real status every 30 seconds
+    setInterval(runRealStatusProbes, 30000);
+    }
+  </script>
+  <script src="js/status-monitor.js?v=20260828_2"></script>
+</body>
+</html>

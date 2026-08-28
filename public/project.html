@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="pageTitle">ข้อมูลโปรเจกต์ • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=20260826_110" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      databaseURL: "https://bestcynixdev-default-rtdb.asia-southeast1.firebasedatabase.app",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5",
+      projectNumber: "172682556745"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <script>
+    (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawId = urlParams.get('id');
+      if (!rawId || rawId.trim() === '') {
+        document.documentElement.classList.add('mode-catalog');
+      } else {
+        document.documentElement.classList.add('mode-detail');
+      }
+    })();
+  </script>
+
+  <style>
+    /* Instant Zero-Delay Mode Rendering */
+    html.mode-catalog #allProjectsView { display: block !important; }
+    html.mode-catalog #singleProjectView { display: none !important; }
+    html.mode-detail #singleProjectView { display: block !important; }
+    html.mode-detail #allProjectsView { display: none !important; }
+
+    .project-page-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-top: 5.5rem;
+      position: relative;
+      z-index: 2;
+    }
+    .project-hero-container {
+      width: min(1200px, calc(100vw - 2.5rem));
+      margin: 2rem auto 4rem;
+      flex: 1;
+    }
+    .project-card-main {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: linear-gradient(165deg, rgba(12, 28, 50, 0.95), rgba(6, 17, 30, 0.98));
+      border: 1px solid rgba(50, 255, 201, 0.25);
+      border-radius: 24px;
+      padding: 3rem 2.8rem;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), 0 0 35px rgba(50, 255, 201, 0.1);
+      backdrop-filter: blur(24px);
+      animation: cardFadeIn 0.5s ease-out;
+    }
+    @keyframes cardFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 650px) {
+      .project-card-main { padding: 1.8rem 1.4rem; }
+    }
+
+    /* Badges & Period Row */
+    .proj-meta-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+    }
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .badge-period {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #94b8db;
+    }
+    .badge-status-active {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+      color: #4ade80;
+    }
+    .badge-status-closed {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #f87171;
+    }
+    .badge-status-spoiler {
+      background: rgba(168, 85, 247, 0.18);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #d8b4fe;
+    }
+    .badge-feat {
+      background: rgba(50, 255, 201, 0.15);
+      border: 1px solid #32ffc9;
+      color: #32ffc9;
+    }
+    .badge-dev {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid #f59e0b;
+      color: #fbbf24;
+    }
+
+    /* Titles */
+    .proj-main-title {
+      font-size: clamp(2rem, 5.5vw, 3rem);
+      font-weight: 800;
+      color: #ffffff;
+      font-family: "Chakra Petch", sans-serif;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 25px rgba(50, 255, 201, 0.25);
+    }
+    .proj-main-desc {
+      font-size: 1.15rem;
+      color: #c5ddf5;
+      line-height: 1.75;
+      margin-bottom: 2.2rem;
+    }
+
+    /* Content Section Boxes */
+    .proj-section-block {
+      background: rgba(4, 14, 26, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 1.8rem 2rem;
+      margin-bottom: 1.8rem;
+      border-left: 4px solid var(--accent);
+      transition: all 0.3s ease;
+    }
+    .proj-section-block:hover {
+      border-color: rgba(50, 255, 201, 0.4);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+    .proj-section-block h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .proj-section-block p {
+      font-size: 0.98rem;
+      color: #9dbedb;
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+
+    /* Stack Pills */
+    .proj-stack-pills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-top: 0.8rem;
+    }
+    .proj-tech-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.5rem 1.1rem;
+      background: rgba(10, 25, 45, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .proj-tech-pill:hover {
+      border-color: var(--accent);
+      background: rgba(15, 38, 65, 0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(50, 255, 201, 0.25);
+    }
+
+    /* Action Buttons */
+    .proj-actions-row {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 2.5rem;
+      padding-top: 1.8rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-visit-main {
+      padding: 0.95rem 2.4rem;
+      background: linear-gradient(135deg, #32ffc9, #0284c7);
+      color: #050b14 !important;
+      font-family: "Prompt", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 25px rgba(50, 255, 201, 0.35);
+      border: none;
+      cursor: pointer;
+    }
+    .btn-visit-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 35px rgba(50, 255, 201, 0.55);
+    }
+    .btn-share-main {
+      padding: 0.95rem 1.8rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff !important;
+      font-family: "Prompt", sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.25s ease;
+    }
+    .btn-share-main:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #32ffc9;
+      color: #32ffc9 !important;
+    }
+
+    /* Cover & Gallery */
+    .proj-cover-banner {
+      width: 100%;
+      max-height: 380px;
+      border-radius: 18px;
+      object-fit: cover;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .proj-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .proj-gallery-item {
+      width: 100%;
+      height: 160px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .proj-gallery-item:hover {
+      transform: scale(1.03);
+      border-color: #32ffc9;
+      box-shadow: 0 8px 25px rgba(50, 255, 201, 0.35);
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Orbs & Particle Layer -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="particle-layer"></div>
+
+  <!-- Topbar Header -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand-row">
+        <a href="/" class="brand" style="text-decoration: none;">
+          <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Dev Logo" />
+          <span>BestCyniX Dev</span>
+        </a>
+      </div>
+      <div class="nav-auth-wrap">
+        <a href="/" class="btn-secondary" id="topbarBackBtn" style="font-size: 0.88rem; padding: 0.45rem 1.1rem; text-decoration: none;">
+          <span>← กลับสู่หน้าหลัก</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <div class="project-page-wrap">
+    <div class="project-hero-container">
+
+      <!-- 1. All Projects Portfolio Archive View (When no ?id= query) -->
+      <div id="allProjectsView" style="display: none; width: 100%;">
+        <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+          <div class="section-tag" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.95rem; border-radius: 999px; background: rgba(50, 255, 201, 0.12); border: 1px solid var(--accent); color: var(--accent); font-size: 0.82rem; font-weight: 700; margin-bottom: 0.8rem;">
+            <span>📁 FEATURED PORTFOLIO</span>
+          </div>
+          <h1 class="hero-title" style="font-size: clamp(2rem, 5vw, 2.8rem); font-family: 'Chakra Petch', sans-serif; font-weight: 800; color: #fff; margin-bottom: 0.6rem;">
+            โปรเจกต์ทั้งหมด
+          </h1>
+          <p class="section-desc" style="color: var(--muted); font-size: 1.05rem; max-width: 680px; margin: 0 auto; line-height: 1.7;">
+            รวมงานบอท, เว็บไซต์ และคอมมูนิตี้ที่เป็นตัวตนของ BestCyniX Dev ค้นหาและกรองได้แบบเรียลไทม์
+          </p>
+        </div>
+
+        <!-- Controls: Search & Filter Pills -->
+        <div class="projects-controls" style="margin-bottom: 1.5rem;">
+          <div class="project-search-box">
+            <span class="project-search-icon">🔍</span>
+            <input type="text" class="project-search-input" id="projectSearchInput" placeholder="ค้นหาชื่อโปรเจกต์, เทคโนโลยี, หรือรายละเอียด..." />
+          </div>
+
+          <div class="project-filter-pills">
+            <button type="button" class="p-filter-pill active" data-filter="all">ทั้งหมด</button>
+            <button type="button" class="p-filter-pill" data-filter="featured">⭐ เด่น (Pinned)</button>
+            <button type="button" class="p-filter-pill" data-filter="active">🟢 เปิดอยู่</button>
+            <button type="button" class="p-filter-pill" data-filter="closed">🔴 ปิดตัวแล้ว</button>
+            <button type="button" class="p-filter-pill" data-filter="spoiler">🔒 ความลับ / สปอยล์</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1.2rem; font-size: 0.88rem; color: var(--muted);" id="projectCountLabel">
+          กำลังโหลดโปรเจกต์...
+        </div>
+
+        <!-- Projects Grid Container -->
+        <div class="projects-grid" id="projectsContainer">
+          <!-- Dynamically rendered by cms-loader.js -->
+        </div>
+
+        <!-- Portfolio Pagination Controls (< 0 >) -->
+        <div class="portfolio-pagination-bar" id="portfolioPaginationBar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 2.2rem; padding: 1.1rem 1.4rem; background: rgba(8, 20, 36, 0.85); border: 1px solid var(--border); border-radius: 16px; backdrop-filter: blur(12px);">
+          <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; color: var(--muted);">
+            <span>แสดงต่อหน้า:</span>
+            <select id="projectPageSizeSelect" class="form-input" style="padding: 0.35rem 0.75rem; font-size: 0.85rem; width: auto; background: rgba(14, 34, 58, 0.95); color: #fff; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; outline: none;">
+              <option value="3">3 รายการ</option>
+              <option value="6">6 รายการ</option>
+              <option value="9">9 รายการ</option>
+              <option value="12">12 รายการ</option>
+              <option value="all" selected>ทั้งหมด (All)</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button type="button" class="btn-nav-action" id="btnProjectPrevPage" title="หน้าก่อนหน้า" style="padding: 0.4rem 0.9rem; font-weight: 700; cursor: pointer;">
+              &lt; หน้าก่อน
+            </button>
+            
+            <div style="display: flex; align-items: center; gap: 0.35rem; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border); padding: 0.25rem 0.65rem; border-radius: 8px; font-family: 'Chakra Petch', sans-serif;">
+              <span style="color: var(--muted);">&lt;</span>
+              <input type="number" id="inputProjectPageNumber" min="1" max="1" value="1" style="width: 36px; text-align: center; background: transparent; border: none; color: var(--accent); font-weight: 700; font-size: 0.95rem; outline: none;" />
+              <span style="color: var(--muted);" id="projectTotalPagesLabel">/ 1 &gt;</span>
+            </div>
+
+            <button type="button" class="btn-nav-action" id="btnProjectNextPage" title="หน้าถัดไป" style="padding: 0.4rem 0.9rem; font-weight: 700; cursor: pointer;">
+              หน้าถัดไป &gt;
+            </button>
+          </div>
+
+          <a href="/" class="btn-primary" style="padding: 0.45rem 1.2rem; font-size: 0.88rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <span>🏠 กลับสู่หน้าหลัก →</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. Single Project Detail View (When ?id= is specified) -->
+      <div id="singleProjectView" style="display: none; width: 100%;">
+        <div class="project-card-main" id="projectCardBox">
+          <!-- Loading State Spinner -->
+          <div style="text-align: center; padding: 4rem 1rem; color: var(--muted);" id="loadingState">
+            <div style="font-size: 1.8rem; margin-bottom: 0.8rem; animation: orbFloat 2s infinite ease-in-out;">⚡</div>
+            <div style="font-size: 1.1rem; color: #fff; font-weight: 600;">กำลังโหลดข้อมูลโปรเจกต์...</div>
+            <div style="font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem;">กำลังดึงข้อมูลสถาปัตยกรรมและเทคโนโลยีจากระบบ</div>
+          </div>
+
+          <!-- Project Loaded Details -->
+          <div id="projectDetailContent" style="display: none;">
+            <!-- Optional Cover Banner -->
+            <img src="" alt="Project Cover" class="proj-cover-banner" id="projCoverBanner" style="display: none;" />
+
+            <!-- Meta Badges Strip -->
+            <div class="proj-meta-bar">
+              <span class="meta-badge badge-period" id="projPeriodBadge">2026 - ปัจจุบัน</span>
+              <span class="meta-badge badge-status-active" id="projStatusBadge">🟢 เปิดใช้งานอยู่</span>
+              <span class="meta-badge badge-feat" id="projFeaturedBadge" style="display: none;">⭐ เด่น (Pinned)</span>
+              <span class="meta-badge badge-dev" id="projDevOnlyBadge" style="display: none;">🛡️ สิทธิ์เฉพาะ DEV</span>
+            </div>
+
+            <!-- Project Main Title & Description -->
+            <h1 class="proj-main-title" id="projTitle">SkyLineBOT #0194</h1>
+            <p class="proj-main-desc" id="projDesc">คำอธิบายภาพรวมของโปรเจกต์</p>
+
+            <!-- Countdown Timer for Scheduled Release -->
+            <div id="projCountdownWrap" style="display: none; margin-bottom: 2rem;">
+              <div class="countdown-pill" id="projCountdownVal" style="font-size: 1rem; padding: 0.65rem 1.3rem;">
+                ⏳ กำลังนับถอยหลังเปิดตัว...
+              </div>
+            </div>
+
+            <!-- Deep Technical Architecture & Story -->
+            <div class="proj-section-block">
+              <h3>📖 รายละเอียดเชิงลึก & เบื้องหลังการพัฒนา</h3>
+              <p id="projDetails">...</p>
+            </div>
+
+            <!-- Production Tech Stack -->
+            <div class="proj-section-block" style="border-left-color: var(--accent-purple);">
+              <h3>💻 สแต็กเทคโนโลยีที่ใช้จริง (Production Tech Stack)</h3>
+              <div class="proj-stack-pills-row" id="projStackGrid">
+                <!-- Tech Pills dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Screenshots Gallery -->
+            <div class="proj-section-block" id="projGalleryBox" style="display: none; border-left-color: var(--accent-blue);">
+              <h3>🖼️ ภาพตัวอย่างระบบ & ผลงานจริง (Screenshots Gallery)</h3>
+              <div class="proj-gallery-grid" id="projGalleryGrid">
+                <!-- Gallery items dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="proj-actions-row">
+              <a href="#" target="_blank" class="btn-visit-main" id="btnVisitProjectUrl">
+                <span>🌐 เปิดหน้าเว็บไซต์โปรเจกต์ →</span>
+              </a>
+              <button type="button" class="btn-share-main" id="btnShareProject">
+                <span>🔗 คัดลอกลิงก์โปรเจกต์นี้</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Access Denied State (For DEV Only projects) -->
+          <div id="accessDeniedState" style="display: none; text-align: center; padding: 4rem 1.5rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+            <h2 style="color: #ff5574; font-size: 1.8rem; margin-bottom: 0.8rem; font-family: 'Chakra Petch', sans-serif;">สงวนสิทธิ์เฉพาะบัญชีทีมพัฒนา (Dev Only)</h2>
+            <p style="color: var(--muted); font-size: 1rem; max-width: 520px; margin: 0 auto 2rem; line-height: 1.7;">
+              โปรเจกต์นี้อยู่ในช่วงพัฒนาลับ หรือเป็นเครื่องมือเฉพาะทีมงาน BestCyniX Dev กรุณาเข้าสู่ระบบด้วยบัญชี Dev เพื่อเข้าถึง
+            </p>
+            <a href="login" class="btn-primary" style="padding: 0.85rem 2rem;">🔐 เข้าสู่ระบบทีมงาน</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lightbox Photo Viewer Modal -->
+    <div class="cms-modal" id="lightboxModal" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.92); backdrop-filter: blur(16px); align-items: center; justify-content: center; padding: 1.5rem;">
+      <div style="position: relative; max-width: 92vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center;">
+        <button type="button" id="btnCloseLightbox" style="position: absolute; top: -45px; right: 0; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 1.2rem; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">✕</button>
+        <img id="lightboxImg" src="" alt="Full Preview" style="max-width: 100%; max-height: 82vh; border-radius: 14px; object-fit: contain; box-shadow: 0 20px 60px rgba(0,0,0,0.85); border: 1.5px solid rgba(50,255,201,0.4);" />
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer"></footer>
+  </div>
+
+  <script src="js/protection.js?v=20260825_02"></script>
+  <script src="js/shared-ui.js?v=20260826_99"></script>
+  <script src="js/cms-loader.js?v=20260825_02"></script>
+  <script src="js/project-detail.js?v=20260825_02"></script>
+</body>
+</html>

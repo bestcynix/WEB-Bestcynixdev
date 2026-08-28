@@ -1,0 +1,42 @@
+{
+  "name": "BestCyniX Dev • Full-Stack Engineering",
+  "short_name": "BestCyniX Dev",
+  "description": "ผู้พัฒนา Bot, Web และ Community Server • Skyline V1 Creator & SkyLineBOT #0194",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050b14",
+  "theme_color": "#050b14",
+  "icons": [
+    {
+      "src": "assets/photo/bcxlogo2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/photo/bcxlogo2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ผลงานโปรเจกต์",
+      "url": "/#projects",
+      "description": "ดูรายการโปรเจกต์และผลงานทั้งหมด"
+    },
+    {
+      "name": "สถานะระบบ",
+      "url": "/status",
+      "description": "ตรวจสอบสถานะระบบสดแบบเรียลไทม์"
+    },
+    {
+      "name": "แชทสดติดต่อ Dev",
+      "url": "/#contact",
+      "description": "ติดต่อและปรึกษาทีมพัฒนา"
+    }
+  ],
+  "categories": ["developer", "productivity", "utilities"]
+}
