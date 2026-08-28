@@ -9,8 +9,8 @@
 - Firestore and Storage security policies are `firestore.rules` and `storage.rules`.
 - Firebase Hosting deploys the `public/` directory as configured in `firebase.json`.
 - Affiliate deal eligibility and provider-sync contract live in `public/js/affiliate.js` and `AFFILIATE-OPERATIONS.md`.
-- Server-backed status monitoring is implemented in `functions/index.js` and rendered by `public/js/status-monitor.js`.
-- Status backend deployment is currently pending Firebase Billing activation. Do not enable billing automatically; after the owner enables it, deploy with `npx -y firebase-tools@latest deploy --only functions:statusApi,functions:statusMonitor`.
+- Server-backed status monitoring is rendered by `public/js/status-monitor.js` and currently served by the Supabase Edge Function `status-api` at `https://eujnhvfgraunjqgymslr.supabase.co/functions/v1/status-api`.
+- The free deployment path uses Supabase Free + Vercel Hosting + public GitHub Actions. Firebase Functions remains in `functions/index.js` as an optional paid-Firebase path; do not enable Billing automatically.
 
 ## Working rules
 
@@ -31,4 +31,4 @@
 - Firestore/Storage rules pass the Firebase rules deployment validation.
 - Deploy only after the local source and security rules are reviewed.
 - Status history must come from `site_status_history`/`site_status_daily`; never replace missing telemetry with random or hard-coded uptime values.
-- `/api/status` is the only frontend status source. If the function is unavailable, show `UNKNOWN`/empty telemetry and keep the page usable; never fall back to direct browser CORS proxies or fabricated values.
+- The Supabase `status-api` endpoint is the frontend status source. If it is unavailable, show `UNKNOWN`/empty telemetry and keep the page usable; never fall back to direct browser CORS proxies or fabricated values.
