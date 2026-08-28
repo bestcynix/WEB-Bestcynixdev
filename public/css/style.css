@@ -2124,7 +2124,7 @@ body.chat-fullscreen-lock .chat-window.fullscreen {
 }
 
 /* Mobile Drawer Components (Strictly hidden on desktop) */
-@media (min-width: 861px) {
+@media (min-width: 1361px) {
   .mobile-drawer-header,
   .mobile-dev-banner,
   .mobile-user-card,
@@ -2622,7 +2622,10 @@ body.chat-fullscreen-lock .chat-window.fullscreen {
   .btn-dev-portal { padding: 0.38rem 0.8rem; font-size: 0.82rem; }
 }
 
-@media (max-width: 1080px) {
+/* The authenticated header can contain a dashboard button, profile pill, and
+   notification control. Collapse the full navigation before those controls
+   become cramped inside the 1280px content rail. */
+@media (max-width: 1360px) {
   .topbar-inner {
     padding: 0.75rem 0;
   }
@@ -4600,7 +4603,7 @@ body.chat-fullscreen-lock .chat-window.fullscreen {
   scrollbar-color: rgba(50, 255, 201, 0.35) rgba(5, 11, 22, 0.6);
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1360px) {
   .desktop-nav-links {
     display: none !important;
   }
@@ -4612,7 +4615,7 @@ body.chat-fullscreen-lock .chat-window.fullscreen {
   }
 }
 
-@media (min-width: 1081px) {
+@media (min-width: 1361px) {
   .mobile-drawer-header,
   .mobile-dev-banner,
   .mobile-user-card,
