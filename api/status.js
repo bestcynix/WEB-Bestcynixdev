@@ -9,6 +9,7 @@ const ALLOWED_ORIGINS = new Set([
   'https://bestcynix.firebaseapp.com',
   'https://web-bestcynixdev.vercel.app'
 ]);
+const SUPABASE_EDGE_ENDPOINT = 'https://eujnhvfgraunjqgymslr.supabase.co/functions/v1/status-api';
 
 const isoNow = () => new Date().toISOString();
 
@@ -47,7 +48,7 @@ async function requestJson(url, timeoutMs = 8000) {
 }
 
 function serviceStatus(probe, isHealthy = probe.ok) {
-  if (!probe.ok) return 'outage';
+  if (!probe.ok) return isHealthy ? 'operational' : 'outage';
   return isHealthy ? 'operational' : 'degraded';
 }
 
@@ -56,7 +57,7 @@ async function runProbes() {
   const [skylineProbe, discordProbe, hostingProbe, cmsProbe, chatsProbe] = await Promise.all([
     requestJson(SKYLINE_ENDPOINT),
     requestJson(LANYARD_ENDPOINT),
-    requestJson('https://bestcynix.web.app/'),
+    requestJson(`https://bestcynix.web.app/?status_probe=${encodeURIComponent(checkedAt)}`),
     requestJson(FIREBASE_SITE_CMS),
     requestJson(FIREBASE_CHATS)
   ]);
@@ -183,6 +184,12 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'method_not_allowed' });
   try {
+    // Keep the legacy Vercel route useful without requiring a paid/server secret.
+    // Supabase owns persistence and privileged database access for the free path.
+    const edgeUrl = `${SUPABASE_EDGE_ENDPOINT}${req.query?.run === '1' ? '?run=1' : ''}`;
+    const edgeResponse = await fetch(edgeUrl, { headers: { accept: 'application/json' } });
+    const edgePayload = await edgeResponse.json();
+    if (edgeResponse.ok || edgeResponse.status !== 503) return res.status(edgeResponse.status).json(edgePayload);
     const payload = await getPayload(req.query?.run === '1');
     return res.status(200).json(payload);
   } catch (error) {
