@@ -10,7 +10,7 @@
 - Firebase Hosting deploys the `public/` directory as configured in `firebase.json`.
 - Affiliate deal eligibility and provider-sync contract live in `public/js/affiliate.js` and `AFFILIATE-OPERATIONS.md`.
 - Server-backed status monitoring is rendered by `public/js/status-monitor.js`; source for the Edge Function is `supabase/functions/status-api/index.ts`, served at `https://eujnhvfgraunjqgymslr.supabase.co/functions/v1/status-api`.
-- The free deployment path uses Supabase Free + Vercel Hosting + public GitHub Actions. Firebase Functions remains in `functions/index.js` as an optional paid-Firebase path; do not enable Billing automatically.
+- The free deployment path uses Supabase Free + Vercel Hosting + Render Static Site (`https://bestcynixdev-web.onrender.com`) + public GitHub Actions. Firebase Functions remains in `functions/index.js` as an optional paid-Firebase path; do not enable Billing automatically.
 
 ## Working rules
 
