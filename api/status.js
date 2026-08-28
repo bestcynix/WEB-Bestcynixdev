@@ -5,6 +5,8 @@ const FIREBASE_WEB_API_KEY = 'AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU';
 const FIREBASE_SITE_CMS = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/site_cms?key=${FIREBASE_WEB_API_KEY}&pageSize=1`;
 const FIREBASE_CHATS = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/chats?key=${FIREBASE_WEB_API_KEY}&pageSize=1`;
 const ALLOWED_ORIGINS = new Set([
+  'https://bestcynixdev.web.app',
+  'https://bestcynixdev.firebaseapp.com',
   'https://bestcynix.web.app',
   'https://bestcynix.firebaseapp.com',
   'https://web-bestcynixdev.vercel.app'
@@ -57,7 +59,7 @@ async function runProbes() {
   const [skylineProbe, discordProbe, hostingProbe, cmsProbe, chatsProbe] = await Promise.all([
     requestJson(SKYLINE_ENDPOINT),
     requestJson(LANYARD_ENDPOINT),
-    requestJson(`https://bestcynix.web.app/?status_probe=${encodeURIComponent(checkedAt)}`),
+    requestJson(`https://bestcynixdev.web.app/?status_probe=${encodeURIComponent(checkedAt)}`),
     requestJson(FIREBASE_SITE_CMS),
     requestJson(FIREBASE_CHATS)
   ]);

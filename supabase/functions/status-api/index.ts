@@ -5,7 +5,7 @@ const LANYARD = "https://api.lanyard.rest/v1/users/1350901490805637202";
 const API_KEY = "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU";
 const CMS = "https://firestore.googleapis.com/v1/projects/bestcynixdev/databases/(default)/documents/site_cms?key=" + API_KEY + "&pageSize=1";
 const CHATS = "https://firestore.googleapis.com/v1/projects/bestcynixdev/databases/(default)/documents/chats?key=" + API_KEY + "&pageSize=1";
-const ORIGINS = new Set(["https://bestcynix.web.app", "https://bestcynix.firebaseapp.com", "https://web-bestcynixdev.vercel.app"]);
+const ORIGINS = new Set(["https://bestcynixdev.web.app", "https://bestcynixdev.firebaseapp.com", "https://bestcynix.web.app", "https://bestcynix.firebaseapp.com", "https://web-bestcynixdev.vercel.app"]);
 const now = () => new Date().toISOString();
 
 function headers(req: Request) {
@@ -33,7 +33,7 @@ const state = (p: { ok: boolean }, healthy = p.ok) => !p.ok ? (healthy ? "operat
 
 async function freshReport() {
   const checkedAt = now();
-  const [skyline, discord, hosting, cms, chats] = await Promise.all([probe(SKYLINE), probe(LANYARD), probe("https://bestcynix.web.app/?status_probe=" + encodeURIComponent(checkedAt)), probe(CMS), probe(CHATS)]);
+  const [skyline, discord, hosting, cms, chats] = await Promise.all([probe(SKYLINE), probe(LANYARD), probe("https://bestcynixdev.web.app/?status_probe=" + encodeURIComponent(checkedAt)), probe(CMS), probe(CHATS)]);
   const sky: any = skyline.data || {};
   const presence: any = discord.data?.data || {};
   const online = skyline.ok && (sky.status_state === "online" || sky.available === true);
