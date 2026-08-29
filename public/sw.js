@@ -2,7 +2,7 @@
  * BestCyniX Dev - Service Worker (PWA & Offline Cache Engine)
  */
 
-const CACHE_NAME = 'bestcynix-cache-v20260826_06';
+const CACHE_NAME = 'bestcynix-cache-v20260829_01';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -119,4 +119,3 @@ self.addEventListener('push', (event) => {
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
-

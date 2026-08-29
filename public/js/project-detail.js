@@ -29,6 +29,7 @@
   const projDetails = document.getElementById('projDetails');
   const projStackGrid = document.getElementById('projStackGrid');
   const btnVisitProjectUrl = document.getElementById('btnVisitProjectUrl');
+  const btnVisitProjectCommunity = document.getElementById('btnVisitProjectCommunity');
   const btnShareProject = document.getElementById('btnShareProject');
   const projCountdownWrap = document.getElementById('projCountdownWrap');
   const projCountdownVal = document.getElementById('projCountdownVal');
@@ -38,6 +39,16 @@
 
   let currentProjectData = null;
   let isDevAdmin = false;
+
+  const safeLink = (value) => {
+    if (!value || typeof value !== 'string') return '';
+    try {
+      const parsed = new URL(value, document.baseURI);
+      return ['http:', 'https:', 'mailto:'].includes(parsed.protocol) ? parsed.href : '';
+    } catch (error) {
+      return '';
+    }
+  };
 
   // ──────────────────────────────────────────────────────────────────────────
   // 1. CATALOG MODE (All Projects Portfolio Archive)
@@ -163,6 +174,12 @@
         projCoverBanner.style.cursor = 'pointer';
         projCoverBanner.title = 'คลิกเพื่อดูภาพขยายเต็มจอ';
         projCoverBanner.onclick = () => openLightbox(proj.coverImage);
+        projCoverBanner.onerror = () => {
+          projCoverBanner.onerror = null;
+          projCoverBanner.src = 'assets/photo/bcxlogo2.png';
+          projCoverBanner.style.cursor = 'default';
+          projCoverBanner.onclick = null;
+        };
       } else {
         projCoverBanner.style.display = 'none';
       }
@@ -178,6 +195,11 @@
           img.alt = 'Screenshot';
           img.className = 'proj-gallery-item';
           img.title = 'คลิกเพื่อดูภาพขยายเต็มจอ';
+          img.onerror = () => {
+            img.onerror = null;
+            img.src = 'assets/photo/bcxlogo2.png';
+            img.title = 'ไม่พบภาพต้นฉบับ';
+          };
           img.onclick = () => openLightbox(imgUrl);
           projGalleryGrid.appendChild(img);
         });
@@ -246,11 +268,34 @@
 
     // Action Link
     if (btnVisitProjectUrl) {
-      btnVisitProjectUrl.href = proj.url || '#';
+      const websiteUrl = safeLink(proj.url);
+      const websiteEnabled = proj.showWebsite !== false && Boolean(websiteUrl);
+      btnVisitProjectUrl.style.display = websiteEnabled ? 'inline-flex' : 'none';
+      btnVisitProjectUrl.href = websiteEnabled ? websiteUrl : '#';
       btnVisitProjectUrl.onclick = (e) => {
+        if (!websiteEnabled) {
+          e.preventDefault();
+          return;
+        }
         if (proj.accessLevel === 'dev_only' && !isDevAdmin) {
           e.preventDefault();
           showCyberToast('🛡️ โปรเจกต์นี้เปิดให้เข้าถึงได้เฉพาะบัญชีทีมพัฒนา (Dev Only) เท่านั้น', '', 'warning');
+        }
+      };
+    }
+    if (btnVisitProjectCommunity) {
+      const communityUrl = safeLink(proj.communityUrl);
+      const communityEnabled = proj.showCommunity === true && Boolean(communityUrl);
+      btnVisitProjectCommunity.style.display = communityEnabled ? 'inline-flex' : 'none';
+      btnVisitProjectCommunity.href = communityEnabled ? communityUrl : '#';
+      btnVisitProjectCommunity.onclick = (e) => {
+        if (!communityEnabled) {
+          e.preventDefault();
+          return;
+        }
+        if (proj.accessLevel === 'dev_only' && !isDevAdmin) {
+          e.preventDefault();
+          showCyberToast('🛡️ ชุมชนของโปรเจกต์นี้เปิดให้บัญชีทีมพัฒนาเท่านั้น', '', 'warning');
         }
       };
     }
@@ -278,6 +323,19 @@
     }) || list[0];
   };
 
+  const normalizeProject = (project) => {
+    if (!project) return null;
+    const fallback = (window.BestCynixCMS?.data?.projects || []).find((item) => item.id === project.id) || {};
+    const communityUrl = project.communityUrl || fallback.communityUrl || '';
+    return {
+      ...fallback,
+      ...project,
+      showWebsite: project.showWebsite !== false,
+      communityUrl,
+      showCommunity: project.showCommunity === true && Boolean(communityUrl)
+    };
+  };
+
   // Main Page Loader Router
   const loadPageContent = async () => {
     if (isCatalogMode) {
@@ -303,7 +361,7 @@
         try {
           const doc = await db.collection('site_cms').doc('projects').get();
           if (doc.exists && doc.data().list) {
-            const found = findProjectInList(doc.data().list);
+            const found = normalizeProject(findProjectInList(doc.data().list));
             if (found) {
               renderProjectDetail(found);
               return;
@@ -313,12 +371,12 @@
 
         // Fallback from default dataset
         const fallbackList = window.BestCynixCMS?.data?.projects || [];
-        const fallback = findProjectInList(fallbackList) || fallbackList[0];
+        const fallback = normalizeProject(findProjectInList(fallbackList) || fallbackList[0]);
         renderProjectDetail(fallback);
       });
     } else {
       const fallbackList = window.BestCynixCMS?.data?.projects || [];
-      const fallback = findProjectInList(fallbackList) || fallbackList[0];
+      const fallback = normalizeProject(findProjectInList(fallbackList) || fallbackList[0]);
       renderProjectDetail(fallback);
     }
   };
@@ -329,4 +387,3 @@
     loadPageContent();
   }
 })();
-

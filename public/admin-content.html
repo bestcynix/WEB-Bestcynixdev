@@ -16,7 +16,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <script src="js/cms-loader.js?v=20260826_21"></script>
+  <script src="js/cms-loader.js?v=20260829_2"></script>
 
   <style>
     :root {
@@ -592,6 +592,22 @@
             <label>URL ของโปรเจกต์ (Project URL)</label>
             <input type="text" id="projUrl" class="form-input" placeholder="https://..." required />
           </div>
+          <div class="form-group full">
+            <label class="checkbox-row">
+              <input type="checkbox" id="projWebsiteEnabled" checked />
+              <span>🌐 แสดงปุ่มเปิดเว็บไซต์โปรเจกต์</span>
+            </label>
+          </div>
+          <div class="form-group full">
+            <label>ลิงก์ชุมชน/Discord ของโปรเจกต์</label>
+            <input type="url" id="projCommunityUrl" class="form-input" placeholder="https://discord.gg/... หรือ URL ชุมชน..." />
+          </div>
+          <div class="form-group full">
+            <label class="checkbox-row">
+              <input type="checkbox" id="projCommunityEnabled" />
+              <span>💬 แสดงปุ่มเข้าร่วมชุมชนโปรเจกต์</span>
+            </label>
+          </div>
 
           <!-- Cover Banner with URL & File Upload -->
           <div class="form-group full">
@@ -885,7 +901,7 @@
           }
         } else {
           socialChannelsList = [
-            { id: "discord", platform: "discord", name: "Discord", url: "https://discord.gg/", desc: "Community & Support Server", visible: true },
+            { id: "discord", platform: "discord", name: "Discord", url: "https://discord.gg/M8k2N3XgYF", desc: "Community & Support Server", visible: true },
             { id: "github", platform: "github", name: "GitHub", url: "https://github.com/Bestcynixdev", desc: "Open Source & Repositories", visible: true },
             { id: "facebook", platform: "facebook", name: "Facebook", url: "https://facebook.com/", desc: "BestCyniX Dev Page", visible: true },
             { id: "instagram", platform: "instagram", name: "Instagram", url: "https://instagram.com/bestcynix.dev", desc: "@bestcynix.dev", visible: true },
@@ -1613,6 +1629,9 @@
       document.getElementById("projStatus").value = p.status || "active";
       document.getElementById("projAccess").value = p.accessLevel || "public";
       document.getElementById("projUrl").value = p.url || "";
+      document.getElementById("projWebsiteEnabled").checked = p.showWebsite !== false;
+      document.getElementById("projCommunityUrl").value = p.communityUrl || "";
+      document.getElementById("projCommunityEnabled").checked = p.showCommunity === true && Boolean(p.communityUrl);
       document.getElementById("projCoverImage").value = p.coverImage || "";
       document.getElementById("projFeatured").checked = p.isFeatured === true;
       document.getElementById("projSpoiler").checked = p.isSpoiler === true;
@@ -1666,6 +1685,9 @@
       const status = document.getElementById("projStatus").value;
       const accessLevel = document.getElementById("projAccess").value;
       const url = document.getElementById("projUrl").value.trim();
+      const showWebsite = document.getElementById("projWebsiteEnabled").checked;
+      const communityUrl = document.getElementById("projCommunityUrl").value.trim();
+      const showCommunity = document.getElementById("projCommunityEnabled").checked && Boolean(communityUrl);
       const coverImage = document.getElementById("projCoverImage").value.trim();
       const gallery = [...currentGalleryList];
       const isFeatured = document.getElementById("projFeatured").checked;
@@ -1682,6 +1704,9 @@
         status,
         accessLevel,
         url,
+        showWebsite,
+        showCommunity,
+        communityUrl,
         coverImage: coverImage || null,
         gallery: gallery || [],
         isFeatured,

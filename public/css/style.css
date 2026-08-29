@@ -2558,13 +2558,44 @@ body.chat-fullscreen-lock .chat-window.fullscreen {
   color: #fff;
   font-weight: 600;
   font-family: 'Prompt', sans-serif;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .dropdown-link-text small {
   font-size: 0.72rem;
   color: var(--muted);
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Keep the shared desktop navigation readable when authenticated controls
+   are present. A scrollable link rail is preferable to overlapping labels. */
+.topbar-inner,
+.top-nav,
+.nav-right-cluster,
+.desktop-nav-links {
+  min-width: 0;
+}
+.desktop-nav-links {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.desktop-nav-links > * {
+  flex: 0 0 auto;
+}
+.nav-dropdown-menu {
+  max-width: min(360px, calc(100vw - 2rem));
+  box-sizing: border-box;
+}
+.nav-dropdown-group:last-child .nav-dropdown-menu {
+  left: auto;
+  right: 0;
+  transform: translateY(8px);
+}
+.nav-dropdown-group:last-child:hover .nav-dropdown-menu {
+  transform: translateY(0);
 }
 
 .drawer-icon-box,

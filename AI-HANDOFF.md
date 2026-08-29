@@ -30,5 +30,8 @@
 - Project history, timeline, CMS fallback, and remote CMS data agree.
 - Firestore/Storage rules pass the Firebase rules deployment validation.
 - Deploy only after the local source and security rules are reviewed.
-- Status history must come from `site_status_history`/`site_status_daily`; never replace missing telemetry with random or hard-coded uptime values.
+- Status history must come from Supabase `status_reports` (with daily aggregates derived by `status-api`); never replace missing telemetry with random or hard-coded uptime values.
 - The Supabase `status-api` endpoint is the frontend status source. If it is unavailable, show `UNKNOWN`/empty telemetry and keep the page usable; never fall back to direct browser CORS proxies or fabricated values.
+- Project CMS records support `showWebsite`, `showCommunity`, and `communityUrl`; missing legacy flags preserve the old website button behavior, while community buttons remain off unless explicitly enabled by Dev.
+- The canonical public community invite is `https://discord.gg/M8k2N3XgYF`, and the business contact email is `bestcynix@gmail.com`. Legacy CMS values are normalized at render time.
+- The status page renders real per-service check ratios and detailed selectable bar tooltips (time range, status, latency, passed checks, and failed services).

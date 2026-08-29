@@ -30,14 +30,20 @@
     if (!window._isDevAdminLoggedIn || adminMetricsStarted) return;
     adminMetricsStarted = true;
 
-    db.collection('users').onSnapshot((snapshot) => {
+    // Do not query the protected users/chats collections from a public page.
+    // Admin UI state can be broader than Firestore rules, so those listeners
+    // produced permission-denied errors for verified accounts without an
+    // admin custom claim. The aggregate site_stats document is intentionally
+    // public-readable and is the safe source for footer counters.
+    db.collection('site_stats').doc('metrics').onSnapshot((snapshot) => {
+      const data = snapshot.exists ? snapshot.data() : {};
       const elUsers = document.getElementById('footerTotalUsers');
-      if (elUsers) elUsers.textContent = snapshot.size.toLocaleString();
-    });
-
-    db.collection('chats').onSnapshot((snapshot) => {
       const elChats = document.getElementById('footerTotalChats');
-      if (elChats) elChats.textContent = snapshot.size.toLocaleString();
+      if (elUsers && data.totalUsers != null) elUsers.textContent = Number(data.totalUsers).toLocaleString();
+      if (elChats && data.totalChats != null) elChats.textContent = Number(data.totalChats).toLocaleString();
+    }, () => {
+      // The footer is non-critical; keep its fallback text without logging a
+      // noisy unhandled snapshot error in the browser console.
     });
   };
 

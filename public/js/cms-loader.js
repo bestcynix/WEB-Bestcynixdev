@@ -125,6 +125,9 @@
   window.getBCXTechIcon = getTechIcon;
   window.BCX_BRAND_ICONS = brandIcons;
 
+  const GLOBAL_DISCORD_URL = 'https://discord.gg/M8k2N3XgYF';
+  const BUSINESS_EMAIL = 'bestcynix@gmail.com';
+
   // 2. Default Rich Datasets
   const defaultCMSData = {
     projects: [
@@ -136,6 +139,9 @@
         isFeatured: true,
         accessLevel: 'public',
         isSpoiler: false,
+        showWebsite: true,
+        showCommunity: true,
+        communityUrl: GLOBAL_DISCORD_URL,
         releaseDate: null,
         url: 'https://skylinebot.xyz/',
         coverImage: 'assets/photo/SkyLineBOT-0194.png',
@@ -152,6 +158,9 @@
         isFeatured: true,
         accessLevel: 'public',
         isSpoiler: true,
+        showWebsite: true,
+        showCommunity: false,
+        communityUrl: '',
         releaseDate: null,
         url: 'https://bestcynixdev.web.app/project?id=mc-skyline',
         coverImage: 'assets/photo/mc-skyline.png',
@@ -384,13 +393,13 @@
       }
     ],
     socialContact: {
-      discord: { name: 'Discord', url: 'https://in-skylineendless.web.app/', desc: 'Community & Support Server', iconKey: 'discord_brand', color: '#5865F2', visible: true },
+      discord: { name: 'Discord', url: GLOBAL_DISCORD_URL, desc: 'Community & Support Server', iconKey: 'discord_brand', color: '#5865F2', visible: true },
       github: { name: 'GitHub', url: 'https://github.com/', desc: 'Open Source & Repositories', iconKey: 'github', color: '#ffffff', visible: true },
       facebook: { name: 'Facebook', url: 'https://facebook.com/', desc: 'BestCyniX Dev Page', iconKey: 'facebook_brand', color: '#1877F2', visible: true },
       instagram: { name: 'Instagram', url: 'https://instagram.com/', desc: '@bestcynix.dev', iconKey: 'instagram_brand', color: '#E4405F', visible: true },
       line: { name: 'LINE', url: 'https://line.me/', desc: 'Direct Chat & Inquiries', iconKey: 'line_brand', color: '#06C755', visible: true },
       x: { name: 'X (Twitter)', url: 'https://x.com/', desc: 'Latest Updates & Dev Log', iconKey: 'x_brand', color: '#ffffff', visible: true },
-      email: { name: 'Email', url: 'mailto:contact@bestcynix.dev', desc: 'Direct Business Mail', iconKey: 'email_brand', color: '#EA4335', visible: true }
+      email: { name: 'Email', url: `mailto:${BUSINESS_EMAIL}`, desc: 'Direct Business Mail', iconKey: 'email_brand', color: '#EA4335', visible: true }
     }
   };
 
@@ -400,6 +409,52 @@
     brandIcons: brandIcons,
     getTechIcon: getTechIcon
   };
+  window.BestCynixSiteConfig = { discordUrl: GLOBAL_DISCORD_URL, businessEmail: BUSINESS_EMAIL };
+
+  const defaultProjectById = new Map(defaultCMSData.projects.map((project) => [project.id, project]));
+  const normalizeProjects = (projects) => (Array.isArray(projects) ? projects : []).map((project) => {
+    const fallback = defaultProjectById.get(project.id) || {};
+    return {
+      ...fallback,
+      ...project,
+      showWebsite: project.showWebsite !== undefined ? project.showWebsite !== false : fallback.showWebsite !== false,
+      communityUrl: project.communityUrl || fallback.communityUrl || '',
+      showCommunity: project.showCommunity !== undefined
+        ? project.showCommunity === true && Boolean(project.communityUrl || fallback.communityUrl)
+        : fallback.showCommunity === true && Boolean(fallback.communityUrl)
+    };
+  });
+
+  const normalizeSocialContact = (raw) => {
+    const source = Array.isArray(raw)
+      ? raw.reduce((result, channel) => {
+        if (channel?.platform) result[channel.platform] = channel;
+        return result;
+      }, {})
+      : { ...(raw || {}) };
+    if (source.discord && (!source.discord.url || source.discord.url === 'https://in-skylineendless.web.app/' || source.discord.url === 'https://discord.gg/')) {
+      source.discord = { ...source.discord, url: GLOBAL_DISCORD_URL };
+    }
+    if (source.email && (!source.email.url || source.email.url.includes('contact@bestcynix.dev'))) {
+      source.email = { ...source.email, url: `mailto:${BUSINESS_EMAIL}` };
+    }
+    return source;
+  };
+
+  const safeLink = (value) => {
+    if (!value || typeof value !== 'string') return '';
+    try {
+      const parsed = new URL(value, document.baseURI);
+      return ['http:', 'https:', 'mailto:'].includes(parsed.protocol) ? parsed.href : '';
+    } catch (error) {
+      return '';
+    }
+  };
+  const escapeAttribute = (value) => String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
   // Auto Calculate & Update Stats Overview
   const updateAutoStats = (projects, futurePlans) => {
@@ -427,7 +482,7 @@
     if (!container) return;
     container.innerHTML = '';
 
-    const list = projectsList || defaultCMSData.projects;
+    const list = normalizeProjects(projectsList || defaultCMSData.projects);
     const activeFilter = window._currentProjectFilter || 'all';
     const searchQuery = (document.getElementById('projectSearchInput')?.value || '').toLowerCase().trim();
 
@@ -533,6 +588,8 @@
 
       // Dedicated Project Page URL
       const projectDetailUrl = `project?id=${p.id}`;
+      const projectUrl = safeLink(p.url);
+      const communityUrl = safeLink(p.communityUrl);
 
       // Sanitize cover image filename (replace # with -)
       const sanitizePhotoUrl = (url) => {
@@ -542,7 +599,7 @@
                   .replace(/#5750\.png/g, '-5750.png');
       };
       const cleanCover = sanitizePhotoUrl(p.coverImage);
-      const coverHtml = cleanCover ? `<img src="${cleanCover}" alt="${p.title}" class="project-card-cover" />` : '';
+      const coverHtml = cleanCover ? `<img src="${cleanCover}" alt="${p.title}" class="project-card-cover" onerror="this.onerror=null;this.src='assets/photo/bcxlogo2.png';" />` : '';
 
       card.innerHTML = `
         <div>
@@ -561,16 +618,15 @@
           ${countdownHtml}
         </div>
         <div class="project-actions-row">
-          <button type="button" class="btn-project-link" data-access="${p.accessLevel || 'public'}" data-url="${p.url}" data-title="${p.title.replace(/"/g, '&quot;')}">
-            <span>🌐 เปิดหน้าเว็บไซต์ →</span>
-          </button>
+          ${p.showWebsite !== false && projectUrl ? `<button type="button" class="btn-project-link" data-access="${escapeAttribute(p.accessLevel || 'public')}" data-url="${escapeAttribute(projectUrl)}" data-title="${escapeAttribute(p.title)}"><span>🌐 เปิดหน้าเว็บไซต์ →</span></button>` : ''}
+          ${p.showCommunity === true && communityUrl ? `<a href="${escapeAttribute(communityUrl)}" target="_blank" rel="noopener noreferrer" class="btn-project-link"><span>💬 เข้าร่วมชุมชน →</span></a>` : ''}
           <a href="${projectDetailUrl}" class="btn-project-details">
             <span>📄 ดูรายละเอียดโปรเจกต์ →</span>
           </a>
         </div>
       `;
 
-      card.querySelector('.btn-project-link')?.addEventListener('click', (e) => {
+      card.querySelector('button.btn-project-link')?.addEventListener('click', (e) => {
         if (p.accessLevel === 'dev_only' && !window._isDevAdminLoggedIn) {
           e.preventDefault();
           showCyberToast('🛡️ โปรเจกต์นี้เปิดให้เข้าถึงได้เฉพาะบัญชีทีมพัฒนา (Dev Only) เท่านั้น', '', 'warning');
@@ -688,12 +744,14 @@
     keys.forEach((k) => {
       const s = socialObj[k];
       if (!s || s.visible === false) return;
+      const socialUrl = safeLink(s.url);
+      if (!socialUrl) return;
 
       let iconHtml = brandIcons[s.iconKey] || brandIcons[k + '_brand'] || brandIcons[k] || '';
       let brandColor = s.color || '#32ffc9';
 
       const btn = document.createElement('a');
-      btn.href = s.url;
+      btn.href = socialUrl;
       btn.target = '_blank';
       btn.rel = 'noopener noreferrer';
       btn.className = 'social-btn reveal-on-scroll';
@@ -720,7 +778,7 @@
     if (data.projects) renderProjects(data.projects);
     if (data.futurePlans) renderFuturePlans(data.futurePlans);
     renderTechStack(data.techStackGroups);
-    if (data.socialContact) renderSocialLinks(data.socialContact);
+    if (data.socialContact) renderSocialLinks(normalizeSocialContact(data.socialContact));
     if (data.projects && data.futurePlans) updateAutoStats(data.projects, data.futurePlans);
   };
 
@@ -735,9 +793,10 @@
 
     db.collection('site_cms').doc('projects').onSnapshot((doc) => {
       if (doc.exists && doc.data().list) {
-        window.BestCynixCMS.data.projects = doc.data().list;
-        renderProjects(doc.data().list);
-        updateAutoStats(doc.data().list, window.BestCynixCMS.data.futurePlans);
+        const projects = normalizeProjects(doc.data().list);
+        window.BestCynixCMS.data.projects = projects;
+        renderProjects(projects);
+        updateAutoStats(projects, window.BestCynixCMS.data.futurePlans);
       }
     }, (e) => console.warn('CMS Projects note:', e));
 
@@ -758,8 +817,9 @@
 
     db.collection('site_cms').doc('social_contact').onSnapshot((doc) => {
       if (doc.exists && doc.data().channels) {
-        window.BestCynixCMS.data.socialContact = doc.data().channels;
-        renderSocialLinks(doc.data().channels);
+        const socialContact = normalizeSocialContact(doc.data().channels);
+        window.BestCynixCMS.data.socialContact = socialContact;
+        renderSocialLinks(socialContact);
       }
     }, (e) => console.warn('CMS Social Links note:', e));
   };

@@ -1276,12 +1276,19 @@
   if (typeof firebase !== 'undefined' && firebase.auth) {
     firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
-        let isAdmin = (user.email === 'bestcynix@gmail.com' || user.email === 'admin@email.com');
-        if (!isAdmin) {
-          try {
-            const doc = await firebase.firestore().collection('users').doc(user.uid).get();
-            if (doc.exists && doc.data().role === 'admin') isAdmin = true;
-          } catch (e) {}
+        // Match Firestore's actual admin policy before opening the protected
+        // team-notification listener. A UI role field alone must not trigger a
+        // query that the security rules will reject.
+        let isAdmin = false;
+        try {
+          const token = await user.getIdTokenResult();
+          const claims = token.claims || {};
+          isAdmin = user.emailVerified === true
+            && (claims.admin === true
+              || user.email === 'bestcynix@gmail.com'
+              || user.email === 'admin@email.com');
+        } catch (e) {
+          isAdmin = false;
         }
         connectNotificationsSync(user, isAdmin);
       } else {

@@ -268,7 +268,10 @@
       padding: 0.5rem 0.8rem;
       color: #fff;
       font-size: 0.76rem;
-      white-space: nowrap;
+      width: min(290px, calc(100vw - 2rem));
+      white-space: normal;
+      line-height: 1.45;
+      text-align: left;
       pointer-events: none;
       opacity: 0;
       visibility: hidden;
@@ -277,10 +280,18 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.8);
       font-family: 'Prompt', sans-serif;
     }
-    .uptime-bar:hover .bar-tooltip {
+    .uptime-bar:hover .bar-tooltip,
+    .uptime-bar.selected .bar-tooltip {
       opacity: 1;
       visibility: visible;
       transform: translateX(-50%) translateY(-4px);
+    }
+    .bar-tooltip strong,
+    .bar-tooltip span {
+      overflow-wrap: anywhere;
+    }
+    .bar-tooltip-failed {
+      color: #fca5a5;
     }
 
     /* Selected Interval Telemetry Card */
@@ -1143,6 +1154,6 @@
     setInterval(runRealStatusProbes, 30000);
     }
   </script>
-  <script src="js/status-monitor.js?v=20260828_2"></script>
+  <script src="js/status-monitor.js?v=20260829_1"></script>
 </body>
 </html>
