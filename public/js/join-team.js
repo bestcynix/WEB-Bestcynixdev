@@ -72,6 +72,9 @@
     return {
       ...routeDefault,
       ...source,
+      // Do not let an old generic/default CMS title leak into the project page.
+      title: source.title && source.title !== 'สมัครร่วมทีม BestCyniX Dev' ? source.title : routeDefault.title,
+      subtitle: source.subtitle && source.subtitle !== 'เป็นส่วนหนึ่งในการพัฒนาโปรเจกต์สุดเจ๋งกับ BestCyniX Dev' ? source.subtitle : routeDefault.subtitle,
       positions: Array.isArray(source.positions) && source.positions.length ? source.positions : routeDefault.positions,
       benefits: Array.isArray(source.benefits) && source.benefits.length ? source.benefits : routeDefault.benefits,
       customQuestions: Array.isArray(source.customQuestions) ? source.customQuestions : routeDefault.customQuestions,
