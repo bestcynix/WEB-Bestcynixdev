@@ -20,10 +20,15 @@
   </url>
   <url>
     <loc>https://bestcynixdev.web.app/join-team</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url><loc>https://bestcynixdev.web.app/join-team/mc-skyline</loc><lastmod>2026-08-29</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bestcynixdev.web.app/join-team/discord-bot</loc><lastmod>2026-08-29</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bestcynixdev.web.app/join-team/discord-server</loc><lastmod>2026-08-29</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bestcynixdev.web.app/join-team/dev-web</loc><lastmod>2026-08-29</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://bestcynixdev.web.app/join-team/teamdev</loc><lastmod>2026-08-29</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url>
     <loc>https://bestcynixdev.web.app/docs</loc>
     <lastmod>2026-08-26</lastmod>
