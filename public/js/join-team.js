@@ -11,6 +11,8 @@
   const FORM_DOC_ID = ROUTE_PROJECT_SLUG || 'default';
   const APPLICATIONS_COL = 'joinTeamApplications';
   const FORMS_COL = 'joinTeamForms';
+  const PROJECTS_COL = 'siteRecruitmentProjects';
+  let projectRegistry = [];
 
   // Brand SVG Icons
   const BRAND_ICONS = {
@@ -109,25 +111,80 @@
   };
 
   const getRouteDefault = () => PROJECT_CONFIGS[ROUTE_PROJECT_SLUG] || GENERAL_DEFAULT;
-  const mergeRouteConfig = (remote) => {
+  const getProjectRegistryMeta = () => projectRegistry.find((project) => project.slug === ROUTE_PROJECT_SLUG) || null;
+  const mergeRouteConfig = (remote, registryMeta = getProjectRegistryMeta()) => {
     const routeDefault = getRouteDefault();
     const source = remote || {};
+    const registry = registryMeta || {};
     const legacyGenericDefault = !ROUTE_PROJECT_SLUG && source.title === 'สมัครร่วมทีม BestCyniX Dev';
     return {
       ...routeDefault,
+      ...registry,
       ...source,
       // Replace the old generic default form on the hub with the multi-project form.
-      isOpen: legacyGenericDefault ? true : (source.isOpen !== undefined ? source.isOpen : routeDefault.isOpen),
+      isOpen: registry.visible === false ? false : (legacyGenericDefault ? true : (registry.isOpen !== undefined ? registry.isOpen : (source.isOpen !== undefined ? source.isOpen : routeDefault.isOpen))),
       // Do not let an old generic/default CMS title leak into the project page.
-      title: source.title && source.title !== 'สมัครร่วมทีม BestCyniX Dev' ? source.title : routeDefault.title,
+      title: registry.title || (source.title && source.title !== 'สมัครร่วมทีม BestCyniX Dev' ? source.title : routeDefault.title),
       subtitle: source.subtitle && source.subtitle !== 'เป็นส่วนหนึ่งในการพัฒนาโปรเจกต์สุดเจ๋งกับ BestCyniX Dev' ? source.subtitle : routeDefault.subtitle,
       positions: legacyGenericDefault ? routeDefault.positions : (Array.isArray(source.positions) && source.positions.length ? source.positions : routeDefault.positions),
       benefits: legacyGenericDefault ? routeDefault.benefits : (Array.isArray(source.benefits) && source.benefits.length ? source.benefits : routeDefault.benefits),
       customQuestions: legacyGenericDefault ? routeDefault.customQuestions : (Array.isArray(source.customQuestions) ? source.customQuestions : routeDefault.customQuestions),
       availableDays: Array.isArray(source.availableDays) && source.availableDays.length ? source.availableDays : routeDefault.availableDays,
-      communityUrl: source.communityUrl || routeDefault.communityUrl,
-      websiteUrl: source.websiteUrl || routeDefault.websiteUrl
+      communityName: registry.communityName || source.communityName || routeDefault.communityName,
+      communityUrl: registry.communityUrl || source.communityUrl || routeDefault.communityUrl,
+      websiteUrl: registry.websiteUrl || source.websiteUrl || routeDefault.websiteUrl
     };
+  };
+
+  const fallbackProjectRows = () => Object.entries(PROJECT_CONFIGS).map(([slug, project]) => ({
+    slug,
+    project,
+    positions: project.positions || [],
+    isOpen: project.isOpen !== false,
+    visible: true,
+    displayOrder: 100
+  }));
+
+  const getProjectRows = (cfg) => {
+    if (ROUTE_PROJECT_SLUG) {
+      const registry = getProjectRegistryMeta();
+      return [{
+        slug: ROUTE_PROJECT_SLUG,
+        project: cfg,
+        positions: cfg.positions || [],
+        isOpen: registry ? registry.isOpen !== false && registry.visible !== false : cfg.isOpen !== false,
+        visible: registry ? registry.visible !== false : true,
+        displayOrder: registry?.displayOrder || 0
+      }];
+    }
+
+    const fallbackRows = fallbackProjectRows().map((row) => ({
+      slug: row.slug,
+      title: row.project.title,
+      summary: row.project.subtitle,
+      communityName: row.project.communityName,
+      communityUrl: row.project.communityUrl,
+      websiteUrl: row.project.websiteUrl,
+      isOpen: row.isOpen,
+      visible: true,
+      displayOrder: row.displayOrder
+    }));
+    // Registry entries override defaults, while missing legacy entries remain
+    // visible so adding one new project never hides the existing teams.
+    const registryBySlug = new Map(projectRegistry.map((project) => [project.slug, project]));
+    const sourceRows = [
+      ...fallbackRows.map((fallback) => registryBySlug.get(fallback.slug) ? { ...fallback, ...registryBySlug.get(fallback.slug) } : fallback),
+      ...projectRegistry.filter((project) => !fallbackRows.some((fallback) => fallback.slug === project.slug))
+    ];
+
+    return sourceRows
+      .filter((meta) => meta.visible !== false)
+      .sort((a, b) => Number(a.displayOrder || 0) - Number(b.displayOrder || 0))
+      .map((meta) => {
+        const base = PROJECT_CONFIGS[meta.slug] || GENERAL_DEFAULT;
+        const project = { ...base, ...meta, title: meta.title || base.title, subtitle: meta.summary || base.subtitle };
+        return { slug: meta.slug, project, positions: project.positions || [], isOpen: meta.isOpen !== false, visible: meta.visible !== false, displayOrder: meta.displayOrder || 0 };
+      });
   };
 
   const renderRoleDirectory = (cfg) => {
@@ -135,14 +192,14 @@
     if (!wrap) return;
     const search = ($('jtRoleSearch')?.value || '').trim().toLowerCase();
     const filter = $('jtRoleStatusFilter')?.value || 'all';
-    const projectRows = !ROUTE_PROJECT_SLUG ? Object.entries(PROJECT_CONFIGS).map(([slug, project]) => ({ slug, project, positions: project.positions || [] })) : [{ slug: ROUTE_PROJECT_SLUG, project: cfg, positions: cfg.positions || [] }];
-    const roles = projectRows.flatMap(({ slug, project, positions }) => positions.filter(p => p.active !== false).map((p) => ({ ...p, projectSlug: slug, projectName: project.communityName || project.title || slug }))).filter((p) => {
+    const projectRows = getProjectRows(cfg);
+    const roles = projectRows.flatMap(({ slug, project, positions, isOpen }) => positions.filter(p => p.active !== false).map((p) => ({ ...p, projectSlug: slug, projectName: project.title || project.communityName || slug, projectOpen: isOpen }))).filter((p) => {
       const approved = Number(p.approvedCount || 0);
       const unlimited = !p.maxSlots || p.maxSlots <= 0 || p.unlimited === true;
       const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
       const searchable = `${p.name || ''} ${p.description || ''} ${p.projectName || ''}`.toLowerCase();
       return (!search || searchable.includes(search))
-        && (filter === 'all' || (filter === 'open' ? unlimited || left > 0 : !unlimited && left <= 0));
+        && (filter === 'all' || (filter === 'open' ? p.projectOpen && (unlimited || left > 0) : !p.projectOpen || (!unlimited && left <= 0)));
     });
     if (!roles.length) {
       wrap.innerHTML = '<div style="grid-column:1/-1;padding:1rem;color:var(--muted);text-align:center;border:1px dashed rgba(255,255,255,.15);border-radius:12px;">ไม่พบตำแหน่งตามตัวกรอง</div>';
@@ -152,7 +209,7 @@
       const approved = Number(p.approvedCount || 0);
       const unlimited = !p.maxSlots || p.maxSlots <= 0 || p.unlimited === true;
       const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
-      const status = unlimited || left > 0 ? '🟢 ยังเปิดรับ' : '🔴 เต็มแล้ว';
+      const status = !p.projectOpen ? '🔴 ปิดรับสมัคร' : (unlimited || left > 0 ? '🟢 ยังเปิดรับ' : '🔴 เต็มแล้ว');
       const quota = unlimited ? 'ไม่จำกัดจำนวน' : `ว่าง ${left}/${p.maxSlots} คน`;
       const href = p.projectSlug ? `/join-team/${p.projectSlug}` : '#';
       return `<article class="jt-role-card"><div style="color:var(--accent);font-size:.75rem;font-weight:700;">${p.projectName || ''}</div><h3>${p.name || 'ตำแหน่งทีมงาน'}</h3><p>${p.description || 'ร่วมพัฒนาโปรเจกต์กับทีม'}</p><div class="jt-role-meta"><span>${status}</span><span>👥 ${quota}</span><span>🎯 ไม่จำกัดอายุ</span></div><a class="btn-secondary" style="display:inline-flex;margin-top:.7rem;" href="${href}">ดูรายละเอียด/สมัคร →</a></article>`;
@@ -1051,9 +1108,23 @@
     // Load form config from Firestore
     if (typeof firebase !== 'undefined' && firebase.apps.length) {
       const db = firebase.firestore();
+      let remoteFormConfig = {};
+      db.collection(PROJECTS_COL).onSnapshot((snapshot) => {
+        projectRegistry = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const currentMeta = getProjectRegistryMeta();
+        if (formConfig) applyFormConfig(mergeRouteConfig(remoteFormConfig, currentMeta));
+        else renderRoleDirectory(mergeRouteConfig({}, currentMeta));
+      }, (err) => {
+        // The registry is an enhancement; the bundled defaults keep the public
+        // recruitment hub usable when Firestore is unavailable.
+        console.warn('JoinTeam project registry load error:', err);
+        projectRegistry = [];
+        if (formConfig) renderRoleDirectory(formConfig);
+      });
       db.collection(FORMS_COL).doc(FORM_DOC_ID).onSnapshot((doc) => {
+        remoteFormConfig = doc.exists ? doc.data() : {};
         if (doc.exists) {
-          applyFormConfig(mergeRouteConfig(doc.data()));
+          applyFormConfig(mergeRouteConfig(remoteFormConfig));
         } else {
           applyFormConfig(mergeRouteConfig({}));
         }

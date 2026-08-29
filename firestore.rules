@@ -125,6 +125,34 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    function isValidRecruitmentProject(projectId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['id', 'slug', 'title', 'summary', 'communityName', 'communityUrl', 'websiteUrl', 'isOpen', 'visible', 'displayOrder', 'updatedAt', 'updatedBy'])
+        && data.id == projectId
+        && data.slug == projectId
+        && data.slug.matches('^[a-z0-9]+(?:-[a-z0-9]+)*$')
+        && validText(data.slug, 80)
+        && validText(data.title, 200)
+        && validText(data.summary, 1000)
+        && validText(data.communityName, 120)
+        && validText(data.communityUrl, 1000)
+        && validText(data.websiteUrl, 1000)
+        && data.isOpen is bool
+        && data.visible is bool
+        && data.displayOrder is int
+        && data.displayOrder >= 0
+        && data.displayOrder <= 10000
+        && validText(data.updatedBy, 128);
+    }
+
+    // Public read is intentional: this registry powers the public recruitment directory.
+    // All changes remain restricted to verified administrators and are schema-bounded.
+    match /siteRecruitmentProjects/{projectId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidRecruitmentProject(projectId);
+      allow delete: if isAdmin();
+    }
+
     match /joinTeamApplications/{appId} {
       allow create: if request.resource.data.status == 'submitted'
         && request.resource.data.applicant is map

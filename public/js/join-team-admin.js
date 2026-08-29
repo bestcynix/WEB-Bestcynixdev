@@ -6,6 +6,7 @@
   'use strict';
 
   const FORMS_COL = 'joinTeamForms';
+  const PROJECTS_COL = 'siteRecruitmentProjects';
   const APPS_COL = 'joinTeamApplications';
   const NOTIF_COL = 'joinTeamNotifications';
   const FORM_DOC_ID = new URLSearchParams(window.location.search).get('project') || 'default';
@@ -41,6 +42,130 @@
   const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[char]));
+
+  // Project/URL registry. This is deliberately separate from joinTeamForms so
+  // editing a public route never overwrites old applications or contracts.
+  const DEFAULT_PROJECTS = [
+    { id: 'mc-skyline', slug: 'mc-skyline', title: 'Mc-Skyline.online', summary: 'ทีม Minecraft: เว็บ บอท ปลั๊กอิน แผนที่ ระบบไอเทม เควสต์ โมเดล และ resource pack', communityName: 'Mc-Skyline.online', communityUrl: 'https://discord.gg/5eNFMMk3ak', websiteUrl: 'https://mc-skyline.online', isOpen: true, visible: true, displayOrder: 10 },
+    { id: 'discord-bot', slug: 'discord-bot', title: 'Discord Bot', summary: 'ทีมพัฒนาบอท Discord, API, ระบบอัตโนมัติ และเครื่องมือดูแลชุมชน', communityName: 'Discord Bot', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: '', isOpen: true, visible: true, displayOrder: 20 },
+    { id: 'discord-server', slug: 'discord-server', title: 'Discord Server', summary: 'ทีมดูแลกฎ สิทธิ์ ระบบ และกิจกรรมของเซิร์ฟเวอร์ Discord', communityName: 'Discord Server', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: '', isOpen: true, visible: true, displayOrder: 30 },
+    { id: 'dev-web', slug: 'dev-web', title: 'Web Development', summary: 'ทีมสร้างเว็บไซต์ เว็บแอป ระบบหลังบ้าน และระบบคลาวด์', communityName: 'Web Development', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app', isOpen: true, visible: true, displayOrder: 40 },
+    { id: 'teamdev', slug: 'teamdev', title: 'ทีมพัฒนา BestCyniX Dev', summary: 'เปิดรับทีมงานตามความสามารถ ให้ระบุความถนัดและตำแหน่งที่ต้องการรับผิดชอบ 1–3', communityName: 'ทีมพัฒนา BestCyniX Dev', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app', isOpen: true, visible: true, displayOrder: 50 }
+  ];
+  let projectRegistry = [];
+
+  const projectRecordFromCard = (card) => {
+    const slug = (card.querySelector('[data-field="slug"]')?.value || '').trim().toLowerCase();
+    return {
+      id: slug,
+      slug,
+      title: (card.querySelector('[data-field="title"]')?.value || '').trim(),
+      summary: (card.querySelector('[data-field="summary"]')?.value || '').trim(),
+      communityName: (card.querySelector('[data-field="communityName"]')?.value || '').trim(),
+      communityUrl: (card.querySelector('[data-field="communityUrl"]')?.value || '').trim(),
+      websiteUrl: (card.querySelector('[data-field="websiteUrl"]')?.value || '').trim(),
+      displayOrder: Math.max(0, Math.min(10000, parseInt(card.querySelector('[data-field="displayOrder"]')?.value, 10) || 0)),
+      isOpen: Boolean(card.querySelector('[data-field="isOpen"]')?.checked),
+      visible: Boolean(card.querySelector('[data-field="visible"]')?.checked)
+    };
+  };
+
+  const renderProjectRegistry = () => {
+    const wrap = $('projectRegistryList');
+    if (!wrap) return;
+    if (!projectRegistry.length) {
+      wrap.innerHTML = '<div style="padding:1.25rem;color:var(--muted);border:1px dashed rgba(255,255,255,.16);border-radius:12px;text-align:center;">ยังไม่มีทะเบียนโปรเจกต์ กด “โหลดค่าเริ่มต้น 5 ทีม” หรือ “เพิ่มโปรเจกต์”</div>';
+      return;
+    }
+    const sorted = [...projectRegistry].sort((a, b) => Number(a.displayOrder || 0) - Number(b.displayOrder || 0));
+    wrap.innerHTML = sorted.map((project) => {
+      const id = escapeHtml(project.id || project.slug || '');
+      return `<article class="project-registry-card" data-project-id="${id}">
+        <div class="project-registry-heading"><div><strong>${escapeHtml(project.title || project.slug || 'โปรเจกต์ใหม่')}</strong><small>/join-team/${escapeHtml(project.slug || '')}</small></div><span class="project-registry-state ${project.visible === false ? 'is-hidden' : (project.isOpen === false ? 'is-closed' : 'is-open')}">${project.visible === false ? 'ซ่อนอยู่' : (project.isOpen === false ? 'ปิดรับสมัคร' : 'เปิดรับสมัคร')}</span></div>
+        <div class="project-registry-grid">
+          <label>URL slug<input class="jt-input" data-field="slug" value="${escapeHtml(project.slug || '')}" placeholder="เช่น discord-bot" /></label>
+          <label>ชื่อทีม/โปรเจกต์<input class="jt-input" data-field="title" value="${escapeHtml(project.title || '')}" placeholder="ชื่อที่แสดงบนหน้าเว็บ" /></label>
+          <label style="grid-column:1/-1;">คำอธิบาย<input class="jt-input" data-field="summary" value="${escapeHtml(project.summary || '')}" placeholder="รายละเอียดสั้น ๆ ของทีม" /></label>
+          <label>ชื่อชุมชน<input class="jt-input" data-field="communityName" value="${escapeHtml(project.communityName || '')}" placeholder="ชื่อ Discord/ชุมชน" /></label>
+          <label>ลิงก์ชุมชน<input class="jt-input" data-field="communityUrl" value="${escapeHtml(project.communityUrl || '')}" placeholder="https://discord.gg/..." /></label>
+          <label>URL เว็บไซต์<input class="jt-input" data-field="websiteUrl" value="${escapeHtml(project.websiteUrl || '')}" placeholder="https://..." /></label>
+          <label>ลำดับแสดง<input class="jt-input" data-field="displayOrder" type="number" min="0" max="10000" value="${Number(project.displayOrder || 0)}" /></label>
+        </div>
+        <div class="project-registry-actions">
+          <label class="toggle-switch"><input data-field="isOpen" type="checkbox" ${project.isOpen !== false ? 'checked' : ''}/><span class="toggle-track"></span><span class="toggle-thumb"></span><span class="toggle-label">เปิดรับสมัคร</span></label>
+          <label class="toggle-switch"><input data-field="visible" type="checkbox" ${project.visible !== false ? 'checked' : ''}/><span class="toggle-track"></span><span class="toggle-thumb"></span><span class="toggle-label">แสดง URL นี้</span></label>
+          <div class="project-registry-buttons"><a class="jt-admin-btn secondary" href="/join-team/${encodeURIComponent(project.slug || '')}" target="_blank">🔗 เปิดหน้า</a><a class="jt-admin-btn secondary" href="/admin-join-team?project=${encodeURIComponent(project.slug || '')}" target="_blank">⚙️ ตั้งค่าฟอร์ม</a><button type="button" class="jt-admin-btn primary btn-save-project">💾 บันทึก</button><button type="button" class="jt-admin-btn danger btn-hide-project">${project.visible === false ? '♻️ แสดงกลับ' : '🗑️ ซ่อน/ลบ'}</button></div>
+        </div>
+      </article>`;
+    }).join('');
+
+    wrap.querySelectorAll('.btn-save-project').forEach((button) => button.addEventListener('click', () => saveProjectFromCard(button.closest('.project-registry-card'))));
+    wrap.querySelectorAll('.btn-hide-project').forEach((button) => button.addEventListener('click', () => toggleProjectVisibility(button.closest('.project-registry-card'))));
+  };
+
+  const loadProjectRegistry = () => {
+    db.collection(PROJECTS_COL).onSnapshot((snapshot) => {
+      projectRegistry = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      renderProjectRegistry();
+    }, (err) => {
+      console.warn('Project registry load error:', err);
+      projectRegistry = [];
+      renderProjectRegistry();
+      showToast('โหลดทะเบียนโปรเจกต์ไม่สำเร็จ', 'ตรวจสอบ Firestore Rules หรือสิทธิ์ Admin', 'error');
+    });
+  };
+
+  const saveProjectRecord = async (record, oldId = record.id) => {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(record.slug)) throw new Error('URL slug ใช้ได้เฉพาะ a-z, 0-9 และขีดกลาง เช่น discord-bot');
+    if (!record.title || record.title.length > 200) throw new Error('กรุณากรอกชื่อทีม/โปรเจกต์ไม่เกิน 200 ตัวอักษร');
+    if (record.summary.length > 1000 || record.communityName.length > 120 || record.communityUrl.length > 1000 || record.websiteUrl.length > 1000) throw new Error('ข้อมูลบางช่องยาวเกินกำหนด');
+    const payload = { ...record, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: currentUser?.uid || '' };
+    const targetRef = db.collection(PROJECTS_COL).doc(record.slug);
+    await targetRef.set(payload, { merge: true });
+    if (oldId && oldId !== record.slug && oldId !== 'new') await db.collection(PROJECTS_COL).doc(oldId).delete();
+  };
+
+  const saveProjectFromCard = async (card) => {
+    if (!card) return;
+    try {
+      const oldId = card.dataset.projectId || 'new';
+      const record = projectRecordFromCard(card);
+      await saveProjectRecord(record, oldId);
+      showToast('บันทึกโปรเจกต์และ URL แล้ว', `/join-team/${record.slug}`, 'success');
+    } catch (err) { showToast('บันทึกโปรเจกต์ไม่สำเร็จ', err.message, 'error'); }
+  };
+
+  const toggleProjectVisibility = async (card) => {
+    if (!card) return;
+    const current = projectRecordFromCard(card);
+    const isVisible = current.visible;
+    const accepted = window.bcxConfirm ? await window.bcxConfirm(isVisible ? 'ซ่อน URL และปิดรับสมัครโปรเจกต์นี้หรือไม่?' : 'แสดง URL โปรเจกต์นี้กลับมาอีกครั้งหรือไม่?', 'ข้อมูลใบสมัครเก่าจะไม่ถูกลบ การซ่อนจะไม่แสดงในหน้า /join-team') : window.confirm(isVisible ? 'ซ่อน URL โปรเจกต์นี้หรือไม่?' : 'แสดง URL โปรเจกต์นี้กลับมาหรือไม่?');
+    if (!accepted) return;
+    try {
+      await db.collection(PROJECTS_COL).doc(current.slug).set({ visible: !isVisible, isOpen: isVisible ? false : current.isOpen, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: currentUser?.uid || '' }, { merge: true });
+      showToast(isVisible ? 'ซ่อนโปรเจกต์แล้ว' : 'แสดงโปรเจกต์แล้ว', '', 'success');
+    } catch (err) { showToast('เปลี่ยนการแสดงผลไม่สำเร็จ', err.message, 'error'); }
+  };
+
+  const addProjectDraft = () => {
+    projectRegistry = [{ id: 'new', slug: 'new-project', title: 'โปรเจกต์ใหม่', summary: '', communityName: '', communityUrl: '', websiteUrl: '', displayOrder: 100, isOpen: false, visible: true }, ...projectRegistry];
+    renderProjectRegistry();
+    document.querySelector('.admin-tab-btn[data-tab="projects"]')?.click();
+  };
+
+  const seedDefaultProjects = async () => {
+    const accepted = window.bcxConfirm ? await window.bcxConfirm('โหลดค่าเริ่มต้น 5 ทีมลงทะเบียนโปรเจกต์หรือไม่?', 'ระบบจะเขียนเฉพาะทะเบียน URL และไม่ลบฟอร์มหรือใบสมัครเดิม') : window.confirm('โหลดค่าเริ่มต้น 5 ทีมลงทะเบียนโปรเจกต์หรือไม่?');
+    if (!accepted) return;
+    try {
+      const batch = db.batch();
+      DEFAULT_PROJECTS.forEach((project) => batch.set(db.collection(PROJECTS_COL).doc(project.id), { ...project, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: currentUser?.uid || '' }, { merge: true }));
+      await batch.commit();
+      showToast('เพิ่มทะเบียน 5 ทีมแล้ว', 'Dev สามารถแก้ URL และเปิด/ปิดแต่ละทีมต่อได้', 'success');
+    } catch (err) { showToast('โหลดค่าเริ่มต้นไม่สำเร็จ', err.message, 'error'); }
+  };
+
+  $('btnSeedProjects')?.addEventListener('click', seedDefaultProjects);
+  $('btnAddProject')?.addEventListener('click', addProjectDraft);
 
   // Contract clause CMS renderer. Kept independent from Firestore listeners so an
   // empty/new document never throws and the admin can build clauses from scratch.
@@ -1952,6 +2077,7 @@
   const initAdminPanel = () => {
     initTabs();
     loadFormConfig();
+    loadProjectRegistry();
     loadApplications();
     loadNotifications();
 
