@@ -401,8 +401,9 @@ window.bringToFront = function (el) {
         flex-wrap: nowrap !important;
       }
 
-      /* Desktop Hide Rules */
-      @media (min-width: 1025px) {
+      /* Desktop Hide Rules. Keep the full nav out of the way until there is
+         room for authenticated controls as well as the navigation labels. */
+      @media (min-width: 1361px) {
         .mobile-nav-drawer,
         .mobile-drawer-overlay,
         .nav-toggle {
@@ -412,7 +413,7 @@ window.bringToFront = function (el) {
           display: flex !important;
         }
       }
-      @media (max-width: 1024px) {
+      @media (max-width: 1360px) {
         .desktop-nav-links {
           display: none !important;
         }
