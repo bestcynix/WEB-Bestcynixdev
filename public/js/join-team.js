@@ -8,7 +8,7 @@
   const ROUTE_PARTS = window.location.pathname.split('/').filter(Boolean);
   const ROUTE_PROJECT_SLUG = new URLSearchParams(window.location.search).get('project')
     || (ROUTE_PARTS[0] === 'join-team' && ROUTE_PARTS[1] ? ROUTE_PARTS[1] : null);
-  const FORM_DOC_ID = ROUTE_PROJECT_SLUG === 'mc-skyline' ? 'mc-skyline' : 'default';
+  const FORM_DOC_ID = ROUTE_PROJECT_SLUG || 'default';
   const APPLICATIONS_COL = 'joinTeamApplications';
   const FORMS_COL = 'joinTeamForms';
 
@@ -64,10 +64,53 @@
     customQuestions: []
   };
 
-  const getRouteDefault = () => ROUTE_PROJECT_SLUG === 'mc-skyline' ? MC_SKYLINE_DEFAULT : null;
+  const GENERAL_DEFAULT = {
+    formId: 'default', projectSlug: 'all', isOpen: true,
+    title: 'ร่วมพัฒนาโปรเจกต์กับทีม',
+    subtitle: 'เลือกโปรเจกต์และตำแหน่งที่สนใจ แล้วกรอกข้อมูลเพื่อให้ทีมติดต่อกลับ',
+    communityName: 'BestCyniX Dev', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app',
+    ageRange: {}, availableDays: ALL_DAYS,
+    positions: [
+      { id: 'general-dev', name: 'Developer', description: 'พัฒนาเว็บ บอท ระบบหลังบ้าน และเครื่องมือของทีม', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
+      { id: 'general-admin', name: 'Admin', description: 'ดูแลระบบ ชุมชน เอกสาร และการประสานงาน', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
+      { id: 'general-staff', name: 'Staff', description: 'ช่วยงานทีมตามความถนัดและเวลาที่สะดวก', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
+      { id: 'general-specialist', name: 'ทีมงานตามความสามารถ', description: 'ระบุความสามารถและตำแหน่งที่ถนัดในคำถามเพิ่มเติม', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
+    ],
+    benefits: [
+      { icon: '🧭', title: 'เลือกโปรเจกต์ที่สนใจ', desc: 'สมัคร Mc-Skyline, Discord Bot, Discord Server, Web หรือทีมพัฒนาได้จากหน้าเดียว' },
+      { icon: '🧰', title: 'บอกความสามารถได้เต็มที่', desc: 'ทีมเปิดรับทั้ง Developer, Admin, Staff และความสามารถเฉพาะด้าน' },
+      { icon: '📜', title: 'ข้อตกลงชัดเจน', desc: 'รายละเอียดงาน สิทธิในผลงาน และค่าตอบแทนจะคุยและทำเป็นลายลักษณ์อักษรก่อนเริ่มงาน' }
+    ],
+    customQuestions: [
+      { id: 'project', label: 'โปรเจกต์ที่ต้องการร่วมงาน', type: 'select', required: true, options: ['Mc-Skyline.online', 'Discord Bot', 'Discord Server', 'Web Development', 'ทีมพัฒนา BestCyniX Dev', 'ยังไม่แน่ใจ ขอให้ทีมแนะนำ'] },
+      { id: 'skill1', label: 'ความสามารถที่ถนัดอันดับ 1', type: 'text', required: true, placeholder: 'เช่น JavaScript, Minecraft Builder, Moderation' },
+      { id: 'skill2', label: 'ความสามารถที่ถนัดอันดับ 2', type: 'text', required: false, placeholder: 'ระบุเพิ่มเติม (ถ้ามี)' },
+      { id: 'skill3', label: 'ความสามารถที่ถนัดอันดับ 3', type: 'text', required: false, placeholder: 'ระบุเพิ่มเติม (ถ้ามี)' },
+      { id: 'role1', label: 'ตำแหน่งที่ต้องการรับผิดชอบอันดับ 1', type: 'text', required: true, placeholder: 'เช่น Developer, Admin, Staff' },
+      { id: 'role2', label: 'ตำแหน่งที่ต้องการรับผิดชอบอันดับ 2', type: 'text', required: false, placeholder: 'ระบุเพิ่มเติม (ถ้ามี)' },
+      { id: 'role3', label: 'ตำแหน่งที่ต้องการรับผิดชอบอันดับ 3', type: 'text', required: false, placeholder: 'ระบุเพิ่มเติม (ถ้ามี)' }
+    ]
+  };
+
+  const PROJECT_CONFIGS = {
+    'mc-skyline': MC_SKYLINE_DEFAULT,
+    'discord-bot': { ...GENERAL_DEFAULT, formId: 'discord-bot', projectSlug: 'discord-bot', title: 'รับสมัครทีม Discord Bot', subtitle: 'ร่วมพัฒนาบอท Discord ระบบอัตโนมัติ และเครื่องมือดูแลชุมชน', communityName: 'Discord Bot', positions: [
+      { id: 'bot-dev', name: 'Dev', description: 'พัฒนาบอท Discord, API และระบบอัตโนมัติ', maxSlots: 2, active: true, ageRule: 'unlimited' },
+      { id: 'bot-admin', name: 'Admin', description: 'ดูแลการตั้งค่า บริหารระบบ และจัดการชุมชน', maxSlots: 5, active: true, ageRule: 'unlimited' },
+      { id: 'bot-staff', name: 'Staff', description: 'ช่วยดูแลสมาชิกและงานประจำวันของชุมชน', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
+    ], customQuestions: [] },
+    'discord-server': { ...GENERAL_DEFAULT, formId: 'discord-server', projectSlug: 'discord-server', title: 'รับสมัครทีม Discord Server', subtitle: 'ร่วมดูแลและพัฒนาเซิร์ฟเวอร์ Discord ให้เป็นระเบียบและปลอดภัย', communityName: 'Discord Server', positions: [
+      { id: 'server-dev', name: 'Dev', description: 'พัฒนาบอทและระบบเชื่อมต่อสำหรับเซิร์ฟเวอร์', maxSlots: 3, active: true, ageRule: 'unlimited' },
+      { id: 'server-admin', name: 'Admin', description: 'ดูแลกฎ การตั้งค่า สิทธิ์ และการจัดการเซิร์ฟเวอร์', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
+      { id: 'server-staff', name: 'Staff', description: 'ช่วยดูแลสมาชิก ตอบคำถาม และจัดกิจกรรม', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
+    ], customQuestions: [] },
+    'dev-web': { ...GENERAL_DEFAULT, formId: 'dev-web', projectSlug: 'dev-web', title: 'รับสมัครทีม Web Development', subtitle: 'ร่วมสร้างเว็บไซต์ เว็บแอป และระบบหลังบ้านกับ BestCyniX Dev', communityName: 'Web Development', positions: [{ id: 'web-dev', name: 'Dev', description: 'พัฒนา Frontend, Backend, Full-stack และระบบคลาวด์', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }], customQuestions: [] },
+    'teamdev': { ...GENERAL_DEFAULT, formId: 'teamdev', projectSlug: 'teamdev', title: 'รับสมัครทีมพัฒนา BestCyniX Dev', subtitle: 'เปิดรับตำแหน่งตามความสามารถ ไม่จำกัดจำนวน พร้อมระบุความถนัดและตำแหน่งที่ต้องการรับผิดชอบ 1–3', communityName: 'ทีมพัฒนา BestCyniX Dev', positions: [{ id: 'teamdev-specialist', name: 'ทีมพัฒนาตามความสามารถ', description: 'ระบุความสามารถเด่นและตำแหน่งที่ต้องการรับผิดชอบ 1–3 ในคำถามเพิ่มเติม', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }], customQuestions: GENERAL_DEFAULT.customQuestions.slice(1) }
+  };
+
+  const getRouteDefault = () => PROJECT_CONFIGS[ROUTE_PROJECT_SLUG] || GENERAL_DEFAULT;
   const mergeRouteConfig = (remote) => {
     const routeDefault = getRouteDefault();
-    if (!routeDefault) return remote || {};
     const source = remote || {};
     return {
       ...routeDefault,
@@ -89,11 +132,12 @@
     if (!wrap) return;
     const search = ($('jtRoleSearch')?.value || '').trim().toLowerCase();
     const filter = $('jtRoleStatusFilter')?.value || 'all';
-    const roles = (cfg.positions || []).filter(p => p.active !== false).filter((p) => {
+    const projectRows = !ROUTE_PROJECT_SLUG ? Object.entries(PROJECT_CONFIGS).map(([slug, project]) => ({ slug, project, positions: project.positions || [] })) : [{ slug: ROUTE_PROJECT_SLUG, project: cfg, positions: cfg.positions || [] }];
+    const roles = projectRows.flatMap(({ slug, project, positions }) => positions.filter(p => p.active !== false).map((p) => ({ ...p, projectSlug: slug, projectName: project.communityName || project.title || slug }))).filter((p) => {
       const approved = Number(p.approvedCount || 0);
       const unlimited = !p.maxSlots || p.maxSlots <= 0 || p.unlimited === true;
       const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
-      const searchable = `${p.name || ''} ${p.description || ''} ${cfg.communityName || ''}`.toLowerCase();
+      const searchable = `${p.name || ''} ${p.description || ''} ${p.projectName || ''}`.toLowerCase();
       return (!search || searchable.includes(search))
         && (filter === 'all' || (filter === 'open' ? unlimited || left > 0 : !unlimited && left <= 0));
     });
@@ -107,7 +151,8 @@
       const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
       const status = unlimited || left > 0 ? '🟢 ยังเปิดรับ' : '🔴 เต็มแล้ว';
       const quota = unlimited ? 'ไม่จำกัดจำนวน' : `ว่าง ${left}/${p.maxSlots} คน`;
-      return `<article class="jt-role-card"><h3>${p.name || 'ตำแหน่งทีมงาน'}</h3><p>${p.description || 'ร่วมพัฒนาโปรเจกต์กับทีม'}</p><div class="jt-role-meta"><span>${status}</span><span>👥 ${quota}</span><span>🎯 ไม่จำกัดอายุ</span></div></article>`;
+      const href = p.projectSlug ? `/join-team/${p.projectSlug}` : '#';
+      return `<article class="jt-role-card"><div style="color:var(--accent);font-size:.75rem;font-weight:700;">${p.projectName || ''}</div><h3>${p.name || 'ตำแหน่งทีมงาน'}</h3><p>${p.description || 'ร่วมพัฒนาโปรเจกต์กับทีม'}</p><div class="jt-role-meta"><span>${status}</span><span>👥 ${quota}</span><span>🎯 ไม่จำกัดอายุ</span></div><a class="btn-secondary" style="display:inline-flex;margin-top:.7rem;" href="${href}">ดูรายละเอียด/สมัคร →</a></article>`;
     }).join('');
   };
 
@@ -1007,14 +1052,14 @@
         if (doc.exists) {
           applyFormConfig(mergeRouteConfig(doc.data()));
         } else {
-          applyFormConfig(mergeRouteConfig({ isOpen: ROUTE_PROJECT_SLUG === 'mc-skyline', title: 'สมัครร่วมทีม BestCyniX Dev', positions: [], customQuestions: [] }));
+          applyFormConfig(mergeRouteConfig({}));
         }
       }, (err) => {
         console.warn('JoinTeam config load error:', err);
-        applyFormConfig(mergeRouteConfig({ isOpen: ROUTE_PROJECT_SLUG === 'mc-skyline', title: 'สมัครร่วมทีม BestCyniX Dev', positions: [], customQuestions: [] }));
+        applyFormConfig(mergeRouteConfig({}));
       });
     } else {
-      applyFormConfig(mergeRouteConfig({ isOpen: false, positions: [], customQuestions: [] }));
+      applyFormConfig(mergeRouteConfig({}));
     }
   };
 

@@ -15,6 +15,22 @@
           "functionId": "statusApi",
           "region": "asia-southeast1"
         }
+      },
+      {
+        "source": "/join-team/discord-bot",
+        "destination": "/join-team.html"
+      },
+      {
+        "source": "/join-team/discord-server",
+        "destination": "/join-team.html"
+      },
+      {
+        "source": "/join-team/dev-web",
+        "destination": "/join-team.html"
+      },
+      {
+        "source": "/join-team/teamdev",
+        "destination": "/join-team.html"
       }
     ],
     "headers": [
