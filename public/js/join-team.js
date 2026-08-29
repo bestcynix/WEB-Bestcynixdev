@@ -112,15 +112,18 @@
   const mergeRouteConfig = (remote) => {
     const routeDefault = getRouteDefault();
     const source = remote || {};
+    const legacyGenericDefault = !ROUTE_PROJECT_SLUG && source.title === 'สมัครร่วมทีม BestCyniX Dev';
     return {
       ...routeDefault,
       ...source,
+      // Replace the old generic default form on the hub with the multi-project form.
+      isOpen: legacyGenericDefault ? true : (source.isOpen !== undefined ? source.isOpen : routeDefault.isOpen),
       // Do not let an old generic/default CMS title leak into the project page.
       title: source.title && source.title !== 'สมัครร่วมทีม BestCyniX Dev' ? source.title : routeDefault.title,
       subtitle: source.subtitle && source.subtitle !== 'เป็นส่วนหนึ่งในการพัฒนาโปรเจกต์สุดเจ๋งกับ BestCyniX Dev' ? source.subtitle : routeDefault.subtitle,
-      positions: Array.isArray(source.positions) && source.positions.length ? source.positions : routeDefault.positions,
-      benefits: Array.isArray(source.benefits) && source.benefits.length ? source.benefits : routeDefault.benefits,
-      customQuestions: Array.isArray(source.customQuestions) ? source.customQuestions : routeDefault.customQuestions,
+      positions: legacyGenericDefault ? routeDefault.positions : (Array.isArray(source.positions) && source.positions.length ? source.positions : routeDefault.positions),
+      benefits: legacyGenericDefault ? routeDefault.benefits : (Array.isArray(source.benefits) && source.benefits.length ? source.benefits : routeDefault.benefits),
+      customQuestions: legacyGenericDefault ? routeDefault.customQuestions : (Array.isArray(source.customQuestions) ? source.customQuestions : routeDefault.customQuestions),
       availableDays: Array.isArray(source.availableDays) && source.availableDays.length ? source.availableDays : routeDefault.availableDays,
       communityUrl: source.communityUrl || routeDefault.communityUrl,
       websiteUrl: source.websiteUrl || routeDefault.websiteUrl
