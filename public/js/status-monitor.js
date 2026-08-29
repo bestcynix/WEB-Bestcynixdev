@@ -92,6 +92,9 @@
         latencyMs: day.totalChecks ? Math.round((day.latencyTotalMs || 0) / day.totalChecks) : null,
         uptimeRate: day.totalChecks ? (Number(day.passedChecks || 0) / Number(day.totalChecks) * 100).toFixed(2) : '—',
         passed: `${day.passedChecks || 0} / ${day.totalChecks || 0}`,
+        passedCount: Number(day.passedChecks || 0),
+        totalCount: Number(day.totalChecks || 0),
+        failedServices: [],
         note: `บันทึกจริง ${day.totalChecks || 0} รอบในวันนี้`
       }));
     }
@@ -100,13 +103,24 @@
     return (statusPayload.history || []).slice().reverse().filter(item => Date.parse(item.checkedAt) >= cutoff).map(item => {
       const services = Object.values(item.services || {});
       const passed = services.filter(service => service.status === 'operational').length;
+      const failedServices = services
+        .filter(service => service.status !== 'operational')
+        .map(service => service.label || service.detail || 'ไม่ทราบบริการ');
+      const totalChecks = services.length;
       return {
         checkedAt: item.checkedAt,
         status: item.overall || 'unknown',
-        latencyMs: services.length ? Math.round(services.reduce((sum, service) => sum + (Number(service.latencyMs) || 0), 0) / services.length) : null,
-        uptimeRate: item.overall === 'operational' ? '100.00' : '0.00',
-        passed: `${passed} / ${services.length}`,
-        note: item.services?.skylinebot?.detail || 'Server probe report'
+        latencyMs: totalChecks ? Math.round(services.reduce((sum, service) => sum + (Number(service.latencyMs) || 0), 0) / totalChecks) : null,
+        // Show the real service-check ratio for an interval. Previously any
+        // degraded service forced this to 0%, even when 4 of 5 checks passed.
+        uptimeRate: totalChecks ? (passed / totalChecks * 100).toFixed(2) : '—',
+        passed: `${passed} / ${totalChecks}`,
+        passedCount: passed,
+        totalCount: totalChecks,
+        failedServices,
+        note: failedServices.length
+          ? `บริการที่ไม่ผ่าน: ${failedServices.join(', ')}`
+          : 'ทุกบริการผ่านการตรวจสอบจริงในรอบนี้'
       };
     });
   };
@@ -131,8 +145,9 @@
     container.replaceChildren();
     const items = getHistoryItems();
     const total = items.length;
-    const passed = items.filter(item => item.status === 'operational').length;
-    const uptime = total ? (passed / total * 100).toFixed(2) : '—';
+    const passedChecks = items.reduce((sum, item) => sum + Number(item.passedCount || 0), 0);
+    const totalChecks = items.reduce((sum, item) => sum + Number(item.totalCount || 0), 0);
+    const uptime = totalChecks ? (passedChecks / totalChecks * 100).toFixed(2) : '—';
     if ($('uptimeRangeLeft')) $('uptimeRangeLeft').textContent = currentMode === '90d' ? '90 วันที่แล้ว' : currentMode === '5m' ? '5 ชั่วโมงที่แล้ว' : '12 ชั่วโมงที่แล้ว';
     if ($('uptimeRangeRight')) $('uptimeRangeRight').textContent = total ? 'ล่าสุดจาก server' : 'ยังไม่มีข้อมูล';
     if ($('uptimePercentageText')) $('uptimePercentageText').textContent = total ? `${uptime}% Uptime จาก ${total} รอบจริง` : 'ยังไม่มี Uptime data';
@@ -147,11 +162,38 @@
     items.forEach((item, index) => {
       const bar = document.createElement('div');
       bar.className = `uptime-bar bar-${item.status === 'operational' ? 'green' : item.status === 'degraded' ? 'yellow' : 'red'}${index === items.length - 1 ? ' selected' : ''}`;
-      bar.title = `${new Date(item.checkedAt).toLocaleString('th-TH')} • ${statusLabel(item.status)} • ${item.latencyMs == null ? '—' : item.latencyMs + ' ms'}`;
+      bar.setAttribute('role', 'button');
+      bar.setAttribute('tabindex', '0');
+      bar.setAttribute('aria-label', `${new Date(item.checkedAt).toLocaleString('th-TH')} ${statusLabel(item.status)} ${item.passed} ผ่าน`);
+
+      const tooltip = document.createElement('div');
+      tooltip.className = 'bar-tooltip';
+      const title = document.createElement('strong');
+      title.textContent = currentMode === '90d'
+        ? new Date(item.checkedAt).toLocaleDateString('th-TH', { dateStyle: 'full' })
+        : formatRange(item.checkedAt, currentMode === '5m' ? 5 : 10);
+      const summary = document.createElement('span');
+      summary.textContent = `${statusEmoji(item.status)} ${statusLabel(item.status)} • Ping ${item.latencyMs == null ? '—' : item.latencyMs + ' ms'}`;
+      const checks = document.createElement('span');
+      checks.textContent = `ตรวจผ่าน ${item.passed} (${item.uptimeRate}%)`;
+      tooltip.append(title, document.createElement('br'), summary, document.createElement('br'), checks);
+      if (item.failedServices?.length) {
+        const failed = document.createElement('span');
+        failed.className = 'bar-tooltip-failed';
+        failed.textContent = `ไม่ผ่าน: ${item.failedServices.join(', ')}`;
+        tooltip.append(document.createElement('br'), failed);
+      }
+      bar.appendChild(tooltip);
       bar.addEventListener('click', () => {
         container.querySelectorAll('.uptime-bar').forEach(node => node.classList.remove('selected'));
         bar.classList.add('selected');
         inspect(item);
+      });
+      bar.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          bar.click();
+        }
       });
       container.appendChild(bar);
     });
