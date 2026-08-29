@@ -32,6 +32,21 @@ No age or gender restriction is shown in the recruitment copy. Contract capacity
 5. Confidentiality, security, account access, incident handling, termination, data return/deletion, and dispute process.
 6. Signature/date and a copy of the final version accepted by both parties.
 
+## Proposed funding and profit waterfall
+
+The organizer/funding lead identified by the requester is นายพงศ์ภรณ์ ทองศิริ. Project receipts are proposed to flow into the account designated by that person, subject to the final contract, accounting evidence, and tax advice.
+
+1. Record all project receipts for the period.
+2. Deduct only documented and pre-agreed project costs: electricity, VPS, domain, software, payment fees, and other necessary costs listed in the contract.
+3. Until the agreed cost basis has been recovered, no salary or guaranteed monthly payment is due unless a later written agreement says otherwise.
+4. If a month has no receipts or no net profit after allowable costs, no profit distribution is made for that month; it must not be described as an accrued salary.
+5. After the cost basis is fully recovered and there is net profit, distribute using explicit percentages. นายพงศ์ภรณ์ ทองศิริ may receive a larger share, but every percentage, calculation base, and payment date must be written and accepted before signing.
+6. Provide a periodic statement showing receipts, costs, unrecovered balance, net profit, each person’s percentage, and paid amount.
+
+Do not invent the percentages in code or in a contract. The final document must fill in the numbers, define “net profit”, set approval rules for expenses, explain treatment of losses/carry-forward, and specify how a participant can inspect supporting records.
+
+Tax treatment depends on the actual arrangement. The Revenue Department publishes guidance for ordinary partnerships/non-juristic person groups and requires appropriate income/expense records; obtain an accountant/tax lawyer’s advice before receiving or distributing project money.
+
 ## Identity and payment documents
 
 Request only after selection and only where necessary. Use a private authenticated upload flow with encryption at rest, MFA for admins, least-privilege roles, short-lived signed URLs, access audit logs, and a published retention/deletion date.
