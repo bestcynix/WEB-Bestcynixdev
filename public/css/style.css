@@ -5162,3 +5162,42 @@ body.chat-fullscreen-lock .chat-window.fullscreen {
     text-overflow: ellipsis;
   }
 }
+
+/* Join Team directory: readable cards at every viewport width. */
+.jt-project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin: 0 auto 1.5rem;
+  max-width: 1000px;
+}
+.jt-project-links a { flex: 1 1 240px; text-align: center; text-decoration: none; }
+.jt-recruitment-overview {
+  max-width: 1000px;
+  margin: 0 auto 2rem;
+  padding: clamp(1rem, 3vw, 1.6rem);
+  border: 1px solid rgba(50,255,201,.24);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(8,28,49,.9), rgba(5,14,28,.8));
+}
+.jt-overview-head { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.jt-overview-kicker { color:var(--accent); font-size:.72rem; letter-spacing:.12em; font-weight:800; }
+.jt-overview-head h2 { margin:.3rem 0 .35rem; color:#fff; font-size:clamp(1.15rem, 2.4vw, 1.55rem); }
+.jt-overview-head p { margin:0; color:var(--muted); font-size:.88rem; }
+.jt-overview-link { color:var(--accent); font-weight:700; white-space:nowrap; text-decoration:none; }
+.jt-overview-poster-wrap { display:grid; grid-template-columns:minmax(0, 1.15fr) minmax(220px, .85fr); gap:1rem; align-items:center; margin:1.15rem 0; }
+.jt-overview-poster-wrap img { display:block; width:100%; max-height:280px; object-fit:cover; border-radius:14px; border:1px solid rgba(50,255,201,.28); }
+.jt-overview-poster-wrap h3 { color:#fff; margin:0 0 .45rem; font-size:1.05rem; }
+.jt-overview-poster-wrap p { color:var(--muted); margin:0; font-size:.87rem; line-height:1.75; }
+.jt-overview-filters { display:grid; grid-template-columns:minmax(0, 1fr) 220px; gap:.75rem; margin-bottom:1rem; }
+.jt-role-directory { display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:.75rem; }
+.jt-role-card { border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:1rem; background:rgba(5,11,22,.72); }
+.jt-role-card h3 { color:#fff; margin:0 0 .35rem; font-size:1rem; }
+.jt-role-card p { color:var(--muted); font-size:.82rem; line-height:1.6; margin:0 0 .65rem; }
+.jt-role-meta { display:flex; flex-wrap:wrap; gap:.4rem; font-size:.75rem; color:#d8efff; }
+.jt-role-meta span { padding:.2rem .45rem; border-radius:6px; background:rgba(50,255,201,.08); border:1px solid rgba(50,255,201,.18); }
+@media (max-width: 640px) {
+  .jt-overview-poster-wrap, .jt-overview-filters { grid-template-columns:1fr; }
+  .jt-overview-poster-wrap img { max-height:220px; }
+  .jt-overview-link { width:100%; }
+}

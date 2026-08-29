@@ -754,7 +754,7 @@
     </div>
   </div>
 
-  <script src="js/shared-ui.js?v=20260829_1"></script>
+  <script src="js/shared-ui.js?v=20260829_2"></script>
   <script src="js/notifications.js?v=20260826_115"></script>
   <script>
     (function () {
@@ -1011,7 +1011,8 @@
 
           // Fetch Form Config for Dynamic Clauses & Title
           try {
-            const formSnap = await db.collection('joinTeamForms').doc('default').get();
+            const formDocId = app.formId || app.projectSlug || 'default';
+            const formSnap = await db.collection('joinTeamForms').doc(formDocId).get();
             if (formSnap.exists) {
               const cfg = formSnap.data();
               if (cfg.communityName) $('ctrCommunityName').textContent = cfg.communityName;

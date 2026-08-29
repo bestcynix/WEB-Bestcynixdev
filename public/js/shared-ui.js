@@ -32,6 +32,42 @@ window.bringToFront = function (el) {
   };
   window.syncGlobalCommunityLinks = syncGlobalCommunityLinks;
 
+  // One confirmation dialog for every admin action; avoids browser-native
+  // prompts that stack behind tabs and behave differently across devices.
+  window.bcxConfirm = (title = 'ยืนยันการทำรายการ', message = '') => new Promise((resolve) => {
+    let modal = document.getElementById('bcxConfirmModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'bcxConfirmModal';
+      modal.className = 'cyber-modal';
+      modal.innerHTML = `<div class="cyber-modal-card" role="dialog" aria-modal="true" aria-labelledby="bcxConfirmTitle">
+        <div class="cyber-modal-header"><h3 id="bcxConfirmTitle" style="margin:0;color:#fff;font-size:1.15rem;"></h3><button type="button" class="cyber-modal-close" data-confirm-cancel aria-label="ปิด">✕</button></div>
+        <p id="bcxConfirmMessage" style="color:var(--muted);line-height:1.7;margin:0 0 1.25rem;"></p>
+        <div style="display:flex;justify-content:flex-end;gap:.6rem;flex-wrap:wrap;"><button type="button" class="btn-cookie-action btn-essential" data-confirm-cancel>ยกเลิก</button><button type="button" class="btn-cookie-action btn-accept" data-confirm-ok>ตกลง</button></div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    const titleEl = modal.querySelector('#bcxConfirmTitle');
+    const messageEl = modal.querySelector('#bcxConfirmMessage');
+    if (titleEl) titleEl.textContent = title;
+    if (messageEl) messageEl.textContent = message;
+    modal.classList.add('is-open');
+    window.bringToFront?.(modal);
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      modal.classList.remove('is-open');
+      modal.querySelectorAll('[data-confirm-ok], [data-confirm-cancel]').forEach((button) => button.removeEventListener('click', button._confirmHandler));
+      document.removeEventListener('keydown', onKeydown);
+      resolve(value);
+    };
+    const onKeydown = (event) => { if (event.key === 'Escape') finish(false); };
+    modal.querySelectorAll('[data-confirm-ok]').forEach((button) => { button._confirmHandler = () => finish(true); button.addEventListener('click', button._confirmHandler); });
+    modal.querySelectorAll('[data-confirm-cancel]').forEach((button) => { button._confirmHandler = () => finish(false); button.addEventListener('click', button._confirmHandler); });
+    document.addEventListener('keydown', onKeydown);
+  });
+
   // 0. Inject Self-Contained Styles for Shared Modals, PDPA Banner & Footer (Guarantees perfect rendering across all pages)
   const injectSharedStyles = () => {
     if (document.getElementById('bcxSharedStyles')) return;

@@ -129,6 +129,9 @@ service cloud.firestore {
       allow create: if request.resource.data.status == 'submitted'
         && request.resource.data.applicant is map
         && request.resource.data.applicant.size() <= 30
+        // Public recruitment must never receive identity/payment documents.
+        && !request.resource.data.keys().hasAny(['nationalId', 'identityDocument', 'bankBook', 'bankAccount', 'taxId', 'taxDocument'])
+        && !request.resource.data.applicant.keys().hasAny(['nationalId', 'identityCardNumber', 'identityDocument', 'bankBook', 'bankAccount', 'taxId', 'taxDocument'])
         && validText(request.resource.data.positionId, 100)
         && validText(request.resource.data.positionName, 200)
         && validText(request.resource.data.contractRefNo, 80)

@@ -5,7 +5,10 @@
 (function () {
   'use strict';
 
-  const FORM_DOC_ID = 'default';
+  const ROUTE_PARTS = window.location.pathname.split('/').filter(Boolean);
+  const ROUTE_PROJECT_SLUG = new URLSearchParams(window.location.search).get('project')
+    || (ROUTE_PARTS[0] === 'join-team' && ROUTE_PARTS[1] ? ROUTE_PARTS[1] : null);
+  const FORM_DOC_ID = ROUTE_PROJECT_SLUG === 'mc-skyline' ? 'mc-skyline' : 'default';
   const APPLICATIONS_COL = 'joinTeamApplications';
   const FORMS_COL = 'joinTeamForms';
 
@@ -33,6 +36,77 @@
   ];
 
   const ALL_DAYS = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์', 'ทุกวัน'];
+
+  const MC_SKYLINE_DEFAULT = {
+    formId: 'mc-skyline',
+    projectSlug: 'mc-skyline',
+    isOpen: true,
+    title: 'รับสมัครทีม Mc-Skyline.online',
+    subtitle: 'ร่วมสร้างเซิร์ฟเวอร์ Minecraft รุ่นใหม่จากทีมเดิม — ไม่จำกัดอายุหรือเพศ ขอเพียงรักการทำงานและมีเวลาว่างเพียงพอ',
+    communityName: 'Mc-Skyline.online',
+    communityUrl: 'https://discord.gg/5eNFMMk3ak',
+    websiteUrl: 'https://mc-skyline.online',
+    ageRange: {},
+    availableDays: ALL_DAYS,
+    positions: [
+      { id: 'mc-dev', name: 'Developer', description: 'พัฒนาเว็บ บอท ปลั๊กอิน หรือระบบหลังบ้าน', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-builder', name: 'Builder', description: 'ออกแบบและสร้างแผนที่/สิ่งปลูกสร้างในเซิร์ฟเวอร์', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-systems', name: 'System / Item / Quest', description: 'ตั้งค่าระบบ ไอเทม เควสต์ และระบบภายในเกม', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-modeler', name: 'Modeler', description: 'สร้างโมเดลและองค์ประกอบ 3D สำหรับเกม', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-resource-pack', name: 'Resource Pack', description: 'จัดทำพื้นผิว เสียง และ resource pack', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-other-staff', name: 'ทีมงานอื่น ๆ ตามความถนัด', description: 'ตำแหน่งเพิ่มเติมสำหรับผู้มีความสามารถเฉพาะด้าน', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
+    ],
+    benefits: [
+      { icon: '🤝', title: 'ทำงานเป็นทีม', desc: 'ร่วมวางระบบและสร้างผลงานจริงกับทีม Mc-Skyline.online' },
+      { icon: '📜', title: 'ข้อตกลงชัดเจน', desc: 'กำหนดหน้าที่ สิทธิในผลงาน และการยุติความร่วมมือไว้ในเอกสารก่อนเริ่มงาน' },
+      { icon: '💰', title: 'แบ่งผลกำไรตามสัญญา', desc: 'หากโครงการมีกำไร จะแบ่งตามเปอร์เซ็นต์และเงื่อนไขที่คู่สัญญาตกลงเป็นลายลักษณ์อักษร' }
+    ],
+    customQuestions: []
+  };
+
+  const getRouteDefault = () => ROUTE_PROJECT_SLUG === 'mc-skyline' ? MC_SKYLINE_DEFAULT : null;
+  const mergeRouteConfig = (remote) => {
+    const routeDefault = getRouteDefault();
+    if (!routeDefault) return remote || {};
+    const source = remote || {};
+    return {
+      ...routeDefault,
+      ...source,
+      positions: Array.isArray(source.positions) && source.positions.length ? source.positions : routeDefault.positions,
+      benefits: Array.isArray(source.benefits) && source.benefits.length ? source.benefits : routeDefault.benefits,
+      customQuestions: Array.isArray(source.customQuestions) ? source.customQuestions : routeDefault.customQuestions,
+      availableDays: Array.isArray(source.availableDays) && source.availableDays.length ? source.availableDays : routeDefault.availableDays,
+      communityUrl: source.communityUrl || routeDefault.communityUrl,
+      websiteUrl: source.websiteUrl || routeDefault.websiteUrl
+    };
+  };
+
+  const renderRoleDirectory = (cfg) => {
+    const wrap = $('jtRoleDirectory');
+    if (!wrap) return;
+    const search = ($('jtRoleSearch')?.value || '').trim().toLowerCase();
+    const filter = $('jtRoleStatusFilter')?.value || 'all';
+    const roles = (cfg.positions || []).filter(p => p.active !== false).filter((p) => {
+      const approved = Number(p.approvedCount || 0);
+      const unlimited = !p.maxSlots || p.maxSlots <= 0 || p.unlimited === true;
+      const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
+      const searchable = `${p.name || ''} ${p.description || ''} ${cfg.communityName || ''}`.toLowerCase();
+      return (!search || searchable.includes(search))
+        && (filter === 'all' || (filter === 'open' ? unlimited || left > 0 : !unlimited && left <= 0));
+    });
+    if (!roles.length) {
+      wrap.innerHTML = '<div style="grid-column:1/-1;padding:1rem;color:var(--muted);text-align:center;border:1px dashed rgba(255,255,255,.15);border-radius:12px;">ไม่พบตำแหน่งตามตัวกรอง</div>';
+      return;
+    }
+    wrap.innerHTML = roles.map((p) => {
+      const approved = Number(p.approvedCount || 0);
+      const unlimited = !p.maxSlots || p.maxSlots <= 0 || p.unlimited === true;
+      const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
+      const status = unlimited || left > 0 ? '🟢 ยังเปิดรับ' : '🔴 เต็มแล้ว';
+      const quota = unlimited ? 'ไม่จำกัดจำนวน' : `ว่าง ${left}/${p.maxSlots} คน`;
+      return `<article class="jt-role-card"><h3>${p.name || 'ตำแหน่งทีมงาน'}</h3><p>${p.description || 'ร่วมพัฒนาโปรเจกต์กับทีม'}</p><div class="jt-role-meta"><span>${status}</span><span>👥 ${quota}</span><span>🎯 ไม่จำกัดอายุ</span></div></article>`;
+    }).join('');
+  };
 
   let formConfig = null;
   let selectedDays = [];
@@ -239,6 +313,24 @@
     if ($('jtHeroSub')) $('jtHeroSub').textContent = cfg.subtitle || '';
     if ($('jtCommunity')) $('jtCommunity').textContent = cfg.communityName || 'BestCyniX Dev';
 
+    const routeLinks = $('jtProjectLinks');
+    if (routeLinks && (cfg.communityUrl || cfg.websiteUrl)) {
+      show(routeLinks);
+      const communityLink = $('jtProjectCommunityLink');
+      const websiteLink = $('jtProjectWebsiteLink');
+      if (communityLink) {
+        communityLink.href = cfg.communityUrl || '#';
+        communityLink.style.display = cfg.communityUrl ? '' : 'none';
+        communityLink.textContent = `💬 เข้าร่วมชุมชน ${cfg.communityName || 'โปรเจกต์'}`;
+      }
+      if (websiteLink) {
+        websiteLink.href = cfg.websiteUrl || '#';
+        websiteLink.style.display = cfg.websiteUrl ? '' : 'none';
+      }
+    } else if (routeLinks) {
+      hide(routeLinks);
+    }
+
     const ageChip = $('jtAgeChip');
     if (ageChip) {
       if (cfg.ageRange && (cfg.ageRange.min || cfg.ageRange.max)) {
@@ -250,6 +342,7 @@
 
     const positions = (cfg.positions || []).filter(p => p.active !== false);
     if ($('jtPositionCount')) $('jtPositionCount').textContent = positions.length;
+    renderRoleDirectory(cfg);
 
     // Benefits
     if (cfg.benefits && cfg.benefits.length && isOpen) {
@@ -645,6 +738,7 @@
     // Build Payload
     const payload = {
       formId: FORM_DOC_ID,
+      projectSlug: ROUTE_PROJECT_SLUG || null,
       status: 'submitted',
       applicantUid: applicantUid,
       userId: applicantUid,
@@ -908,18 +1002,23 @@
       const db = firebase.firestore();
       db.collection(FORMS_COL).doc(FORM_DOC_ID).onSnapshot((doc) => {
         if (doc.exists) {
-          applyFormConfig(doc.data());
+          applyFormConfig(mergeRouteConfig(doc.data()));
         } else {
-          applyFormConfig({ isOpen: true, title: 'สมัครร่วมทีม BestCyniX Dev', positions: [], customQuestions: [] });
+          applyFormConfig(mergeRouteConfig({ isOpen: ROUTE_PROJECT_SLUG === 'mc-skyline', title: 'สมัครร่วมทีม BestCyniX Dev', positions: [], customQuestions: [] }));
         }
       }, (err) => {
         console.warn('JoinTeam config load error:', err);
-        applyFormConfig({ isOpen: true, title: 'สมัครร่วมทีม BestCyniX Dev', positions: [], customQuestions: [] });
+        applyFormConfig(mergeRouteConfig({ isOpen: ROUTE_PROJECT_SLUG === 'mc-skyline', title: 'สมัครร่วมทีม BestCyniX Dev', positions: [], customQuestions: [] }));
       });
     } else {
-      applyFormConfig({ isOpen: false, positions: [], customQuestions: [] });
+      applyFormConfig(mergeRouteConfig({ isOpen: false, positions: [], customQuestions: [] }));
     }
   };
+
+  ['jtRoleSearch', 'jtRoleStatusFilter'].forEach((id) => {
+    $(id)?.addEventListener('input', () => formConfig && renderRoleDirectory(formConfig));
+    $(id)?.addEventListener('change', () => formConfig && renderRoleDirectory(formConfig));
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

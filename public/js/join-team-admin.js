@@ -8,7 +8,7 @@
   const FORMS_COL = 'joinTeamForms';
   const APPS_COL = 'joinTeamApplications';
   const NOTIF_COL = 'joinTeamNotifications';
-  const FORM_DOC_ID = 'default';
+  const FORM_DOC_ID = new URLSearchParams(window.location.search).get('project') || 'default';
   const ADMIN_EMAIL = 'bestcynix@gmail.com';
 
   const ALL_DAYS = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์', 'ทุกวัน'];
@@ -19,6 +19,10 @@
   let formConfig = {};
   let allApplications = [];
   let currentAppId = null;
+  let contractClauses = [];
+  let editingContractClauseIndex = null;
+  const publicFormLink = $('adminPublicFormLink');
+  if (publicFormLink && FORM_DOC_ID !== 'default') publicFormLink.href = `join-team/${encodeURIComponent(FORM_DOC_ID)}`;
 
   // ── Toast ─────────────────────────────────────────────────────────────────
   const showToast = (title, body = '', type = 'info') => {
@@ -33,6 +37,82 @@
     requestAnimationFrame(() => toast.classList.add('is-show'));
     setTimeout(() => { toast.classList.remove('is-show'); setTimeout(() => toast.remove(), 400); }, 5000);
   };
+
+  const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[char]));
+
+  // Contract clause CMS renderer. Kept independent from Firestore listeners so an
+  // empty/new document never throws and the admin can build clauses from scratch.
+  const renderContractClausesList = (list = []) => {
+    contractClauses = Array.isArray(list) ? list : [];
+    const el = $('clausesListContainer');
+    if (!el) return;
+    if (!contractClauses.length) {
+      el.innerHTML = '<div style="padding:1rem;color:var(--muted);border:1px dashed rgba(255,255,255,.16);border-radius:12px;">ยังไม่มีข้อตกลง กด “เพิ่มข้อตกลงใหม่” เพื่อเริ่มจัดทำร่าง</div>';
+      return;
+    }
+    el.innerHTML = contractClauses.map((clause, index) => {
+      const editing = editingContractClauseIndex === index;
+      if (!editing) {
+        return `<article style="background:rgba(5,11,22,.72);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:1rem 1.15rem;">
+          <div style="display:flex;justify-content:space-between;gap:.8rem;align-items:flex-start;flex-wrap:wrap;">
+            <div><strong style="color:#fff;">${escapeHtml(clause.title || `ข้อ ${index + 1}`)}</strong>${clause.pageBreak ? '<span style="margin-left:.5rem;color:#facc15;font-size:.75rem;">ขึ้นหน้าใหม่</span>' : ''}
+              <p style="white-space:pre-wrap;color:var(--muted);font-size:.84rem;margin:.45rem 0 0;">${escapeHtml(clause.content || 'ยังไม่มีรายละเอียด')}</p></div>
+            <div style="display:flex;gap:.45rem;flex-wrap:wrap;"><button type="button" class="jt-admin-btn secondary" onclick="window._editContractClause(${index})">✏️ แก้ไข</button><button type="button" class="jt-admin-btn danger" onclick="window._deleteContractClause(${index})">🗑️ ลบ</button></div>
+          </div>
+        </article>`;
+      }
+      return `<article style="background:rgba(5,11,22,.9);border:1px solid rgba(50,255,201,.35);border-radius:14px;padding:1rem 1.15rem;display:grid;gap:.7rem;">
+        <input class="jt-input clause-title" data-idx="${index}" value="${escapeHtml(clause.title || '')}" placeholder="หัวข้อข้อตกลง" />
+        <textarea class="jt-textarea clause-content" data-idx="${index}" rows="6" placeholder="รายละเอียดข้อตกลง">${escapeHtml(clause.content || '')}</textarea>
+        <label style="display:flex;align-items:center;gap:.5rem;color:var(--muted);font-size:.84rem;"><input class="clause-page-break" data-idx="${index}" type="checkbox" ${clause.pageBreak ? 'checked' : ''}/> ขึ้นหน้าใหม่เมื่อนำไปจัดทำสัญญา</label>
+        <div style="display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;"><button type="button" class="jt-admin-btn secondary" onclick="window._cancelContractClauseEdit()">ยกเลิก</button><button type="button" class="jt-admin-btn primary" onclick="window._saveContractClause(${index})">💾 บันทึกข้อนี้</button></div>
+      </article>`;
+    }).join('');
+  };
+
+  const saveContractClauses = async () => {
+    const communityName = $('clauseCommunityName')?.value || '';
+    const contractTitle = $('clauseDocTitle')?.value || '';
+    const contractSubtitle = $('clauseDocSubtitle')?.value || '';
+    await db.collection(FORMS_COL).doc(FORM_DOC_ID).set({
+      contractClauses,
+      communityName,
+      contractTitle,
+      contractSubtitle,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  };
+
+  window._editContractClause = (index) => { editingContractClauseIndex = index; renderContractClausesList(contractClauses); };
+  window._cancelContractClauseEdit = () => { editingContractClauseIndex = null; renderContractClausesList(contractClauses); };
+  window._saveContractClause = async (index) => {
+    const title = document.querySelector(`.clause-title[data-idx="${index}"]`)?.value.trim() || `ข้อ ${index + 1}`;
+    const content = document.querySelector(`.clause-content[data-idx="${index}"]`)?.value.trim() || '';
+    const pageBreak = Boolean(document.querySelector(`.clause-page-break[data-idx="${index}"]`)?.checked);
+    contractClauses[index] = { ...contractClauses[index], title, content, pageBreak };
+    try { await saveContractClauses(); editingContractClauseIndex = null; renderContractClausesList(contractClauses); showToast('บันทึกข้อตกลงสำเร็จ', title, 'success'); }
+    catch (err) { showToast('บันทึกไม่สำเร็จ', err.message, 'error'); }
+  };
+  window._deleteContractClause = async (index) => {
+    const accepted = window.bcxConfirm ? await window.bcxConfirm('ลบข้อตกลงนี้หรือไม่?', 'การลบจะมีผลกับเอกสารสัญญาที่สร้างใหม่') : window.confirm('ลบข้อตกลงนี้หรือไม่?');
+    if (!accepted) return;
+    contractClauses.splice(index, 1);
+    editingContractClauseIndex = null;
+    try { await saveContractClauses(); renderContractClausesList(contractClauses); showToast('ลบข้อตกลงแล้ว', '', 'success'); }
+    catch (err) { showToast('ลบไม่สำเร็จ', err.message, 'error'); }
+  };
+
+  $('btnAddClause')?.addEventListener('click', () => {
+    contractClauses.push({ title: `ข้อ ${contractClauses.length + 1}. ข้อตกลง`, content: '', pageBreak: false });
+    editingContractClauseIndex = contractClauses.length - 1;
+    renderContractClausesList(contractClauses);
+  });
+  $('btnSaveClauses')?.addEventListener('click', async () => {
+    try { await saveContractClauses(); showToast('บันทึกข้อตกลงสัญญาทั้งหมดแล้ว', '', 'success'); }
+    catch (err) { showToast('บันทึกไม่สำเร็จ', err.message, 'error'); }
+  });
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   const initAuth = () => {
@@ -118,6 +198,9 @@
     if ($('cfgAgeMin')) $('cfgAgeMin').value = cfg.ageRange?.min ?? '';
     if ($('cfgAgeMax')) $('cfgAgeMax').value = cfg.ageRange?.max ?? '';
     if ($('cfgStatusMode')) $('cfgStatusMode').value = cfg.statusConfig?.mode || 'manual';
+    if ($('clauseCommunityName')) $('clauseCommunityName').value = cfg.communityName || '';
+    if ($('clauseDocTitle')) $('clauseDocTitle').value = cfg.contractTitle || '';
+    if ($('clauseDocSubtitle')) $('clauseDocSubtitle').value = cfg.contractSubtitle || '';
     if ($('cfgAutoOpen')) $('cfgAutoOpen').value = cfg.statusConfig?.autoOpenAt || '';
     if ($('cfgAutoClose')) $('cfgAutoClose').value = cfg.statusConfig?.autoCloseAt || '';
 
@@ -663,7 +746,7 @@
   };
 
   window._deletePosition = async (idx) => {
-    if (!confirm('ยืนยันการลบตำแหน่งนี้?')) return;
+    if (!(window.bcxConfirm ? await window.bcxConfirm('ยืนยันการลบตำแหน่งนี้?', 'ตำแหน่งนี้จะถูกลบออกจากแบบฟอร์มรับสมัคร') : window.confirm('ยืนยันการลบตำแหน่งนี้?'))) return;
     positions.splice(idx, 1);
     editingPositionIndex = null;
     await db.collection(FORMS_COL).doc(FORM_DOC_ID).set({ positions, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
@@ -911,7 +994,7 @@
   };
 
   window._deleteQuestion = async (idx) => {
-    if (!confirm('ยืนยันการลบคำถามนี้?')) return;
+    if (!(window.bcxConfirm ? await window.bcxConfirm('ยืนยันการลบคำถามนี้?', 'คำถามนี้จะถูกลบออกจากแบบฟอร์มรับสมัคร') : window.confirm('ยืนยันการลบคำถามนี้?'))) return;
     questions.splice(idx, 1);
     editingQuestionIndex = null;
     await db.collection(FORMS_COL).doc(FORM_DOC_ID).set({ customQuestions: questions, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
@@ -1032,7 +1115,7 @@
   };
 
   window._deleteBenefit = async (idx) => {
-    if (!confirm('ยืนยันการลบสิทธิพิเศษนี้?')) return;
+    if (!(window.bcxConfirm ? await window.bcxConfirm('ยืนยันการลบสิทธิพิเศษนี้?', 'สิทธิพิเศษนี้จะถูกลบออกจากหน้า Public') : window.confirm('ยืนยันการลบสิทธิพิเศษนี้?'))) return;
     benefits.splice(idx, 1);
     editingBenefitIndex = null;
     await db.collection(FORMS_COL).doc(FORM_DOC_ID).set({ benefits, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
@@ -1309,7 +1392,7 @@
     tbody.querySelectorAll('.btn-del-ctr').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const id = e.currentTarget.dataset.id;
-        if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบใบสมัครและสัญญานี้อย่างถาวร?')) {
+        if (window.bcxConfirm ? await window.bcxConfirm('ลบใบสมัครและสัญญานี้ถาวรหรือไม่?', 'การลบข้อมูลไม่สามารถย้อนกลับได้') : window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบใบสมัครและสัญญานี้อย่างถาวร?')) {
           try {
             await db.collection(APPS_COL).doc(id).delete();
             await recordAuditLog('DELETE_CONTRACT_APPLICATION', 'ลบสัญญาและใบสมัคร ID: ' + id);
@@ -1691,7 +1774,7 @@
 
   $('btnDeleteApp')?.addEventListener('click', async () => {
     if (!currentAppId) return;
-    if (!confirm('ลบใบสมัครนี้ถาวร?')) return;
+    if (!(window.bcxConfirm ? await window.bcxConfirm('ลบใบสมัครนี้ถาวรหรือไม่?', 'การลบข้อมูลไม่สามารถย้อนกลับได้') : window.confirm('ลบใบสมัครนี้ถาวร?'))) return;
     try {
       await db.collection(APPS_COL).doc(currentAppId).delete();
       showToast('ลบใบสมัครแล้ว', '', 'success');
