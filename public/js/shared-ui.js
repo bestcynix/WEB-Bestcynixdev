@@ -16,6 +16,21 @@ window.bringToFront = function (el) {
   'use strict';
 
   const currentYear = new Date().getFullYear();
+  window.BestCynixSiteConfig = window.BestCynixSiteConfig || {
+    discordUrl: 'https://discord.gg/M8k2N3XgYF',
+    businessEmail: 'bestcynix@gmail.com'
+  };
+
+  const syncGlobalCommunityLinks = () => {
+    const url = window.BestCynixSiteConfig.discordUrl;
+    if (!url) return;
+    document.querySelectorAll('[data-global-link="discord"]').forEach((link) => {
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    });
+  };
+  window.syncGlobalCommunityLinks = syncGlobalCommunityLinks;
 
   // 0. Inject Self-Contained Styles for Shared Modals, PDPA Banner & Footer (Guarantees perfect rendering across all pages)
   const injectSharedStyles = () => {
@@ -1097,6 +1112,7 @@ window.bringToFront = function (el) {
     mountPdpaBanner();
     updateAllCopyrightYears();
     registerServiceWorker();
+    syncGlobalCommunityLinks();
     initUniversalMobileDrawer();
     initUniversalScrollReveal();
   };

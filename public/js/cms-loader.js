@@ -410,6 +410,7 @@
     getTechIcon: getTechIcon
   };
   window.BestCynixSiteConfig = { discordUrl: GLOBAL_DISCORD_URL, businessEmail: BUSINESS_EMAIL };
+  window.syncGlobalCommunityLinks?.();
 
   const defaultProjectById = new Map(defaultCMSData.projects.map((project) => [project.id, project]));
   const normalizeProjects = (projects) => (Array.isArray(projects) ? projects : []).map((project) => {
@@ -433,8 +434,10 @@
       }, {})
       : { ...(raw || {}) };
     if (source.discord && (!source.discord.url || source.discord.url === 'https://in-skylineendless.web.app/' || source.discord.url === 'https://discord.gg/')) {
-      source.discord = { ...source.discord, url: GLOBAL_DISCORD_URL };
-    }
+        source.discord = { ...source.discord, url: GLOBAL_DISCORD_URL };
+      } else if (source.discord?.url) {
+        window.BestCynixSiteConfig.discordUrl = source.discord.url;
+      }
     if (source.email && (!source.email.url || source.email.url.includes('contact@bestcynix.dev'))) {
       source.email = { ...source.email, url: `mailto:${BUSINESS_EMAIL}` };
     }
@@ -819,6 +822,10 @@
       if (doc.exists && doc.data().channels) {
         const socialContact = normalizeSocialContact(doc.data().channels);
         window.BestCynixCMS.data.socialContact = socialContact;
+        if (socialContact.discord?.url) {
+          window.BestCynixSiteConfig.discordUrl = socialContact.discord.url;
+          window.syncGlobalCommunityLinks?.();
+        }
         renderSocialLinks(socialContact);
       }
     }, (e) => console.warn('CMS Social Links note:', e));
