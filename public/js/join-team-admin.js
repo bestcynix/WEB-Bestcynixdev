@@ -113,6 +113,15 @@
       renderProjectRegistry();
       showToast('โหลดทะเบียนโปรเจกต์ไม่สำเร็จ', 'ตรวจสอบ Firestore Rules หรือสิทธิ์ Admin', 'error');
     });
+    // First admin visit: seed the requested five-team registry once. Existing
+    // data is never replaced, and later deletions remain soft-hidden records.
+    db.collection(PROJECTS_COL).limit(1).get().then(async (snapshot) => {
+      if (!snapshot.empty) return;
+      const batch = db.batch();
+      DEFAULT_PROJECTS.forEach((project) => batch.set(db.collection(PROJECTS_COL).doc(project.id), { ...project, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: currentUser?.uid || '' }, { merge: true }));
+      await batch.commit();
+      showToast('เตรียมทะเบียน URL 5 ทีมให้แล้ว', 'สามารถแก้ไข เพิ่ม เปิด/ปิด หรือซ่อนแต่ละทีมได้จากรายการด้านบน', 'success');
+    }).catch((err) => console.warn('Project registry initial seed skipped:', err));
   };
 
   const saveProjectRecord = async (record, oldId = record.id) => {
