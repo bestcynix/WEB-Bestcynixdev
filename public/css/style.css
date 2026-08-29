@@ -5099,3 +5099,66 @@ body.chat-fullscreen-lock .chat-window.fullscreen {
   margin-top: 0.2rem;
   flex-shrink: 0;
 }
+
+/* Homepage desktop navigation: keep the full drawer for touch screens, but
+   collapse the long direct links into the existing dropdown categories on
+   wide layouts so labels never collide with the account controls. */
+@media (min-width: 1361px) {
+  .topbar-inner > #siteNav {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: flex-end;
+  }
+
+  .topbar-inner > #siteNav > .drawer-nav-list {
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-end;
+    gap: 0.42rem;
+  }
+
+  .topbar-inner > #siteNav > .drawer-nav-list > .drawer-nav-item {
+    display: none;
+  }
+
+  .topbar-inner > #siteNav > .drawer-nav-list > .nav-dropdown-group {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .topbar-inner > #siteNav .nav-dropdown-trigger {
+    max-width: 100%;
+    padding: 0.42rem 0.36rem;
+    gap: 0.2rem;
+    font-size: 0.79rem;
+  }
+
+  .topbar-inner > #siteNav .nav-dropdown-trigger > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .topbar-inner > .topbar-actions {
+    flex: 0 0 auto;
+  }
+}
+
+@media (min-width: 1361px) and (max-width: 1550px) {
+  .topbar .container,
+  .topbar-inner {
+    gap: 0.55rem !important;
+    padding-inline: 0.75rem !important;
+  }
+
+  .topbar-inner > #siteNav .nav-dropdown-trigger {
+    font-size: 0.72rem;
+    padding-inline: 0.25rem;
+  }
+
+  .topbar .user-pill-name {
+    max-width: 7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

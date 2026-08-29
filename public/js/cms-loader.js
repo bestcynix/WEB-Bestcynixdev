@@ -126,6 +126,10 @@
   window.BCX_BRAND_ICONS = brandIcons;
 
   const GLOBAL_DISCORD_URL = 'https://discord.gg/M8k2N3XgYF';
+  const PROJECT_COMMUNITY_URLS = {
+    'mc-skyline': 'https://discord.gg/5eNFMMk3ak',
+    'skylinebot-0194': 'https://discord.gg/CzsBvjYBdQ'
+  };
   const BUSINESS_EMAIL = 'bestcynix@gmail.com';
 
   // 2. Default Rich Datasets
@@ -141,7 +145,7 @@
         isSpoiler: false,
         showWebsite: true,
         showCommunity: true,
-        communityUrl: GLOBAL_DISCORD_URL,
+        communityUrl: PROJECT_COMMUNITY_URLS['skylinebot-0194'],
         releaseDate: null,
         url: 'https://skylinebot.xyz/',
         coverImage: 'assets/photo/SkyLineBOT-0194.png',
@@ -159,8 +163,8 @@
         accessLevel: 'public',
         isSpoiler: true,
         showWebsite: true,
-        showCommunity: false,
-        communityUrl: '',
+        showCommunity: true,
+        communityUrl: PROJECT_COMMUNITY_URLS['mc-skyline'],
         releaseDate: null,
         url: 'https://bestcynixdev.web.app/project?id=mc-skyline',
         coverImage: 'assets/photo/mc-skyline.png',
@@ -415,13 +419,18 @@
   const defaultProjectById = new Map(defaultCMSData.projects.map((project) => [project.id, project]));
   const normalizeProjects = (projects) => (Array.isArray(projects) ? projects : []).map((project) => {
     const fallback = defaultProjectById.get(project.id) || {};
+    const canonicalCommunityUrl = PROJECT_COMMUNITY_URLS[project.id];
+    const storedCommunityUrl = project.communityUrl || fallback.communityUrl || '';
+    const communityUrl = canonicalCommunityUrl && (!project.communityUrl || project.communityUrl === GLOBAL_DISCORD_URL)
+      ? canonicalCommunityUrl
+      : storedCommunityUrl;
     return {
       ...fallback,
       ...project,
       showWebsite: project.showWebsite !== undefined ? project.showWebsite !== false : fallback.showWebsite !== false,
-      communityUrl: project.communityUrl || fallback.communityUrl || '',
+      communityUrl,
       showCommunity: project.showCommunity !== undefined
-        ? project.showCommunity === true && Boolean(project.communityUrl || fallback.communityUrl)
+        ? project.showCommunity === true && Boolean(communityUrl)
         : fallback.showCommunity === true && Boolean(fallback.communityUrl)
     };
   });

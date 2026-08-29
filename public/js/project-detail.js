@@ -326,13 +326,22 @@
   const normalizeProject = (project) => {
     if (!project) return null;
     const fallback = (window.BestCynixCMS?.data?.projects || []).find((item) => item.id === project.id) || {};
-    const communityUrl = project.communityUrl || fallback.communityUrl || '';
+    const canonicalCommunityUrls = {
+      'mc-skyline': 'https://discord.gg/5eNFMMk3ak',
+      'skylinebot-0194': 'https://discord.gg/CzsBvjYBdQ'
+    };
+    const canonicalCommunityUrl = canonicalCommunityUrls[project.id];
+    const communityUrl = canonicalCommunityUrl && (!project.communityUrl || project.communityUrl === 'https://discord.gg/M8k2N3XgYF')
+      ? canonicalCommunityUrl
+      : (project.communityUrl || fallback.communityUrl || '');
     return {
       ...fallback,
       ...project,
       showWebsite: project.showWebsite !== false,
       communityUrl,
-      showCommunity: project.showCommunity === true && Boolean(communityUrl)
+      showCommunity: project.showCommunity !== undefined
+        ? project.showCommunity === true && Boolean(communityUrl)
+        : fallback.showCommunity === true && Boolean(communityUrl)
     };
   };
 
