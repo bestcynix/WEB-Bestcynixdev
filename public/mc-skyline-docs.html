@@ -8,6 +8,22 @@
   <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
   <link rel="stylesheet" href="css/style.css?v=20260829_3" />
   <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  </script>
   <style>
     .ms-docs { width:min(980px,calc(100vw - 2rem)); margin:0 auto; padding:2.5rem 0 4rem; }
     .ms-card { background:rgba(8,24,42,.88); border:1px solid rgba(50,255,201,.22); border-radius:20px; padding:clamp(1rem,3vw,2rem); margin:1rem 0; }
@@ -131,5 +147,6 @@
     </section>
   </main>
   <script src="js/shared-ui.js?v=20260829_2"></script>
+  <script src="js/mc-skyline-docs.js?v=20260829_1"></script>
 </body>
 </html>

@@ -18,6 +18,13 @@ service firebase.storage {
         && request.resource.size <= maxBytes;
     }
 
+    function isValidDocumentUpload() {
+      return request.resource != null
+        && request.resource.size <= 20 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*')
+          || request.resource.contentType == 'application/pdf');
+    }
+
     function isValidChatId(chatId) {
       return chatId.matches('^anon_[A-Za-z0-9]{7}$')
         || (isSignedIn() && chatId == request.auth.uid);
@@ -40,6 +47,14 @@ service firebase.storage {
 
     match /admin-uploads/{allPaths=**} {
       allow read, write: if isAdmin() && isValidImage(10 * 1024 * 1024);
+    }
+
+    // Files are public only because the public docs page embeds them.
+    // Only verified admins may upload or delete document assets.
+    match /document-assets/mc-skyline/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidDocumentUpload();
+      allow delete: if isAdmin();
     }
 
     match /{allPaths=**} {

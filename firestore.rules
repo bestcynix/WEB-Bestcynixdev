@@ -160,6 +160,26 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    function isValidSiteDocument() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['id', 'title', 'subtitle', 'intro', 'links', 'sections', 'updatedAt', 'updatedBy'])
+        && data.id == 'mc-skyline'
+        && validText(data.title, 200)
+        && validText(data.subtitle, 1000)
+        && validText(data.intro, 2000)
+        && data.links is list && data.links.size() <= 30
+        && data.sections is list && data.sections.size() <= 40
+        && validText(data.updatedBy, 128);
+    }
+
+    // Public read is intentional: this document powers the public docs page.
+    // Writes remain admin-only and bounded to the Mc-Skyline CMS document.
+    match /siteDocuments/{docId} {
+      allow read: if docId == 'mc-skyline';
+      allow create, update: if isAdmin() && docId == 'mc-skyline' && isValidSiteDocument();
+      allow delete: if isAdmin() && docId == 'mc-skyline';
+    }
+
     match /auditLogs/{logId} {
       allow read: if isAdmin();
       allow create: if isSignedIn()
