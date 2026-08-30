@@ -44,6 +44,16 @@
       .replace(/'/g, '&#039;');
   };
 
+  const storageErrorMessage = (error) => {
+    const code = String(error?.code || '');
+    if (code === 'storage/quota-exceeded' || code.endsWith('/quota-exceeded')) return 'Firebase Storage ใช้งานครบโควตา หรือโปรเจกต์ยังไม่ได้เปิดแพ็กเกจ Blaze กรุณาตรวจสอบ Billing และ Storage quota ก่อนอัปโหลดไฟล์อีกครั้ง';
+    if (code === 'storage/unauthorized') return 'ไม่มีสิทธิ์อัปโหลดไฟล์นี้';
+    if (code === 'storage/canceled') return 'ยกเลิกการอัปโหลดไฟล์แล้ว';
+    if (code === 'storage/retry-limit-exceeded') return 'อัปโหลดไม่สำเร็จเพราะการเชื่อมต่อไม่เสถียร กรุณาลองใหม่';
+    if (code === 'storage/network-request-failed') return 'อัปโหลดไม่สำเร็จเพราะเครือข่ายขัดข้อง กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
+    return error?.message || 'อัปโหลดไฟล์ไม่สำเร็จ';
+  };
+
   // Helper: Lock / Unlock page background scroll on Fullscreen Chat
   const syncChatScrollLock = () => {
     const isFullscreen = liveChatWindow && liveChatWindow.classList.contains('active') && liveChatWindow.classList.contains('fullscreen');
@@ -393,7 +403,7 @@
       if (chatPreviewWrap) chatPreviewWrap.style.display = 'none';
 
     } catch (err) {
-      showCyberToast('ส่งข้อความไม่สำเร็จ', err.message, 'error');
+      showCyberToast('ส่งข้อความไม่สำเร็จ', selectedChatFile ? storageErrorMessage(err) : (err.message || 'กรุณาลองใหม่'), 'error');
     } finally {
       if (btnChatSend) btnChatSend.disabled = false;
     }

@@ -127,6 +127,15 @@
   function safeUrl(value) { const url = String(value || '').trim(); return ALLOWED_URL.test(url) ? url : '#'; }
   function linkHtml(link, className) { return `<a class="${className || ''}" href="${escapeHtml(safeUrl(link.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label || link.url)}</a>`; }
   function notify(title, message, type) { if (typeof window.showCyberToast === 'function') window.showCyberToast(title, message, type || 'info'); else window.alert(`${title}\n${message}`); }
+  function storageErrorMessage(error) {
+    const code = String(error?.code || '');
+    if (code === 'storage/quota-exceeded' || code.endsWith('/quota-exceeded')) return 'Firebase Storage ใช้งานครบโควตา หรือโปรเจกต์ยังไม่ได้เปิดแพ็กเกจ Blaze กรุณาตรวจสอบ Billing และ Storage quota ก่อนอัปโหลดไฟล์อีกครั้ง';
+    if (code === 'storage/unauthorized') return 'ไม่มีสิทธิ์อัปโหลดไฟล์เอกสารนี้';
+    if (code === 'storage/canceled') return 'ยกเลิกการอัปโหลดไฟล์แล้ว';
+    if (code === 'storage/retry-limit-exceeded') return 'อัปโหลดไม่สำเร็จเพราะการเชื่อมต่อไม่เสถียร กรุณาลองใหม่';
+    if (code === 'storage/network-request-failed') return 'อัปโหลดไม่สำเร็จเพราะเครือข่ายขัดข้อง กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
+    return error?.message || 'ตรวจสอบสิทธิ์และการเชื่อมต่อ Storage';
+  }
 
   function renderDocument() {
     if (state.editing && state.admin) { renderEditor(); return; }
@@ -220,7 +229,7 @@
       const snapshot = await ref.put(file, { contentType: file.type, customMetadata: { docId: DOC_ID } });
       const url = await snapshot.ref.getDownloadURL(); state.doc.sections[sectionIndex].attachments.push({ name: file.name, url, type: file.type, size: file.size });
       notify('อัปโหลดสำเร็จ', 'ไฟล์ถูกเพิ่มในหัวข้อนี้แล้ว กดบันทึกเพื่อเผยแพร่', 'success'); renderEditor();
-    } catch (error) { notify('อัปโหลดไม่สำเร็จ', error.message || 'ตรวจสอบสิทธิ์และการเชื่อมต่อ Storage', 'error'); button.disabled = false; }
+    } catch (error) { notify('อัปโหลดไม่สำเร็จ', storageErrorMessage(error), 'error'); button.disabled = false; }
   }
 
   root.addEventListener('input', (event) => { if (state.editing && event.target.matches('[data-field],[data-link-field],[data-section-field],[data-paragraph-field],[data-item-field],[data-sub-field],[data-subitem-field],[data-section-link-field]')) updateFromElement(event.target); });
