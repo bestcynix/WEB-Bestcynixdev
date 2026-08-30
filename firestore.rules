@@ -62,7 +62,7 @@ service cloud.firestore {
 
     function validTeamMessage() {
       let data = request.resource.data;
-      return data.keys().hasOnly(['senderUid', 'senderName', 'senderPhoto', 'senderOnline', 'text', 'attachmentUrl', 'attachmentType', 'attachmentName', 'replyTo', 'pinned', 'readBy', 'unreadBy', 'createdAt', 'updatedAt'])
+      return data.keys().hasOnly(['senderUid', 'senderName', 'senderPhoto', 'senderOnline', 'text', 'attachmentUrl', 'attachmentType', 'attachmentName', 'replyTo', 'pinned', 'readBy', 'unreadBy', 'editedAt', 'revokedAt', 'revokedBy', 'createdAt', 'updatedAt'])
         && validText(data.senderUid, 128)
         && validText(data.senderName, 120)
         && (data.senderPhoto == null || validUrl(data.senderPhoto))
@@ -74,7 +74,10 @@ service cloud.firestore {
         && (data.replyTo == null || data.replyTo is map)
         && data.pinned is bool
         && (!('readBy' in data) || (data.readBy is map && data.readBy.keys().size() <= 500))
-        && (!('unreadBy' in data) || (data.unreadBy is map && data.unreadBy.keys().size() <= 500));
+        && (!('unreadBy' in data) || (data.unreadBy is map && data.unreadBy.keys().size() <= 500))
+        && (!('editedAt' in data) || data.editedAt is timestamp)
+        && (!('revokedAt' in data) || data.revokedAt is timestamp)
+        && (!('revokedBy' in data) || validText(data.revokedBy, 128));
     }
 
     function validTeamDocument() {
@@ -655,7 +658,11 @@ service cloud.firestore {
         allow update: if (isGroupManager(groupId) && validTeamMessage())
           || (isGroupMember(groupId) && resource.data.senderUid == request.auth.uid
             && validTeamMessage()
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'updatedAt']))
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'editedAt', 'updatedAt']))
+          || (isGroupMember(groupId) && resource.data.senderUid == request.auth.uid
+            && validTeamMessage()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['revokedAt', 'revokedBy', 'updatedAt'])
+            && request.resource.data.revokedBy == request.auth.uid)
           // Every member may change only their own read/unread flag. The maps are
           // bounded and legacy messages without readBy can be initialized
           // with the current user's flag only.
