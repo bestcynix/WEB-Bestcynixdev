@@ -59,7 +59,7 @@ service firebase.storage {
 
     function isGroupMember(groupId) {
       return isSignedIn()
-        && firestore.get(/databases/(default)/documents/teamGroups/$(groupId)/members/$(request.auth.uid)).data.uid == request.auth.uid;
+        && firestore.exists(/databases/(default)/documents/teamGroups/$(groupId)/members/$(request.auth.uid));
     }
 
     function isGroupManager(groupId) {
