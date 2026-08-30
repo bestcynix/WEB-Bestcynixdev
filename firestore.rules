@@ -93,12 +93,35 @@ service cloud.firestore {
 
     function validTeamMeeting() {
       let data = request.resource.data;
-      return data.keys().hasOnly(['title', 'url', 'startsAt', 'createdBy', 'responses', 'createdAt', 'updatedAt'])
+      return data.keys().hasOnly(['title', 'provider', 'url', 'roomUrl', 'startsAt', 'createdBy', 'responses', 'createdAt', 'updatedAt'])
         && validText(data.title, 160)
+        && (!('provider' in data) || data.provider in ['web', 'google-meet', 'discord', 'microsoft-teams'])
         && validUrl(data.url)
+        && (!('roomUrl' in data) || data.roomUrl == null || validUrl(data.roomUrl))
         && validText(data.startsAt, 80)
         && validText(data.createdBy, 128)
-        && data.responses is map;
+        && data.responses is map
+        && (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function validTeamSignal() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['from', 'to', 'type', 'payload', 'createdAt'])
+        && validText(data.from, 128)
+        && validText(data.to, 128)
+        && data.type in ['offer', 'answer', 'candidate']
+        && data.payload is map
+        && data.createdAt is timestamp;
+    }
+
+    function validMeetingParticipant(userId) {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['uid', 'displayName', 'online', 'joinedAt', 'updatedAt'])
+        && data.uid == userId
+        && validText(data.displayName, 120)
+        && data.online is bool
+        && data.joinedAt is timestamp
+        && data.updatedAt is timestamp;
     }
 
     function isValidUserDoc(userId) {
@@ -704,6 +727,23 @@ service cloud.firestore {
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['responses'])
             && request.resource.data.responses[request.auth.uid] in ['accepted', 'rejected']);
         allow delete: if isGroupManager(groupId);
+
+        match /participants/{userId} {
+          allow read: if isGroupMember(groupId) || isAdmin();
+          allow create, update: if isGroupMember(groupId)
+            && request.auth.uid == userId
+            && validMeetingParticipant(userId);
+          allow delete: if isGroupMember(groupId) && request.auth.uid == userId;
+        }
+
+        match /signals/{signalId} {
+          allow read: if isGroupMember(groupId) || isAdmin();
+          allow create: if isGroupMember(groupId)
+            && request.resource.data.from == request.auth.uid
+            && request.resource.data.to != request.auth.uid
+            && validTeamSignal();
+          allow delete: if isGroupMember(groupId) && resource.data.from == request.auth.uid;
+        }
       }
     }
 

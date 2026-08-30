@@ -9,7 +9,7 @@
   <link rel="icon" href="assets/photo/bcxlogo2.png">
   <link rel="stylesheet" href="css/style.css?v=20260829_2">
   <link rel="stylesheet" href="css/team-workspace.css?v=20260829_1">
-  <link rel="stylesheet" href="css/team-workspace-overrides.css?v=20260829_1">
+  <link rel="stylesheet" href="css/team-workspace-overrides.css?v=20260830_2">
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -36,25 +36,25 @@
       </aside>
 
       <section class="tw-main" aria-live="polite">
-        <div id="twNoGroup" class="tw-empty-panel"><div class="tw-empty-icon">🧩</div><h2>เลือกกลุ่มงานเพื่อเริ่มต้น</h2><p>พื้นที่นี้จะแสดงเฉพาะกลุ่มที่บัญชีของคุณเป็นสมาชิกเท่านั้น</p></div>
+        <div id="twNoGroup" class="tw-empty-panel" aria-live="polite"><div class="tw-empty-icon">🧩</div><h2>ยังไม่ได้เลือกกลุ่มงาน</h2><p>เลือกกลุ่มจากรายการด้านซ้ายเพื่อเปิดแชท เอกสาร นัดหมาย และสมาชิก</p></div>
         <div id="twGroupPanel" hidden>
           <div class="tw-group-header">
-            <div class="tw-group-title-wrap"><img id="twGroupImage" class="tw-group-image" src="assets/photo/bcxlogo2.png" alt="รูปกลุ่ม"><div><span id="twGroupOrganization" class="tw-eyebrow">WORKSPACE</span><h2 id="twGroupName">กลุ่มงาน</h2><p id="twGroupDescription"></p><div id="twGroupRole" class="tw-role-chip"></div><small id="twGroupUrlText" class="tw-group-url"></small></div></div>
+            <div class="tw-group-title-wrap"><img id="twGroupImage" class="tw-group-image" src="assets/photo/bcxlogo2.png" alt="รูปกลุ่ม"><div><span id="twGroupOrganization" class="tw-eyebrow">WORKSPACE</span><h2 id="twGroupName">กลุ่มงาน</h2><p id="twGroupDescription"></p><div id="twGroupRole" class="tw-role-chip"></div><div id="twGroupSelectionStatus" class="tw-selection-badge">● เปิดกลุ่มนี้อยู่</div><small id="twGroupUrlText" class="tw-group-url"></small></div></div>
             <div class="tw-group-actions"><button id="twCopyGroupLink" class="tw-btn tw-btn-outline" type="button">🔗 คัดลอก URL กลุ่ม</button><button id="twCopyInvite" class="tw-btn tw-btn-outline" type="button">✉️ คัดลอกลิงก์เชิญ</button><button id="twEditGroup" class="tw-btn tw-btn-muted" type="button" hidden>ตั้งค่ากลุ่ม</button></div>
           </div>
           <nav class="tw-tabs" role="tablist"><button class="is-active" data-tab="chat" role="tab">💬 แชท</button><button data-tab="documents" role="tab">📄 เอกสาร</button><button data-tab="meetings" role="tab">📹 ประชุม</button><button data-tab="members" role="tab">👥 สมาชิก</button></nav>
 
-          <section id="twTabChat" class="tw-tab-panel is-active"><div class="tw-chat-toolbar"><input id="twMessageSearch" class="tw-input" type="search" placeholder="ค้นหาข้อความหรือชื่อไฟล์…"><div class="tw-chat-actions"><button id="twMarkAllRead" class="tw-btn tw-btn-muted" type="button">✓ อ่านทั้งหมด</button><button id="twShowUnread" class="tw-btn tw-btn-muted" type="button">ยังไม่อ่าน</button><button id="twNotifyPermission" class="tw-btn tw-btn-muted" type="button">🔔 แจ้งเตือน</button></div></div><div id="twMessages" class="tw-messages"><div class="tw-empty">เลือกกลุ่มเพื่อโหลดแชท</div></div><form id="twMessageForm" class="tw-composer"><div id="twReplyPreview" class="tw-reply-preview" hidden></div><textarea id="twMessageText" class="tw-input" rows="2" maxlength="2500" placeholder="พิมพ์ข้อความ…"></textarea><div class="tw-composer-actions"><label class="tw-file-btn">📎 รูป/วิดีโอ<input id="twAttachment" type="file" accept="image/*,video/*" hidden></label><span id="twAttachmentName" class="tw-file-name"></span><button id="twCancelReply" class="tw-btn tw-btn-muted" type="button" hidden>ยกเลิกตอบกลับ</button><button class="tw-btn tw-btn-primary" type="submit">ส่งข้อความ</button></div></form></section>
+          <section id="twTabChat" class="tw-tab-panel is-active"><div class="tw-chat-toolbar"><label class="tw-search-wrap"><span class="tw-sr-only">ค้นหาข้อความหรือชื่อไฟล์</span><input id="twMessageSearch" class="tw-input" type="search" placeholder="ค้นหาข้อความหรือชื่อไฟล์…"></label><div class="tw-chat-actions"><button id="twMarkAllRead" class="tw-btn tw-btn-muted" type="button">✓ อ่านทั้งหมด</button><button id="twShowUnread" class="tw-btn tw-btn-muted" type="button">เฉพาะยังไม่อ่าน</button><button id="twNotifyPermission" class="tw-btn tw-btn-muted" type="button">🔔 เปิดแจ้งเตือน</button></div></div><div id="twMessages" class="tw-messages"><div class="tw-empty">เลือกกลุ่มเพื่อโหลดแชท</div></div><form id="twMessageForm" class="tw-composer"><div id="twReplyPreview" class="tw-reply-preview" hidden></div><textarea id="twMessageText" class="tw-input" rows="2" maxlength="2500" placeholder="พิมพ์ข้อความ…"></textarea><div class="tw-composer-actions"><label class="tw-file-btn">📎 รูป/วิดีโอ<input id="twAttachment" type="file" accept="image/*,video/*" hidden></label><span id="twAttachmentName" class="tw-file-name"></span><button id="twCancelReply" class="tw-btn tw-btn-muted" type="button" hidden>ยกเลิกตอบกลับ</button><button class="tw-btn tw-btn-primary" type="submit">ส่งข้อความ</button></div></form></section>
 
           <section id="twTabDocuments" class="tw-tab-panel"><div class="tw-section-head"><div><span class="tw-eyebrow">PRIVATE DOCUMENTS</span><h3>เอกสารของกลุ่ม</h3><p>สมาชิกในกลุ่มเท่านั้นที่เปิดดูได้</p></div><button id="twAddDocument" class="tw-btn tw-btn-primary" type="button" hidden>＋ เพิ่มเอกสาร</button></div><div id="twDocuments" class="tw-card-list"></div></section>
-          <section id="twTabMeetings" class="tw-tab-panel"><div class="tw-section-head"><div><span class="tw-eyebrow">MEETINGS</span><h3>ห้องประชุม</h3><p>บันทึกลิงก์ Google Meet หรือบริการประชุมที่ทีมอนุมัติ</p></div><button id="twAddMeeting" class="tw-btn tw-btn-primary" type="button" hidden>＋ สร้างนัดหมาย</button></div><div id="twMeetings" class="tw-card-list"></div></section>
+          <section id="twTabMeetings" class="tw-tab-panel"><div class="tw-section-head"><div><span class="tw-eyebrow">MEETINGS</span><h3>ห้องประชุม</h3><p>สร้างห้องเสียง/วิดีโอในเว็บ หรือเชื่อม Google Meet, Discord และ Microsoft Teams</p></div><button id="twAddMeeting" class="tw-btn tw-btn-primary" type="button" hidden>＋ สร้างนัดหมาย</button></div><div id="twMeetings" class="tw-card-list"></div></section>
           <section id="twTabMembers" class="tw-tab-panel"><div class="tw-section-head"><div><span class="tw-eyebrow">ACCESS CONTROL</span><h3>สมาชิกและยศตำแหน่ง</h3><p>หัวหน้ากลุ่มจัดการบทบาทและนำสมาชิกออกได้</p></div></div><div id="twMembers" class="tw-card-list"></div></section>
         </div>
       </section>
     </div>
   </main>
 
-  <dialog id="twModal" class="tw-modal"><form method="dialog" id="twModalForm"><div class="tw-modal-head"><h3 id="twModalTitle">จัดการ</h3><button class="tw-icon-btn" value="cancel" aria-label="ปิด">✕</button></div><div id="twModalBody"></div><div class="tw-modal-actions"><button class="tw-btn tw-btn-muted" value="cancel">ยกเลิก</button><button id="twModalSubmit" class="tw-btn tw-btn-primary" value="default">บันทึก</button></div></form></dialog>
-  <script src="js/team-workspace.js?v=20260830_1"></script>
+  <dialog id="twModal" class="tw-modal"><form method="dialog" id="twModalForm"><div class="tw-modal-head"><h3 id="twModalTitle">จัดการ</h3><button class="tw-icon-btn" value="cancel" aria-label="ปิด">✕</button></div><div id="twModalBody"></div><div class="tw-modal-actions"><button id="twModalCancel" class="tw-btn tw-btn-muted" value="cancel">ยกเลิก</button><button id="twModalSubmit" class="tw-btn tw-btn-primary" value="default">บันทึก</button></div></form></dialog>
+  <script src="js/team-workspace.js?v=20260830_2"></script>
 </body>
 </html>
