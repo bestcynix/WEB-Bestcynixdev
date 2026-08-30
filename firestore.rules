@@ -62,12 +62,23 @@ service cloud.firestore {
 
     function validTeamMessage() {
       let data = request.resource.data;
-      return data.keys().hasOnly(['senderUid', 'senderName', 'senderPhoto', 'senderOnline', 'text', 'attachmentUrl', 'attachmentType', 'attachmentName', 'replyTo', 'pinned', 'readBy', 'unreadBy', 'editedAt', 'revokedAt', 'revokedBy', 'createdAt', 'updatedAt'])
+      return data.keys().hasOnly(['senderUid', 'senderName', 'senderPhoto', 'senderOnline', 'text', 'attachments', 'attachmentUrl', 'attachmentType', 'attachmentName', 'replyTo', 'pinned', 'readBy', 'unreadBy', 'editedAt', 'revokedAt', 'revokedBy', 'createdAt', 'updatedAt'])
         && validText(data.senderUid, 128)
         && validText(data.senderName, 120)
         && (data.senderPhoto == null || validUrl(data.senderPhoto))
         && data.senderOnline is bool
         && validText(data.text, 2500)
+        && (!('attachments' in data) || (data.attachments is list && data.attachments.size() <= 10
+          && (data.attachments.size() == 0 || validTeamAttachment(data.attachments[0]))
+          && (data.attachments.size() <= 1 || validTeamAttachment(data.attachments[1]))
+          && (data.attachments.size() <= 2 || validTeamAttachment(data.attachments[2]))
+          && (data.attachments.size() <= 3 || validTeamAttachment(data.attachments[3]))
+          && (data.attachments.size() <= 4 || validTeamAttachment(data.attachments[4]))
+          && (data.attachments.size() <= 5 || validTeamAttachment(data.attachments[5]))
+          && (data.attachments.size() <= 6 || validTeamAttachment(data.attachments[6]))
+          && (data.attachments.size() <= 7 || validTeamAttachment(data.attachments[7]))
+          && (data.attachments.size() <= 8 || validTeamAttachment(data.attachments[8]))
+          && (data.attachments.size() <= 9 || validTeamAttachment(data.attachments[9]))))
         && (data.attachmentUrl == null || validUrl(data.attachmentUrl))
         && (data.attachmentType == null || validText(data.attachmentType, 100))
         && (data.attachmentName == null || validText(data.attachmentName, 180))
@@ -78,6 +89,15 @@ service cloud.firestore {
         && (!('editedAt' in data) || data.editedAt is timestamp)
         && (!('revokedAt' in data) || data.revokedAt is timestamp)
         && (!('revokedBy' in data) || validText(data.revokedBy, 128));
+    }
+
+    function validTeamAttachment(file) {
+      return file is map
+        && file.keys().hasOnly(['url', 'name', 'type', 'size'])
+        && validUrl(file.url)
+        && validText(file.name, 180)
+        && validText(file.type, 100)
+        && file.size is int && file.size >= 0 && file.size <= 26214400;
     }
 
     function validTeamDocument() {

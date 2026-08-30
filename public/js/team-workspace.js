@@ -42,7 +42,7 @@
   function closeMessageMenus(exceptId = '') { document.querySelectorAll('.tw-message-menu-list').forEach((menu) => { if (menu.dataset.messageId !== exceptId) { menu.hidden = true; menu.previousElementSibling?.setAttribute('aria-expanded', 'false'); } }); }
   function setNoGroupState(title, description) { const panel = $('twNoGroup'); if (!panel) return; const heading = panel.querySelector('h2'); const text = panel.querySelector('p'); if (heading) heading.textContent = title; if (text) text.textContent = description; }
   function modalValue(id) { return ($(id)?.value || '').trim(); }
-  function messageIsRead(message) { return message.senderUid === state.user?.uid || (message.readBy?.[state.user?.uid] === true && message.unreadBy?.[state.user?.uid] !== true); }
+  function messageIsRead(message) { return message.senderUid === state.user?.uid || message.readBy?.[state.user?.uid] === true; }
   function readReceiptNames(message) { const ids = Object.entries(message.readBy || {}).filter(([, value]) => value === true).map(([uid]) => uid); return ids.map((uid) => state.members.find((member) => member.id === uid)?.displayName || state.members.find((member) => member.id === uid)?.email || uid); }
   async function uploadWorkspaceFile(file, path, maxBytes = 25 * 1024 * 1024, accepted = () => true) {
     if (!file) return null;
@@ -182,7 +182,7 @@
 
   function loadMessages() {
     const groupId = state.group.id;
-    const unsubscribe = db.collection(`teamGroups/${groupId}/messages`).orderBy('createdAt', 'desc').limit(100).onSnapshot((snap) => { const next = snap.docs.map((d) => ({ id: d.id, ...d.data() })).reverse(); const latest = next[next.length - 1]; if (state.messageInitialized && latest && latest.senderUid !== state.user.uid && 'Notification' in window && Notification.permission === 'granted') { const notify = () => new Notification(`${state.group.name}: ${latest.senderName || 'สมาชิก'}`, { body: latest.text || 'ส่งไฟล์แนบใหม่', icon: '/assets/photo/bcxlogo2.png', tag: `team-${groupId}` }); if (navigator.serviceWorker?.ready) navigator.serviceWorker.ready.then((registration) => registration.showNotification(`${state.group.name}: ${latest.senderName || 'สมาชิก'}`, { body: latest.text || 'ส่งไฟล์แนบใหม่', icon: '/assets/photo/bcxlogo2.png', tag: `team-${groupId}`, data: { url: `/team-workspace?group=${groupId}` } })).catch(notify); else notify(); } state.messageInitialized = true; state.messages = next; renderMessages(); }, (error) => flash(`โหลดแชทไม่สำเร็จ: ${friendlyErrorMessage(error)}`, 'error'));
+    const unsubscribe = db.collection(`teamGroups/${groupId}/messages`).orderBy('createdAt', 'desc').limit(100).onSnapshot((snap) => { const next = snap.docs.map((d) => ({ id: d.id, ...d.data() })).reverse(); const latest = next[next.length - 1]; if (state.messageInitialized && latest && latest.senderUid !== state.user.uid && 'Notification' in window && Notification.permission === 'granted') { const notify = () => new Notification(`${state.group.name}: ${latest.senderName || 'สมาชิก'}`, { body: latest.text || 'ส่งไฟล์แนบใหม่', icon: '/assets/photo/bcxlogo2.png', tag: `team-${groupId}` }); if (navigator.serviceWorker?.ready) navigator.serviceWorker.ready.then((registration) => registration.showNotification(`${state.group.name}: ${latest.senderName || 'สมาชิก'}`, { body: latest.text || 'ส่งไฟล์แนบใหม่', icon: '/assets/photo/bcxlogo2.png', tag: `team-${groupId}`, data: { url: `/team-workspace?group=${groupId}` } })).catch(notify); else notify(); } state.messageInitialized = true; state.messages = next; renderMessages(); markMessagesRead(next, groupId); }, (error) => flash(`โหลดแชทไม่สำเร็จ: ${friendlyErrorMessage(error)}`, 'error'));
     state.unsubs.push(unsubscribe);
   }
   function renderMessages() {
@@ -216,6 +216,15 @@
     const batch = db.batch(); pending.forEach((m) => batch.update(db.doc(`teamGroups/${state.group.id}/messages/${m.id}`), { [`readBy.${state.user.uid}`]: true, [`unreadBy.${state.user.uid}`]: false, updatedAt: timestamp() })); await batch.commit(); flash(`ทำเครื่องหมายอ่านแล้ว ${pending.length} ข้อความ`, 'info');
   }
 
+  async function markMessagesRead(messages, groupId = state.group?.id) {
+    if (!groupId || !state.user) return;
+    const pending = messages.filter((m) => m.senderUid !== state.user.uid && !messageIsRead(m));
+    if (!pending.length) return;
+    const batch = db.batch();
+    pending.forEach((m) => batch.update(db.doc(`teamGroups/${groupId}/messages/${m.id}`), { [`readBy.${state.user.uid}`]: true, [`unreadBy.${state.user.uid}`]: false, updatedAt: timestamp() }));
+    try { await batch.commit(); } catch (error) { flash(`บันทึกสถานะอ่านไม่สำเร็จ: ${friendlyErrorMessage(error)}`, 'error'); }
+  }
+
   async function sendMessage(event) {
     event.preventDefault();
     if (!state.group || !state.user) return;
@@ -236,11 +245,11 @@
         }
       }
       const first = attachments[0] || {};
-      await db.collection(`teamGroups/${state.group.id}/messages`).add({ senderUid: state.user.uid, senderName: displayName(), senderPhoto: state.user.photoURL || null, senderOnline: true, text, attachments, attachmentUrl: first.url || null, attachmentType: first.type || null, attachmentName: first.name || null, replyTo: state.reply ? { messageId: state.reply.id, senderName: state.reply.senderName || '', text: String(state.reply.text || '').slice(0, 300) } : null, pinned: false, readBy: {}, createdAt: timestamp() });
+      await db.collection(`teamGroups/${state.group.id}/messages`).add({ senderUid: state.user.uid, senderName: displayName(), senderPhoto: state.user.photoURL || null, senderOnline: true, text, attachments, attachmentUrl: first.url || null, attachmentType: first.type || null, attachmentName: first.name || null, replyTo: state.reply ? { messageId: state.reply.id, senderName: state.reply.senderName || '', text: String(state.reply.text || '').slice(0, 300) } : null, pinned: false, readBy: {}, unreadBy: {}, createdAt: timestamp() });
       $('twMessageText').value = ''; clearSelectedMessageFiles(); cancelReply();
       if (uploadWarning) flash(`ส่งข้อความแล้ว แต่ไม่ได้แนบรูป: ${uploadWarning}`, 'error');
     } catch (error) {
-      flash(files.length ? storageErrorMessage(error) : (error.message || 'ส่งข้อความไม่สำเร็จ'), 'error');
+      flash(friendlyErrorMessage(error), 'error');
     } finally { button.disabled = false; }
   }
   function cancelReply() { state.reply = null; $('twReplyPreview').hidden = true; $('twCancelReply').hidden = true; }
