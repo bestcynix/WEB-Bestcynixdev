@@ -1,7 +1,10 @@
 /*
  * Profile Workforce Workspace
  * Private employment history, attendance, payroll and finance controls.
- * All sensitive reads/writes are additionally enforced by Firestore/Storage Rules.
+ * Sensitive workforce reads/writes go through the Supabase private-workforce API.
+ * Firebase Auth remains the login provider; no Supabase service key is shipped to
+ * this browser. Firestore is kept only for the non-workforce profile bootstrap
+ * and legacy records while migration is being verified.
  */
 (function () {
   'use strict';
@@ -28,8 +31,11 @@
     paymentProfile: null,
     paymentHistory: [],
     paymentRequests: [],
-    isWorkforce: false
+    isWorkforce: false,
+    privateSnapshot: null
   };
+
+  var PRIVATE_API_URL = window.BESTCYNIX_PRIVATE_API_URL || 'https://eujnhvfgraunjqgymslr.supabase.co/functions/v1/private-workforce-api';
 
   var $ = function (id) { return document.getElementById(id); };
   var stamp = function () { return firebase.firestore.FieldValue.serverTimestamp(); };
@@ -39,6 +45,52 @@
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   };
   var currentMonth = function () { return todayKey().slice(0, 7); };
+
+  async function privateRequest(method, action, data, file) {
+    if (!wfState.authUser) throw new Error('ไม่พบเซสชันผู้ใช้');
+    var token = await wfState.authUser.getIdToken();
+    var url = PRIVATE_API_URL;
+    var options = { method: method, headers: { Authorization: 'Bearer ' + token } };
+    if (method === 'GET') {
+      var params = new URLSearchParams({ uid: wfState.targetUid });
+      if (action) params.set('action', action);
+      Object.keys(data || {}).forEach(function (key) { if (data[key] != null) params.set(key, String(data[key])); });
+      url += '?' + params.toString();
+    } else if (file) {
+      var form = new FormData();
+      form.append('action', action);
+      Object.keys(data || {}).forEach(function (key) { if (data[key] != null) form.append(key, String(data[key])); });
+      form.append('file', file, file.name);
+      options.body = form;
+    } else {
+      options.headers['Content-Type'] = 'application/json';
+      options.body = JSON.stringify(Object.assign({ action: action }, data || {}));
+    }
+    var response = await fetch(url, options);
+    var body = await response.json().catch(function () { return {}; });
+    if (!response.ok) throw new Error(body.error || 'private_workforce_api_failed');
+    return body;
+  }
+
+  async function loadPrivateSnapshot() {
+    var data = await privateRequest('GET', '', null);
+    wfState.privateSnapshot = data;
+    // The API is the source of truth for private-data privileges. Do not let
+    // a client-side Firestore profile or allow-list decide what the UI exposes.
+    wfState.isAdmin = Boolean(data.isAdmin);
+    wfState.applications = data.applications || [];
+    wfState.employment = data.employment || [];
+    wfState.attendance = data.attendance || [];
+    wfState.payroll = data.payroll || [];
+    wfState.identityDocs = data.identityDocs || [];
+    wfState.finance = data.finance || [];
+    wfState.paymentProfile = data.paymentProfile || null;
+    wfState.paymentProfileExists = Boolean(data.paymentProfile);
+    wfState.paymentHistory = data.paymentHistory || [];
+    wfState.paymentRequests = data.paymentRequests || [];
+    if (data.member) wfState.profile = Object.assign({}, wfState.profile, data.member);
+    return data;
+  }
 
   function esc(value) {
     return String(value == null ? '' : value)
@@ -122,22 +174,8 @@
       ? 'danger' : (['submitted', 'reviewing', 'interview', 'trial', 'suspended'].indexOf(status) >= 0 ? 'warn' : '');
   }
 
-  async function queryBy(collectionName, field, value) {
-    try {
-      var snap = await wfDb.collection(collectionName).where(field, '==', value).get();
-      return snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
-    } catch (error) {
-      console.warn('Profile workforce query failed:', collectionName, field, error);
-      return [];
-    }
-  }
-
   async function loadApplications() {
-    var first = await queryBy('joinTeamApplications', 'applicantUid', wfState.targetUid);
-    var second = await queryBy('joinTeamApplications', 'userId', wfState.targetUid);
-    var map = {};
-    first.concat(second).forEach(function (item) { map[item.id] = item; });
-    wfState.applications = Object.keys(map).map(function (key) { return map[key]; });
+    await loadPrivateSnapshot();
     wfState.applications.sort(function (a, b) {
       return (asDate(b.createdAt) || 0) - (asDate(a.createdAt) || 0);
     });
@@ -174,67 +212,46 @@
   }
 
   async function loadEmployment() {
-    wfState.employment = await queryBy('employmentRecords', 'userUid', wfState.targetUid);
     wfState.employment.sort(function (a, b) {
       return (asDate(b.createdAt) || 0) - (asDate(a.createdAt) || 0);
     });
   }
 
   async function loadAttendance() {
-    wfState.attendance = await queryBy('attendanceRecords', 'uid', wfState.targetUid);
     wfState.attendance.sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
     renderAttendance();
   }
 
   async function loadPayroll() {
-    wfState.payroll = await queryBy('payrollRecords', 'uid', wfState.targetUid);
     wfState.payroll.sort(function (a, b) { return String(b.period || '').localeCompare(String(a.period || '')); });
     renderPayroll();
   }
 
   async function loadIdentityDocuments() {
-    wfState.identityDocs = await queryBy('identityDocuments', 'userUid', wfState.targetUid);
     wfState.identityDocs.sort(function (a, b) { return (asDate(b.createdAt) || 0) - (asDate(a.createdAt) || 0); });
     renderIdentityDocuments();
   }
 
   async function loadFinance() {
     if (!wfState.isAdmin) return;
-    try {
-      var snap = await wfDb.collection('financeEntries').limit(500).get();
-      wfState.finance = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
-      wfState.finance.sort(function (a, b) { return (asDate(b.createdAt) || 0) - (asDate(a.createdAt) || 0); });
-    } catch (error) {
-      wfState.finance = [];
-      flash('โหลดบัญชีรายรับรายจ่ายไม่สำเร็จ', error.message, 'error');
-    }
+    wfState.finance.sort(function (a, b) { return (asDate(b.createdAt) || 0) - (asDate(a.createdAt) || 0); });
     renderFinance();
   }
 
   async function loadPaymentProfile() {
-    try {
-      var snap = await wfDb.collection('paymentProfiles').doc(wfState.targetUid).get();
-      var data = snap.exists ? snap.data() : {};
-      wfState.paymentProfileExists = snap.exists;
-      wfState.paymentProfile = snap.exists ? Object.assign({ id: snap.id }, data) : null;
-      ['paymentBankName', 'paymentAccountName', 'paymentAccountNumber', 'paymentTaxId'].forEach(function (id) {
-        var field = id.replace('payment', '').replace(/^[A-Z]/, function (m) { return m.toLowerCase(); });
-        if ($(id)) $(id).value = data[field] || '';
-      });
-    } catch (error) {
-      flash('โหลดข้อมูลรับเงินไม่สำเร็จ', error.message, 'error');
-    }
-    await Promise.all([loadPaymentHistory(), loadPaymentRequests()]);
+    var data = wfState.paymentProfile || {};
+    ['paymentBankName', 'paymentAccountName', 'paymentAccountNumber', 'paymentTaxId'].forEach(function (id) {
+      var field = id.replace('payment', '').replace(/^[A-Z]/, function (m) { return m.toLowerCase(); });
+      if ($(id)) $(id).value = data[field] || '';
+    });
     renderPaymentHistory();
   }
 
   async function loadPaymentHistory() {
-    wfState.paymentHistory = await queryBy('paymentProfileHistory', 'userUid', wfState.targetUid);
     wfState.paymentHistory.sort(function (a, b) { return (asDate(b.createdAt) || 0) - (asDate(a.createdAt) || 0); });
   }
 
   async function loadPaymentRequests() {
-    wfState.paymentRequests = await queryBy('paymentChangeRequests', 'userUid', wfState.targetUid);
     wfState.paymentRequests.sort(function (a, b) { return (asDate(b.requestedAt) || 0) - (asDate(a.requestedAt) || 0); });
   }
 
@@ -272,7 +289,14 @@
   }
 
   async function openPrivateFile(path, popup) {
-    if (!path || !wfState.authUser || !wfStorage) throw new Error('ไม่พบเส้นทางไฟล์หรือเซสชันผู้ใช้');
+    if (!path || !wfState.authUser) throw new Error('ไม่พบเส้นทางไฟล์หรือเซสชันผู้ใช้');
+    if (String(path).indexOf('supabase-document:') === 0) {
+      var documentId = String(path).slice('supabase-document:'.length);
+      var signed = await privateRequest('GET', 'signed-url', { documentId: documentId });
+      if (popup) popup.location.href = signed.url; else window.location.href = signed.url;
+      return;
+    }
+    if (!wfStorage) throw new Error('ไม่พบพื้นที่จัดเก็บไฟล์เดิม');
     // Read through Firebase Storage Rules using the authenticated SDK. Unlike
     // This does not mint a shareable, permanent Firebase token URL.
     var ref = wfStorage.ref(path);
@@ -352,27 +376,9 @@
     var ok = await confirmAction('ยืนยันอัปเดตผลใบสมัคร', 'ต้องการเปลี่ยนสถานะเป็น “' + statusLabel(status) + '” หรือไม่?');
     if (!ok) return;
     try {
-      await wfDb.collection('joinTeamApplications').doc(id).update({
-        status: status,
-        statusChangedAt: stamp(),
-        statusChangedBy: wfState.authUser.uid
-      });
       var app = wfState.applications.find(function (item) { return item.id === id; }) || {};
       var message = 'สถานะใบสมัครตำแหน่ง ' + (app.positionName || '') + ' เปลี่ยนเป็น ' + statusLabel(status);
-      var notice = {
-        targetUid: wfState.targetUid,
-        title: 'อัปเดตสถานะใบสมัคร',
-        message: message,
-        type: 'application_status',
-        url: '/profile',
-        createdAt: stamp(),
-        createdBy: wfState.authUser.uid
-      };
-      await wfDb.collection('adminAnnouncements').add(notice);
-      await wfDb.collection('users').doc(wfState.targetUid).collection('notifications').add({
-        title: notice.title, message: notice.message, type: notice.type, url: notice.url, createdAt: stamp(), read: false
-      });
-      await writeAudit('UPDATE_APPLICATION_STATUS', message);
+      await privateRequest('POST', 'application.update', { targetUid: wfState.targetUid, id: id, status: status, reason: message });
       flash('อัปเดตผลใบสมัครแล้ว', message, 'success');
       await loadApplications();
       renderWorkHistory();
@@ -406,38 +412,35 @@
   }
 
   function updateAttendanceButtons() {
-    var today = wfState.attendance.find(function (item) { return item.id === wfState.targetUid + '_' + todayKey(); });
+    var today = wfState.attendance.find(function (item) { return String(item.date || '') === todayKey(); });
     if ($('btnCheckIn')) $('btnCheckIn').style.display = wfState.isSelf && !(today && today.checkIn) ? 'inline-flex' : 'none';
     if ($('btnCheckOut')) $('btnCheckOut').style.display = wfState.isSelf && today && today.checkIn && !today.checkOut ? 'inline-flex' : 'none';
   }
 
   async function checkIn() {
     if (!wfState.isSelf) return;
-    var id = wfState.targetUid + '_' + todayKey();
-    var existing = wfState.attendance.find(function (item) { return item.id === id; });
+    var existing = wfState.attendance.find(function (item) { return String(item.date || '') === todayKey(); });
     if (existing && existing.checkIn) return flash('ลงชื่อเข้างานแล้ว', 'รายการวันนี้มีเวลาเข้าอยู่แล้ว', 'warning');
     try {
-      await wfDb.collection('attendanceRecords').doc(id).set({
-        uid: wfState.targetUid, date: todayKey(), checkIn: nowTimestamp(), checkOut: null, hours: 0,
-        status: 'open', note: '', createdAt: stamp(), updatedAt: stamp(), createdBy: wfState.authUser.uid, updatedBy: wfState.authUser.uid
-      }, { merge: true });
+      await privateRequest('POST', 'attendance.check_in', { targetUid: wfState.targetUid });
       flash('ลงชื่อเข้างานสำเร็จ', 'บันทึกเวลาเข้าแล้ว', 'success');
+      await loadPrivateSnapshot();
       await loadAttendance();
     } catch (error) { flash('ลงชื่อเข้างานไม่สำเร็จ', error.message, 'error'); }
   }
 
   async function checkOut() {
     if (!wfState.isSelf) return;
-    var id = wfState.targetUid + '_' + todayKey();
-    var existing = wfState.attendance.find(function (item) { return item.id === id; });
+    var existing = wfState.attendance.find(function (item) { return String(item.date || '') === todayKey(); });
     if (!existing || !existing.checkIn) return flash('ยังไม่มีเวลาเข้างาน', 'กรุณาลงชื่อเข้างานก่อน', 'warning');
     if (existing.checkOut) return flash('ลงชื่อออกงานแล้ว', 'รายการวันนี้มีเวลาออกอยู่แล้ว', 'warning');
     var start = asDate(existing.checkIn);
     var end = new Date();
     var hours = start ? Math.max(0, Math.min(24, (end - start) / 3600000)) : 0;
     try {
-      await wfDb.collection('attendanceRecords').doc(id).update({ checkOut: nowTimestamp(), hours: Number(hours.toFixed(2)), status: 'closed', updatedAt: stamp(), updatedBy: wfState.authUser.uid });
+      await privateRequest('POST', 'attendance.check_out', { targetUid: wfState.targetUid });
       flash('ลงชื่อออกงานสำเร็จ', 'บันทึกชั่วโมงทำงาน ' + hours.toFixed(2) + ' ชั่วโมง', 'success');
+      await loadPrivateSnapshot();
       await loadAttendance();
     } catch (error) { flash('ลงชื่อออกงานไม่สำเร็จ', error.message, 'error'); }
   }
@@ -463,13 +466,14 @@
     if (!wfState.isAdmin) return;
     var id = $('attendanceEditId') && $('attendanceEditId').value;
     if (!id) return;
-    var checkIn = $('attendanceEditCheckIn').value ? firebase.firestore.Timestamp.fromDate(new Date($('attendanceEditCheckIn').value)) : null;
-    var checkOut = $('attendanceEditCheckOut').value ? firebase.firestore.Timestamp.fromDate(new Date($('attendanceEditCheckOut').value)) : null;
-    var hours = checkIn && checkOut ? Math.max(0, Math.min(24, (checkOut.toDate() - checkIn.toDate()) / 3600000)) : 0;
+    var checkIn = $('attendanceEditCheckIn').value ? new Date($('attendanceEditCheckIn').value).toISOString() : null;
+    var checkOut = $('attendanceEditCheckOut').value ? new Date($('attendanceEditCheckOut').value).toISOString() : null;
+    var hours = checkIn && checkOut ? Math.max(0, Math.min(24, (new Date(checkOut) - new Date(checkIn)) / 3600000)) : 0;
     try {
-      await wfDb.collection('attendanceRecords').doc(id).update({ checkIn: checkIn, checkOut: checkOut, hours: Number(hours.toFixed(2)), status: checkOut ? 'closed' : 'open', note: ($('attendanceEditNote').value || '').trim(), updatedAt: stamp(), updatedBy: wfState.authUser.uid });
+      await privateRequest('POST', 'attendance.update', { targetUid: wfState.targetUid, id: id, checkIn: checkIn, checkOut: checkOut, note: ($('attendanceEditNote').value || '').trim() });
       if ($('adminAttendanceEditor')) $('adminAttendanceEditor').style.display = 'none';
       flash('แก้ไขเวลาทำงานแล้ว', '', 'success');
+      await loadPrivateSnapshot();
       await loadAttendance();
     } catch (error) { flash('แก้ไขเวลาไม่สำเร็จ', error.message, 'error'); }
   }
@@ -494,8 +498,9 @@
     box.querySelectorAll('[data-delete-payroll]').forEach(function (button) {
       button.addEventListener('click', async function () {
         if (!await confirmAction('ลบรายการจ่ายเงิน', 'รายการนี้จะถูกลบออกจากประวัติการจ่ายเงินของสมาชิก')) return;
-        await wfDb.collection('payrollRecords').doc(button.dataset.deletePayroll).delete();
+        await privateRequest('POST', 'payroll.delete', { targetUid: wfState.targetUid, id: button.dataset.deletePayroll });
         flash('ลบรายการจ่ายเงินแล้ว', '', 'success');
+        await loadPrivateSnapshot();
         await loadPayroll();
       });
     });
@@ -530,41 +535,19 @@
       var deductions = Number($('payrollDeductions').value || 0);
       if (!period || base < 0 || bonus < 0 || deductions < 0) throw new Error('กรุณากรอกเดือนและจำนวนเงินให้ถูกต้อง');
       var slip = $('payrollSlipFile').files[0];
-      var slipPath = null;
       if (slip) {
         validatePrivateFile(slip);
-        slipPath = 'private-personal/' + wfState.targetUid + '/payroll/' + period + '_' + Date.now() + '_' + cleanFileName(slip.name);
-        var ref = wfStorage.ref(slipPath);
-        await ref.put(slip, { contentType: slip.type });
       }
-      var data = {
-        uid: wfState.targetUid,
-        companyName: ($('payrollCompany').value || '').trim(),
-        teamName: ($('payrollTeam').value || '').trim(),
-        period: period,
-        baseSalary: base,
-        bonus: bonus,
-        deductions: deductions,
-        netSalary: Math.max(0, base + bonus - deductions),
-        paymentStatus: $('payrollStatus').value,
-        paidAt: $('payrollStatus').value === 'paid' ? nowTimestamp() : null,
-        note: ($('payrollNote').value || '').trim(),
-        updatedAt: stamp(),
-        updatedBy: wfState.authUser.uid
-      };
-      if (slipPath) data.slipPath = slipPath;
       var editId = ensureHidden('payrollEditId').value;
-      var refDoc = editId ? wfDb.collection('payrollRecords').doc(editId) : wfDb.collection('payrollRecords').doc();
-      if (!editId) {
-        data.createdAt = stamp();
-        data.createdBy = wfState.authUser.uid;
-      }
-      await refDoc.set(data, { merge: true });
+      await privateRequest('POST', 'payroll.upsert', {
+        targetUid: wfState.targetUid, id: editId || '', period: period, base: base, bonus: bonus,
+        deductions: deductions, status: $('payrollStatus').value, note: ($('payrollNote').value || '').trim()
+      }, slip);
       ensureHidden('payrollEditId').value = '';
       $('payrollAdminForm').reset();
       flash('บันทึกรายการเงินเดือนแล้ว', 'คำนวณยอดสุทธิให้อัตโนมัติแล้ว', 'success');
+      await loadPrivateSnapshot();
       await loadPayroll();
-      await writeAudit('UPSERT_PAYROLL', 'บันทึกเงินเดือน ' + period + ' ให้ UID ' + wfState.targetUid);
     } catch (error) { flash('บันทึกเงินเดือนไม่สำเร็จ', error.message, 'error'); }
     finally { setBusy(button, false); }
   }
@@ -576,7 +559,7 @@
       box.innerHTML = '<div class="workspace-empty">ยังไม่มีเอกสารส่วนตัว</div>';
       return;
     }
-    var labels = { 'id-card': 'สำเนาบัตรประชาชน', bankbook: 'หน้าสมุดบัญชีธนาคาร', 'tax-document': 'เอกสารภาษี', other: 'เอกสารอื่น ๆ' };
+    var labels = { 'id-card': 'สำเนาบัตรประชาชน', identity_card: 'สำเนาบัตรประชาชน', bankbook: 'หน้าสมุดบัญชีธนาคาร', bank_book: 'หน้าสมุดบัญชีธนาคาร', 'tax-document': 'เอกสารภาษี', tax_document: 'เอกสารภาษี', other: 'เอกสารอื่น ๆ' };
     box.innerHTML = wfState.identityDocs.map(function (item) {
       return '<article class="workspace-item"><div class="workspace-item-head"><div><strong>🗂️ ' + esc(labels[item.kind] || item.kind || 'เอกสาร') + '</strong><p class="workspace-file">' + esc(item.fileName || item.storagePath || 'ไฟล์ส่วนตัว') + '</p></div><span class="workspace-badge">🔒 Private</span></div><p>อัปโหลดเมื่อ: ' + esc(formatDate(item.createdAt)) + '</p>' +
         (item.storagePath ? '<p><a class="workspace-file" href="#" data-private-path="' + esc(item.storagePath) + '">🔐 ดูเอกสารแบบลิงก์ชั่วคราว</a></p>' : '<p class="workspace-private-note">ไฟล์เดิมไม่มีเส้นทางสำหรับสร้างลิงก์ใหม่ กรุณาให้ Dev อัปโหลดไฟล์อีกครั้ง</p>') +
@@ -589,9 +572,9 @@
         var item = wfState.identityDocs.find(function (doc) { return doc.id === button.dataset.deleteIdentity; });
         if (!item) return;
         try {
-          if (wfStorage && item.storagePath) await wfStorage.ref(item.storagePath).delete().catch(function () {});
-          await wfDb.collection('identityDocuments').doc(item.id).delete();
+          await privateRequest('POST', 'document.delete', { targetUid: wfState.targetUid, id: item.id });
           flash('ลบเอกสารแล้ว', '', 'success');
+          await loadPrivateSnapshot();
           await loadIdentityDocuments();
         } catch (error) { flash('ลบเอกสารไม่สำเร็จ', error.message, 'error'); }
       });
@@ -616,15 +599,10 @@
       validatePrivateFile(file);
       setBusy(button, true, 'กำลังอัปโหลดเอกสาร...');
       var kind = $('identityDocumentType').value;
-      var path = 'private-personal/' + wfState.targetUid + '/identity/' + kind + '_' + Date.now() + '_' + cleanFileName(file.name);
-      var ref = wfStorage.ref(path);
-      await ref.put(file, { contentType: file.type });
-      await wfDb.collection('identityDocuments').add({
-        userUid: wfState.targetUid, kind: kind, fileName: file.name.slice(0, 180), storagePath: path,
-        createdAt: stamp(), updatedAt: stamp(), createdBy: wfState.authUser.uid
-      });
+      await privateRequest('POST', 'document.upload', { targetUid: wfState.targetUid, documentType: kind }, file);
       $('identityDocumentForm').reset();
       flash('อัปโหลดเอกสารส่วนตัวแล้ว', 'เอกสารนี้ไม่แสดงบนหน้า Public', 'success');
+      await loadPrivateSnapshot();
       await loadIdentityDocuments();
     } catch (error) { flash('อัปโหลดเอกสารไม่สำเร็จ', error.message, 'error'); }
     finally { setBusy(button, false); }
@@ -653,10 +631,9 @@
     box.querySelectorAll('[data-delete-finance]').forEach(function (button) {
       button.addEventListener('click', async function () {
         if (!await confirmAction('ลบรายการบัญชี', 'ยืนยันลบรายการรายรับ/รายจ่ายนี้หรือไม่?')) return;
-        var item = wfState.finance.find(function (row) { return row.id === button.dataset.deleteFinance; });
-        if (item && wfStorage && item.receiptPath) await wfStorage.ref(item.receiptPath).delete().catch(function () {});
-        await wfDb.collection('financeEntries').doc(button.dataset.deleteFinance).delete();
+        await privateRequest('POST', 'finance.delete', { targetUid: wfState.targetUid, id: button.dataset.deleteFinance });
         flash('ลบรายการบัญชีแล้ว', '', 'success');
+        await loadPrivateSnapshot();
         await loadFinance();
       });
     });
@@ -684,28 +661,20 @@
       var period = $('financePeriod').value;
       if (!amount || amount < 0 || amount > 100000000 || !period || !$('financeCategory').value.trim()) throw new Error('กรุณากรอกจำนวนเงิน หมวดหมู่ และเดือนบัญชีให้ครบ');
       var receipt = $('financeReceiptFile').files[0];
-      var receiptPath = null;
       if (receipt) {
         validatePrivateFile(receipt);
-        receiptPath = 'private-personal/' + wfState.authUser.uid + '/finance/' + period + '_' + Date.now() + '_' + cleanFileName(receipt.name);
-        var ref = wfStorage.ref(receiptPath);
-        await ref.put(receipt, { contentType: receipt.type });
       }
-      var data = {
-        type: $('financeType').value, amount: amount, category: $('financeCategory').value.trim(),
-        companyName: $('financeCompany').value.trim(), period: period, note: $('financeNote').value.trim(),
-        updatedAt: stamp(), updatedBy: wfState.authUser.uid
-      };
-      if (receiptPath) data.receiptPath = receiptPath;
       var editId = ensureHidden('financeEntryEditId').value;
-      var refDoc = editId ? wfDb.collection('financeEntries').doc(editId) : wfDb.collection('financeEntries').doc();
-      if (!editId) data.createdAt = stamp(), data.createdBy = wfState.authUser.uid;
-      await refDoc.set(data, { merge: true });
+      await privateRequest('POST', 'finance.upsert', {
+        targetUid: wfState.targetUid, id: editId || '', type: $('financeType').value, amount: amount,
+        category: $('financeCategory').value.trim(), companySlug: $('financeCompany').value.trim(),
+        period: period, note: $('financeNote').value.trim()
+      }, receipt);
       ensureHidden('financeEntryEditId').value = '';
       $('financeEntryForm').reset();
       flash('บันทึกรายการบัญชีแล้ว', 'อัปเดตกำไรคงเหลือให้อัตโนมัติแล้ว', 'success');
+      await loadPrivateSnapshot();
       await loadFinance();
-      await writeAudit('UPSERT_FINANCE_ENTRY', 'บันทึก ' + data.type + ' ' + amount + ' บาท');
     } catch (error) { flash('บันทึกรายการบัญชีไม่สำเร็จ', error.message, 'error'); }
     finally { setBusy(button, false); }
   }
@@ -727,47 +696,23 @@
         await applyPaymentProfile(data, null, data.reason);
         flash('บันทึกข้อมูลรับเงินแล้ว', 'เก็บเวอร์ชันเดิมไว้เป็นหลักฐานและเปิดใช้ข้อมูลใหม่แล้ว', 'success');
       } else {
-        await wfDb.collection('paymentChangeRequests').add({
-          userUid: wfState.targetUid, newBankName: data.newBankName, newAccountName: data.newAccountName,
-          newAccountNumber: data.newAccountNumber, newTaxId: data.newTaxId, reason: data.reason,
-          status: 'pending', requestedAt: stamp(), requestedBy: wfState.authUser.uid
-        });
+        await privateRequest('POST', 'payment.request', { targetUid: wfState.targetUid, bankName: data.newBankName, accountName: data.newAccountName, accountNumber: data.newAccountNumber, taxId: data.newTaxId, reason: data.reason });
         flash('ส่งคำขอแล้ว', 'Dev/CEO จะตรวจสอบก่อนเปิดใช้บัญชีใหม่ ข้อมูลเดิมจะไม่ถูกลบ', 'success');
       }
       $('paymentChangeReason').value = '';
+      await loadPrivateSnapshot();
       await loadPaymentProfile();
     } catch (error) { flash('บันทึกข้อมูลรับเงินไม่สำเร็จ', error.message, 'error'); }
   }
 
   async function applyPaymentProfile(requestData, requestId, reviewNote) {
     if (!wfState.isAdmin) throw new Error('เฉพาะ Dev/CEO เท่านั้นที่อนุมัติข้อมูลรับเงินได้');
-    var current = wfState.paymentProfile;
-    var batch = wfDb.batch();
-    var version = Number(current && current.version || 0) + 1;
-    if (current) {
-      var oldHistoryRef = wfDb.collection('paymentProfileHistory').doc();
-      batch.set(oldHistoryRef, {
-        userUid: wfState.targetUid, version: Number(current.version || 1), bankName: current.bankName || '', accountName: current.accountName || '',
-        accountNumber: current.accountNumber || '', taxId: current.taxId || '', status: 'archived', sourceRequestId: requestId || null,
-        createdAt: current.createdAt || stamp(), createdBy: current.updatedBy || wfState.authUser.uid
-      });
+    if (requestId) {
+      await privateRequest('POST', 'payment.review', { targetUid: wfState.targetUid, id: requestId, status: 'approved', reviewNote: String(reviewNote || '').slice(0, 1000) });
+      return;
     }
-    var historyRef = wfDb.collection('paymentProfileHistory').doc();
-    batch.set(historyRef, {
-      userUid: wfState.targetUid, version: version, bankName: requestData.newBankName, accountName: requestData.newAccountName,
-      accountNumber: requestData.newAccountNumber, taxId: requestData.newTaxId || '', status: 'active', sourceRequestId: requestId || null,
-      createdAt: stamp(), createdBy: wfState.authUser.uid
-    });
-    var profileRef = wfDb.collection('paymentProfiles').doc(wfState.targetUid);
-    batch.set(profileRef, {
-      uid: wfState.targetUid, bankName: requestData.newBankName, accountName: requestData.newAccountName,
-      accountNumber: requestData.newAccountNumber, taxId: requestData.newTaxId || '', version: version,
-      activeHistoryId: historyRef.id, createdAt: current && current.createdAt ? current.createdAt : stamp(), updatedAt: stamp(), updatedBy: wfState.authUser.uid
-    }, { merge: true });
-    if (requestId) batch.update(wfDb.collection('paymentChangeRequests').doc(requestId), { status: 'approved', reviewedAt: stamp(), reviewedBy: wfState.authUser.uid, reviewNote: String(reviewNote || '').slice(0, 1000), approvedVersion: version });
-    await batch.commit();
-    await wfDb.collection('users').doc(wfState.targetUid).collection('notifications').add({ title: 'อัปเดตข้อมูลรับเงิน', message: 'คำขอข้อมูลบัญชีรับเงินของคุณได้รับการอนุมัติแล้ว', type: 'payment_profile', url: '/profile', createdAt: stamp(), read: false });
-    await writeAudit('APPROVE_PAYMENT_PROFILE', 'เปิดใช้ข้อมูลรับเงินเวอร์ชัน ' + version + ' ของ UID ' + wfState.targetUid);
+    var created = await privateRequest('POST', 'payment.request', { targetUid: wfState.targetUid, bankName: requestData.newBankName, accountName: requestData.newAccountName, accountNumber: requestData.newAccountNumber, taxId: requestData.newTaxId || '', reason: requestData.reason || 'บันทึกโดย Dev/CEO' });
+    await privateRequest('POST', 'payment.review', { targetUid: wfState.targetUid, id: created.id, status: 'approved', reviewNote: String(reviewNote || '').slice(0, 1000) });
   }
 
   async function reviewPaymentRequest(requestId, status) {
@@ -779,11 +724,10 @@
     try {
       if (status === 'approved') await applyPaymentProfile(item, requestId, note);
       else {
-        await wfDb.collection('paymentChangeRequests').doc(requestId).update({ status: 'rejected', reviewedAt: stamp(), reviewedBy: wfState.authUser.uid, reviewNote: String(note || '').slice(0, 1000) });
-        await wfDb.collection('users').doc(wfState.targetUid).collection('notifications').add({ title: 'คำขอเปลี่ยนข้อมูลรับเงิน', message: 'คำขอของคุณยังไม่ได้รับการอนุมัติ' + (note ? ' เหตุผล: ' + note : ''), type: 'payment_profile', url: '/profile', createdAt: stamp(), read: false });
-        await writeAudit('REJECT_PAYMENT_PROFILE', 'ไม่อนุมัติคำขอข้อมูลรับเงิน ' + requestId);
+        await privateRequest('POST', 'payment.review', { targetUid: wfState.targetUid, id: requestId, status: 'rejected', reviewNote: String(note || '').slice(0, 1000) });
       }
       flash(status === 'approved' ? 'อนุมัติคำขอแล้ว' : 'ไม่อนุมัติคำขอแล้ว', 'บันทึกประวัติและแจ้งสมาชิกแล้ว', 'success');
+      await loadPrivateSnapshot();
       await loadPaymentProfile();
     } catch (error) { flash('จัดการคำขอไม่สำเร็จ', error.message, 'error'); }
   }
@@ -803,21 +747,11 @@
     var button = $('btnSaveEmployment');
     setBusy(button, true, 'กำลังบันทึกสถานะ...');
     try {
-      await wfDb.collection('users').doc(wfState.targetUid).set({
-        companyId: companyId, companyName: companyName, teamName: teamName, teamRole: teamRole,
-        employmentStatus: status, employmentNote: reason, employmentChangedAt: stamp(), employmentChangedBy: wfState.authUser.uid, updatedAt: stamp()
-      }, { merge: true });
       var title = status === 'active' ? 'แจ้งสถานะกลับเข้าทีม' : 'ประกาศเปลี่ยนสถานะทีมงาน';
       var message = 'สถานะของคุณใน ' + companyName + ' เปลี่ยนเป็น ' + statusLabel(status) + ' เหตุผล: ' + reason;
-      await wfDb.collection('employmentRecords').add({
-        userUid: wfState.targetUid, companyId: companyId, companyName: companyName, teamName: teamName, teamRole: teamRole,
-        status: status, reason: reason, noticeTitle: title, noticeMessage: message,
-        createdAt: stamp(), updatedAt: stamp(), createdBy: wfState.authUser.uid
-      });
-      await wfDb.collection('adminAnnouncements').add({ targetUid: wfState.targetUid, title: title, message: message, type: 'employment', url: '/profile', createdAt: stamp(), createdBy: wfState.authUser.uid });
-      await wfDb.collection('users').doc(wfState.targetUid).collection('notifications').add({ title: title, message: message, type: 'employment', url: '/profile', createdAt: stamp(), read: false });
-      await writeAudit('UPDATE_EMPLOYMENT_STATUS', message);
+      await privateRequest('POST', 'employment.update', { targetUid: wfState.targetUid, status: status, companySlug: companyId, teamSlug: teamName, roleName: teamRole, reason: reason });
       flash('เปลี่ยนสถานะและส่งประกาศแล้ว', message, 'success');
+      await loadPrivateSnapshot();
       await loadEmployment();
       renderWorkHistory();
     } catch (error) { flash('บันทึกสถานะไม่สำเร็จ', error.message, 'error'); }
@@ -825,10 +759,8 @@
   }
 
   async function writeAudit(action, details) {
-    if (!wfState.isAdmin) return;
-    try {
-      await wfDb.collection('auditLogs').add({ adminUid: wfState.authUser.uid, subjectUid: wfState.targetUid, action: action, details: String(details || '').slice(0, 1000), createdAt: stamp() });
-    } catch (error) { console.warn('Audit write failed:', error); }
+    // Private audit events are appended server-side by Supabase.
+    return Promise.resolve({ action: action, details: details });
   }
 
   function bindEvents() {
@@ -865,8 +797,15 @@
       return;
     }
 
-    await loadApplications();
-    wfState.isWorkforce = inferWorkforceMode();
+    try {
+      await loadApplications();
+    } catch (error) {
+      flash('โหลดข้อมูลพื้นที่ทีมงานไม่สำเร็จ', error.message, 'error');
+      return;
+    }
+    // The Supabase workforce member row is the source of truth after migration;
+    // a legacy Firestore field alone must not expose private workforce sections.
+    wfState.isWorkforce = Boolean(wfState.privateSnapshot && wfState.privateSnapshot.member);
     if (wfState.isWorkforce) await loadEmployment();
     applyProfileMode();
     var adminBox = $('profileAdminWorkspace');

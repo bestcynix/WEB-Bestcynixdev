@@ -20,6 +20,8 @@ Firestore นับการอ่าน/เขียนเป็นรายเ
 - `supabase/private-workforce-schema.sql`: ตารางส่วนตัว, การเข้ารหัสค่าเลขบัญชี/เลขภาษีฝั่งแอป, RLS, private storage bucket และ append-only audit/history
 - `scripts/sync-firestore-daily.cjs`: อ่านเฉพาะคอลัมน์ที่ใช้ทำสรุปจาก Supabase, ตรวจชื่อฟิลด์เสี่ยง PII, dry-run และเขียน Firestore เมื่อใช้ `--commit`
 - `.github/workflows/sync-firestore-daily.yml`: เรียกวันละครั้งเวลา 01:00 น. เวลาไทย และรองรับการกดทำงานเอง
+- `supabase/functions/private-workforce-api/index.ts`: API ที่ตรวจ Firebase ID token ฝั่งเซิร์ฟเวอร์ แล้วอ่าน/เขียนข้อมูลส่วนตัวกับ Supabase; ไม่ส่ง service key ไปยังเบราว์เซอร์
+- `public/js/profile-workforce.js`: adapter ของหน้าโปรไฟล์ที่เรียก API นี้แทน collections ส่วนตัวใน Firestore
 
 ## ขั้นตอนเปิดใช้งานที่ต้องตรวจโดย Dev/ผู้ดูแล
 
@@ -29,6 +31,8 @@ Firestore นับการอ่าน/เขียนเป็นรายเ
 4. ทดลอง `node scripts/sync-firestore-daily.cjs` แบบ dry-run และตรวจ payload ว่า `containsPII: false`
 5. เปิด `--commit` หลังผ่านการทดสอบ แล้วค่อยเปลี่ยนหน้าโปรไฟล์/สัญญา/เงินเดือนให้เรียก API Supabase
 6. ห้ามลบข้อมูลเดิมจาก Firebase จนกว่าจะตรวจสอบยอด, สิทธิ์, signed URL, retention และแผน rollback ครบ
+
+การ deploy function ต้องใช้ `--no-verify-jwt` เพราะ API ตรวจ Firebase ID token เอง และต้องตั้งค่า secret ฝั่ง Supabase ได้แก่ `PRIVATE_DATA_ENCRYPTION_KEY` (Base64 32 bytes) และ `WORKFORCE_ADMIN_EMAILS` ห้ามใส่ค่าเหล่านี้ใน JavaScript หรือ GitHub repository
 
 ## การส่งข้อมูลสำคัญจริง
 
