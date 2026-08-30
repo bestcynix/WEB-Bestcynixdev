@@ -748,7 +748,7 @@ service cloud.firestore {
     }
 
     match /teamInvites/{inviteId} {
-      allow read: if isSignedIn() && (resource.data.active == true || isGroupManager(resource.data.groupId));
+      allow read: if resource.data.active == true || isGroupManager(resource.data.groupId);
       allow create: if isGroupManager(request.resource.data.groupId)
         && request.resource.data.keys().hasOnly(['id', 'groupId', 'groupName', 'createdBy', 'active', 'expiresAt', 'uses', 'maxUses', 'createdAt'])
         && request.resource.data.id == inviteId
