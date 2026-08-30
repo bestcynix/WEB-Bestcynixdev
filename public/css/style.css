@@ -5304,6 +5304,8 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-role-card h3, .jt-role-card p { overflow-wrap:anywhere; }
 .jt-project-open-link { flex:0 0 auto; white-space:nowrap; }
 .jt-project-apply-link { display:inline-flex; margin-top:.9rem; color:var(--accent); font-weight:700; text-decoration:none; font-size:.86rem; }
+.jt-project-group-head { display:grid; grid-template-columns:1fr; }
+.jt-project-open-link { width:100%; justify-content:center; box-sizing:border-box; }
 .jt-interview-panel { border:1px solid rgba(50,255,201,.25); border-radius:18px; padding:1.1rem; margin:0 0 1.4rem; background:linear-gradient(135deg,rgba(8,31,50,.94),rgba(5,13,26,.9)); }
 .jt-interview-panel-head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
 .jt-interview-panel-head h2 { margin:.25rem 0; color:#fff; font-size:1.1rem; }
