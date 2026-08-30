@@ -1,6 +1,11 @@
 .tw-group-url{display:block;max-width:48ch;margin-top:.35rem;color:#7dd3fc;font-size:.72rem;overflow-wrap:anywhere}
+.tw-chat-actions{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.tw-chat-actions .tw-btn.is-active{color:#04131d;background:#32ffc9;border-color:#32ffc9}
+.tw-document-preview{display:block;width:min(100%,280px);max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:.7rem;border:1px solid rgba(50,255,201,.25)}
+.tw-field small{color:#8aa9c7;font-size:.72rem}
 .tw-message.is-unread{border-color:rgba(251,191,36,.42);box-shadow:0 0 0 1px rgba(251,191,36,.08)}
 .tw-read-state{margin-left:auto;border-radius:999px;padding:.1rem .42rem;font-size:.65rem;white-space:nowrap}
 .tw-read-state.is-read{color:#86efac;background:rgba(34,197,94,.12)}
 .tw-read-state.is-unread{color:#fde68a;background:rgba(245,158,11,.14)}
-@media(max-width:560px){.tw-group-url{max-width:100%}.tw-read-state{margin-left:0}}
+@media(max-width:700px){.tw-chat-toolbar{display:grid}.tw-chat-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.tw-chat-actions .tw-btn{padding:.55rem .35rem;font-size:.72rem}}
+@media(max-width:560px){.tw-group-url{max-width:100%}.tw-read-state{margin-left:0}.tw-chat-actions{grid-template-columns:1fr 1fr}.tw-chat-actions #twNotifyPermission{grid-column:1/-1}}

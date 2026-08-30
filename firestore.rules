@@ -62,7 +62,7 @@ service cloud.firestore {
 
     function validTeamMessage() {
       let data = request.resource.data;
-      return data.keys().hasOnly(['senderUid', 'senderName', 'senderPhoto', 'senderOnline', 'text', 'attachmentUrl', 'attachmentType', 'attachmentName', 'replyTo', 'pinned', 'readBy', 'createdAt', 'updatedAt'])
+      return data.keys().hasOnly(['senderUid', 'senderName', 'senderPhoto', 'senderOnline', 'text', 'attachmentUrl', 'attachmentType', 'attachmentName', 'replyTo', 'pinned', 'readBy', 'unreadBy', 'createdAt', 'updatedAt'])
         && validText(data.senderUid, 128)
         && validText(data.senderName, 120)
         && (data.senderPhoto == null || validUrl(data.senderPhoto))
@@ -73,15 +73,18 @@ service cloud.firestore {
         && (data.attachmentName == null || validText(data.attachmentName, 180))
         && (data.replyTo == null || data.replyTo is map)
         && data.pinned is bool
-        && (!('readBy' in data) || (data.readBy is map && data.readBy.keys().size() <= 500));
+        && (!('readBy' in data) || (data.readBy is map && data.readBy.keys().size() <= 500))
+        && (!('unreadBy' in data) || (data.unreadBy is map && data.unreadBy.keys().size() <= 500));
     }
 
     function validTeamDocument() {
       let data = request.resource.data;
-      return data.keys().hasOnly(['title', 'description', 'url', 'createdBy', 'createdAt', 'updatedAt'])
+      return data.keys().hasOnly(['title', 'description', 'url', 'fileName', 'mimeType', 'createdBy', 'createdAt', 'updatedAt'])
         && validText(data.title, 160)
         && validText(data.description, 800)
         && validUrl(data.url)
+        && (!('fileName' in data) || data.fileName == null || validText(data.fileName, 180))
+        && (!('mimeType' in data) || data.mimeType == null || validText(data.mimeType, 100))
         && validText(data.createdBy, 128);
     }
 
@@ -653,18 +656,25 @@ service cloud.firestore {
           || (isGroupMember(groupId) && resource.data.senderUid == request.auth.uid
             && validTeamMessage()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'updatedAt']))
-          // Every member may change only their own read flag. The map is
+          // Every member may change only their own read/unread flag. The maps are
           // bounded and legacy messages without readBy can be initialized
           // with the current user's flag only.
           || (isGroupMember(groupId)
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'updatedAt'])
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'unreadBy', 'updatedAt'])
             && request.resource.data.readBy is map
             && request.resource.data.readBy.keys().size() <= 500
             && request.resource.data.readBy[request.auth.uid] is bool
+            && request.resource.data.unreadBy is map
+            && request.resource.data.unreadBy.keys().size() <= 500
+            && request.resource.data.unreadBy[request.auth.uid] is bool
             && ((!('readBy' in resource.data)
               && request.resource.data.readBy.keys().hasOnly([request.auth.uid]))
               || (('readBy' in resource.data)
-                && request.resource.data.readBy.diff(resource.data.readBy).affectedKeys().hasOnly([request.auth.uid]))));
+                && request.resource.data.readBy.diff(resource.data.readBy).affectedKeys().hasOnly([request.auth.uid])))
+            && ((!('unreadBy' in resource.data)
+              && request.resource.data.unreadBy.keys().hasOnly([request.auth.uid]))
+              || (('unreadBy' in resource.data)
+                && request.resource.data.unreadBy.diff(resource.data.unreadBy).affectedKeys().hasOnly([request.auth.uid]))));
         allow delete: if isGroupManager(groupId) || (isGroupMember(groupId) && resource.data.senderUid == request.auth.uid);
       }
 

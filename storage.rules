@@ -62,6 +62,11 @@ service firebase.storage {
         && firestore.get(/databases/(default)/documents/teamGroups/$(groupId)/members/$(request.auth.uid)).data.uid == request.auth.uid;
     }
 
+    function isGroupManager(groupId) {
+      return isAdmin() || (isGroupMember(groupId)
+        && firestore.get(/databases/(default)/documents/teamGroups/$(groupId)/members/$(request.auth.uid)).data.role in ['owner', 'admin', 'lead']);
+    }
+
     match /team-attachments/{groupId}/{allPaths=**} {
       allow read: if isGroupMember(groupId) || isAdmin();
       allow write: if (isGroupMember(groupId) || isAdmin())
@@ -69,6 +74,24 @@ service firebase.storage {
         && request.resource.size <= 25 * 1024 * 1024
         && request.resource.contentType.matches('(image|video)/.*');
       allow delete: if isGroupMember(groupId) || isAdmin();
+    }
+
+    match /team-group-images/{groupId}/{allPaths=**} {
+      allow read: if isGroupMember(groupId) || isAdmin();
+      allow write: if isGroupManager(groupId)
+        && request.resource != null
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if isGroupManager(groupId);
+    }
+
+    match /team-documents/{groupId}/{allPaths=**} {
+      allow read: if isGroupMember(groupId) || isAdmin();
+      allow write: if isGroupManager(groupId)
+        && request.resource != null
+        && request.resource.size <= 20 * 1024 * 1024
+        && request.resource.contentType.matches('(image|application/pdf).*');
+      allow delete: if isGroupManager(groupId);
     }
 
     // Sensitive member documents. These paths are never used by public pages.
