@@ -68,6 +68,10 @@ public/assets/video/
 
 # dotenv environment variables file
 .env
+.env.*
+!.env.example
+service-account*.json
+google-service-account*.json
 
 # dataconnect generated files
 .dataconnect
