@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <base href="/" />
   <meta name="robots" content="index, follow" />
-  <meta name="description" content="รับสมัครทีม Mc-Skyline.online — Developer, Builder, System, Modeler และ Resource Pack" />
-  <title>รับสมัครทีม Mc-Skyline.online • BestCyniX Dev</title>
+  <meta name="description" content="สมัครเข้าร่วมทีม BestCyniX Dev — ร่วมพัฒนา Bot, Web และโปรเจกต์สุดแนว" />
+  <title>สมัครร่วมทีม • BestCyniX Dev</title>
   <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
   <meta name="theme-color" content="#050b14" />
-  <meta property="og:title" content="รับสมัครทีม Mc-Skyline.online" />
-  <meta property="og:description" content="ร่วมสร้างเซิร์ฟเวอร์ Minecraft รุ่นใหม่กับทีม Mc-Skyline.online" />
+  <base href="/" />
+  <meta property="og:title" content="สมัครร่วมทีม BestCyniX Dev" />
+  <meta property="og:description" content="เข้าร่วมทีมพัฒนา Bot Discord, Web Application และระบบสุดเจ๋ง" />
   <meta property="og:image" content="https://bestcynixdev.web.app/assets/photo/bcxlogo2.png" />
-  <meta property="og:url" content="https://bestcynixdev.web.app/join-team/mc-skyline" />
+  <meta property="og:url" content="https://bestcynixdev.web.app/join-team" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20260829_2" />
+  <link rel="stylesheet" href="css/style.css?v=20260830_1" />
   <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -73,20 +73,20 @@
         <a id="jtProjectWebsiteLink" class="btn-secondary" href="#" target="_blank" rel="noopener noreferrer">🌐 เปิดหน้าเว็บไซต์โปรเจกต์ →</a>
       </section>
 
-      <section id="jtRecruitmentOverview" class="jt-recruitment-overview" aria-labelledby="jtOverviewTitle">
+      <section id="jtRecruitmentOverview" class="jt-recruitment-overview" style="display:none;" aria-labelledby="jtOverviewTitle">
         <div class="jt-overview-head">
           <div>
             <span class="jt-overview-kicker">OPEN ROLES DIRECTORY</span>
-            <h2 id="jtOverviewTitle">📣 ตำแหน่งที่เปิดรับและโปรเจกต์ที่กำลังเตรียมการ</h2>
-            <p>ค้นหาและเลือกดูรายละเอียดการรับสมัครจากข้อมูลตำแหน่งที่ระบบโหลดอยู่ในขณะนี้</p>
+            <h2 id="jtOverviewTitle">📣 ตำแหน่งที่เปิดรับและโปรเจกต์ทั้งหมด</h2>
+            <p>ค้นหาและเลือกดูรายละเอียดการรับสมัครของแต่ละโปรเจกต์จากข้อมูลตำแหน่งที่ระบบโหลดอยู่ในขณะนี้</p>
           </div>
-          <a class="jt-overview-link" href="join-team/mc-skyline">ดูหน้า Mc-Skyline.online →</a>
+          <a class="jt-overview-link" href="#jtRoleDirectory">ดูตำแหน่งทุกทีม →</a>
         </div>
         <div class="jt-overview-poster-wrap">
-          <img src="assets/photo/mc-skyline-recruitment.png" alt="โปสเตอร์รับสมัครทีม Mc-Skyline.online" loading="lazy" />
+          <img src="assets/photo/team-recruitment-poster.png" alt="โปสเตอร์รับสมัครทีมงานหลายสายของ BestCyniX Dev: Web, Discord, Bot และ Minecraft" loading="lazy" />
           <div>
-            <h3>จากโปรเจกต์เดิมสู่ Mc-Skyline.online</h3>
-            <p>MC-Slashz.net (01/01/2020–08/06/2020) → Mc-ctc.ml (29/08/2020–06/01/2021) → Mc-Kileema.net (01/03/2021–17/05/2021) → Mc-Skyline.online เร็ว ๆ นี้</p>
+            <h3>เปิดรับหลายโปรเจกต์ในทีมเดียว</h3>
+            <p>สมัคร Mc-Skyline.online, Discord Bot, Discord Server, Web Development หรือทีมพัฒนา BestCyniX Dev ได้จากหน้าเดียว โดยแต่ละโปรเจกต์มี URL และตำแหน่งของตัวเอง</p>
           </div>
         </div>
         <div class="jt-overview-filters">
@@ -105,6 +105,20 @@
         <div style="font-size:2.2rem;margin-bottom:0.8rem;">⚡</div>
         <p style="color:var(--muted);font-size:0.95rem;">กำลังโหลดข้อมูลและสถานะการรับสมัคร...</p>
       </div>
+
+      <!-- Private interview/trial updates for the signed-in applicant. -->
+      <section id="jtInterviewPanel" class="jt-interview-panel" style="display:none;" aria-live="polite">
+        <div class="jt-interview-panel-head">
+          <div><span class="jt-overview-kicker">PRIVATE APPLICATION ROOM</span><h2>💬 ห้องสัมภาษณ์และประกาศนัดหมาย</h2><p>แสดงเฉพาะผู้สมัครเจ้าของใบสมัครและทีมงานที่ได้รับสิทธิ์เท่านั้น</p></div>
+          <a id="jtInterviewRoomLink" class="btn-secondary" href="#" target="_blank" rel="noopener">เปิดห้องแชท →</a>
+        </div>
+        <div id="jtInterviewNotice" class="jt-interview-notice">กำลังตรวจสอบห้องสัมภาษณ์...</div>
+        <div id="jtInterviewMessages" class="jt-interview-messages"></div>
+        <form id="jtInterviewMessageForm" class="jt-interview-composer" autocomplete="off">
+          <input id="jtInterviewMessageInput" class="jt-input" maxlength="1500" placeholder="พิมพ์ข้อความถึง Dev..." />
+          <button class="btn-primary" type="submit">ส่งข้อความ</button>
+        </form>
+      </section>
 
       <!-- Benefits -->
       <section id="jtBenefitsSection" style="margin-bottom:2.5rem;display:none;">
@@ -328,8 +342,8 @@
               <input type="checkbox" id="jtPdpaConsent" required style="accent-color:var(--accent);width:18px;height:18px;margin-top:3px;flex-shrink:0;" />
               <div>
                 <span>ข้าพเจ้ายินยอมให้ <strong>BestCyniX Dev</strong> เก็บรวบรวม ใช้ และประมวลผลข้อมูลส่วนบุคคลและรูปถ่ายที่ได้ระบุในใบสมัครนี้ เพื่อวัตถุประสงค์ในการคัดเลือก ติดต่อประสานงาน และจัดทำเอกสารสัญญาการร่วมทีมตาม</span>
-                <a href="pdpa" target="_blank" style="color:var(--accent);text-decoration:underline;">นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)</a>, 
-                <a href="work-policy" target="_blank" style="color:var(--accent);text-decoration:underline;">นโยบายและระเบียบการร่วมทีม</a> และ 
+                <a href="pdpa" target="_blank" style="color:var(--accent);text-decoration:underline;">นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)</a>,
+                <a href="work-policy" target="_blank" style="color:var(--accent);text-decoration:underline;">นโยบายและระเบียบการร่วมทีม</a> และ
                 <a href="terms" target="_blank" style="color:var(--accent);text-decoration:underline;">เงื่อนไขการใช้งาน</a>
                 <span style="color:var(--accent-red);font-weight:700;"> *</span>
               </div>
@@ -355,6 +369,7 @@
 
   <script src="js/shared-ui.js?v=20260829_2"></script>
   <script src="js/notifications.js?v=20260826_115"></script>
-  <script src="js/join-team.js?v=20260829_21"></script>
+  <script src="js/join-team-interview.js?v=20260830_1"></script>
+  <script src="js/join-team.js?v=20260830_1"></script>
 </body>
 </html>

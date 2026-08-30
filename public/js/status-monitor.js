@@ -200,10 +200,19 @@
     inspect(items[items.length - 1]);
   };
 
-  const showUnavailable = () => {
+  const showUnavailable = (error) => {
     updateHero('unknown');
     updateServiceCards(null);
-    if ($('telemetryStatusText')) $('telemetryStatusText').textContent = '● SERVER PROBE UNAVAILABLE';
+    const statusCode = error?.status || String(error?.message || '').match(/(?:^|_)((?:[1-5]\d\d))(?:$|_)/)?.[1] || '—';
+    if ($('telemetryStatusText')) $('telemetryStatusText').textContent = `● SERVER PROBE ERROR • HTTP ${statusCode}`;
+    if ($('rawApiOutput')) $('rawApiOutput').textContent = JSON.stringify({
+      type: 'https://bestcynixdev.web.app/problems/http-status-probe',
+      title: 'ไม่สามารถอ่านผลตรวจสถานะจาก server probe ได้',
+      status: Number(statusCode) || null,
+      detail: error?.message || 'server probe unavailable',
+      instance: window.location.pathname,
+      checkedAt: new Date().toISOString()
+    }, null, 2);
     renderHistory();
   };
 
@@ -212,7 +221,11 @@
     if (button) button.disabled = true;
     try {
       const response = await fetch(`${API_URL}${forceRun ? '?run=1' : ''}`, { cache: 'no-store', headers: { accept: 'application/json' } });
-      if (!response.ok) throw new Error(`status_api_${response.status}`);
+      if (!response.ok) {
+        const probeError = new Error(`status_api_${response.status}`);
+        probeError.status = response.status;
+        throw probeError;
+      }
       statusPayload = await response.json();
       updateHero(statusPayload.current?.overall);
       updateServiceCards(statusPayload.current);
@@ -221,8 +234,7 @@
     } catch (error) {
       // The UI carries the unavailable state; do not turn an expected backend
       // outage into a noisy console error for visitors.
-      void error;
-      showUnavailable();
+      showUnavailable(error);
     } finally {
       if (button) {
         button.disabled = false;

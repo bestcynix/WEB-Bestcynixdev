@@ -381,6 +381,18 @@
       padding: 1.5rem;
     }
     .lightbox-modal.active { display: flex; }
+    .admin-control-panel { margin-top: 1.4rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .admin-tool-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.2rem; }
+    .admin-tool-card h3 { color: var(--accent); margin-bottom: .85rem; font-size: 1rem; }
+    .admin-tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+    .admin-tool-list { display: grid; gap: .55rem; margin-top: .8rem; max-height: 280px; overflow: auto; }
+    .admin-tool-item { display: flex; align-items: center; justify-content: space-between; gap: .7rem; padding: .65rem .75rem; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+    .admin-tool-item small { display: block; color: var(--muted); margin-top: .15rem; }
+    .admin-status-exited { color: #f87171; border-color: rgba(248,113,113,.5); background: rgba(248,113,113,.12); }
+    .admin-status-active { color: #4ade80; border-color: rgba(74,222,128,.5); background: rgba(74,222,128,.12); }
+    .user-detail-box { margin: .8rem 0 0; padding: .8rem; border-radius: 12px; background: rgba(2,132,199,.08); border: 1px solid rgba(2,132,199,.25); }
+    .user-detail-box a { color: var(--accent); }
+    @media (max-width: 760px) { .admin-control-panel, .admin-tool-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -486,6 +498,11 @@
       <input type="text" class="search-input" id="searchUserInput" placeholder="🔍 ค้นหาตามชื่อแสดงผล, อีเมล, UID หรือเบอร์โทร..." />
       <span style="font-size: 0.88rem; color: var(--muted);">จำนวนสมาชิกทั้งหมด: <strong id="userCountLabel" style="color: var(--accent);">0</strong> คน</span>
     </div>
+    <div class="table-controls" style="justify-content:flex-start; margin-top:-.65rem;">
+      <select id="filterCompany" class="form-input-field" aria-label="กรองบริษัท/กลุ่ม"><option value="">ทุกบริษัท/กลุ่ม</option></select>
+      <select id="filterTeamRole" class="form-input-field" aria-label="กรองยศ"><option value="">ทุกยศ/ตำแหน่ง</option></select>
+      <select id="filterEmploymentStatus" class="form-input-field" aria-label="กรองสถานะ"><option value="">ทุกสถานะ</option><option value="active">ยังอยู่ในทีม</option><option value="suspended">พักงาน</option><option value="exited">พ้นสภาพ</option><option value="terminated">ถูกเลิกสัญญา</option></select>
+    </div>
 
     <!-- Users Table Wrap -->
     <div class="table-wrap">
@@ -494,6 +511,8 @@
           <tr>
             <th>ผู้ใช้งาน</th>
             <th>บทบาท (Role)</th>
+            <th>บริษัท / ยศ</th>
+            <th>สถานะทีม</th>
             <th>สถานะอีเมล</th>
             <th>UID บัญชี</th>
             <th>การกระทำ</th>
@@ -504,6 +523,34 @@
         </tbody>
       </table>
     </div>
+    <section class="admin-control-panel" aria-label="ศูนย์ตั้งค่าผู้ใช้และเอกสาร">
+      <div class="admin-tool-card">
+        <h3>🏢 บริษัท/กลุ่ม และตราประจำทีม</h3>
+        <div class="admin-tool-grid">
+          <input id="companyIdInput" class="form-input-field" placeholder="รหัสบริษัท เช่น mc-skyline" />
+          <input id="companyNameInput" class="form-input-field" placeholder="ชื่อบริษัท/กลุ่ม" />
+          <input id="companyLogoInput" class="form-input-field" placeholder="URL โลโก้" />
+          <input id="companySealInput" class="form-input-field" placeholder="URL ตรา" />
+          <input id="companyDefaultSignatureInput" class="form-input-field" placeholder="รหัสลายเซ็นเริ่มต้น (ถ้ามี)" />
+          <label class="form-input-field" style="display:flex;align-items:center;gap:.5rem;"><input id="companyActiveInput" type="checkbox" checked /> เปิดใช้งานบริษัท/กลุ่ม</label>
+        </div>
+        <div class="modal-btn-row" style="margin-top:.8rem;"><button type="button" class="btn-save-edit" id="btnSaveCompany">💾 บันทึกบริษัท/ตรา</button><button type="button" class="btn-action-sm secondary" id="btnClearCompany">ล้าง</button></div>
+        <div id="companyList" class="admin-tool-list"></div>
+      </div>
+      <div class="admin-tool-card">
+        <h3>✍️ ลายเซ็น Dev กลาง</h3>
+        <div class="admin-tool-grid">
+          <input id="signatureNameInput" class="form-input-field" placeholder="ชื่อรายการลายเซ็น" />
+          <input id="signatureSignerInput" class="form-input-field" value="นายพงศ์ภรณ์ ทองศิริ" placeholder="ชื่อผู้ลงนาม" />
+          <input id="signatureTitleInput" class="form-input-field" value="CEO / Owner" placeholder="ตำแหน่ง" />
+          <input id="signatureCompanyInput" class="form-input-field" placeholder="ชื่อบริษัท/กลุ่มตามเอกสาร" />
+          <input id="signatureImageInput" class="form-input-field" placeholder="URL รูปลายเซ็น (ไม่บังคับ)" />
+          <label class="form-input-field" style="display:flex;align-items:center;gap:.5rem;"><input id="signatureDefaultInput" type="checkbox" /> ใช้เป็นค่าเริ่มต้น</label>
+        </div>
+        <div class="modal-btn-row" style="margin-top:.8rem;"><button type="button" class="btn-save-edit" id="btnSaveSignature">💾 บันทึกลายเซ็น</button><button type="button" class="btn-action-sm secondary" id="btnClearSignature">ล้าง</button></div>
+        <div id="signatureList" class="admin-tool-list"></div>
+      </div>
+    </section>
   </div>
 
   <!-- Edit User Modal -->
@@ -604,6 +651,20 @@
           <textarea id="editBio" class="form-input-field" rows="2" placeholder="ข้อมูลประวัติย่อหรือคำอธิบายเกี่ยวกับสมาชิก..."></textarea>
         </div>
 
+        <div class="admin-tool-grid">
+          <div class="form-group"><label>บริษัท/กลุ่ม</label><input type="text" id="editCompanyName" class="form-input-field" placeholder="ชื่อบริษัทหรือกลุ่ม" /></div>
+          <div class="form-group"><label>รหัสบริษัท/กลุ่ม</label><input type="text" id="editCompanyId" class="form-input-field" placeholder="company-id" /></div>
+          <div class="form-group"><label>ยศ/ตำแหน่งในทีม</label><input type="text" id="editTeamRole" class="form-input-field" placeholder="Dev, Admin, Staff..." /></div>
+          <div class="form-group"><label>สถานะการทำงาน</label><select id="editEmploymentStatus" class="form-input-field"><option value="active">ยังอยู่ในทีม</option><option value="suspended">พักงาน</option><option value="exited">พ้นสภาพ</option><option value="terminated">ถูกเลิกสัญญา</option></select></div>
+        </div>
+        <div class="form-group"><label>หมายเหตุสถานะ/ประกาศ</label><textarea id="editEmploymentNote" class="form-input-field" rows="2" placeholder="เหตุผลสำหรับบันทึกภายในและประกาศ"></textarea></div>
+        <div id="editContracts" class="user-detail-box">กำลังโหลดข้อมูลสัญญา...</div>
+        <div class="action-btn-row" style="flex-wrap:wrap; margin-top:.6rem;">
+          <button type="button" class="btn-action-sm" id="btnViewUserContracts">📄 ดูสัญญาทั้งหมด</button>
+          <button type="button" class="btn-action-sm" id="btnExitUser" style="color:#fca5a5;border-color:rgba(248,113,113,.4);">📢 พ้นสภาพ/ออกประกาศ</button>
+          <button type="button" class="btn-action-sm" id="btnDeleteUserProfile" style="color:#fca5a5;border-color:rgba(248,113,113,.4);">🗑️ ลบโปรไฟล์ Firestore</button>
+        </div>
+
         <!-- Bottom Action Buttons -->
         <div class="modal-btn-row">
           <button type="button" class="btn-action-sm secondary" id="btnCancelEdit">✕ ยกเลิก</button>
@@ -696,19 +757,25 @@
     const renderUsersTable = () => {
       const tbody = document.getElementById("usersTableBody");
       const search = document.getElementById("searchUserInput")?.value.toLowerCase().trim() || "";
+      const companyFilter = document.getElementById("filterCompany")?.value || "";
+      const teamRoleFilter = document.getElementById("filterTeamRole")?.value || "";
+      const employmentFilter = document.getElementById("filterEmploymentStatus")?.value || "";
       if (!tbody) return;
       tbody.innerHTML = "";
 
       const filtered = allUsers.filter((u) => {
-        return !search || 
+        const matchesSearch = !search ||
           (u.displayName && u.displayName.toLowerCase().includes(search)) || 
           (u.email && u.email.toLowerCase().includes(search)) || 
           (u.uid && u.uid.toLowerCase().includes(search)) ||
           (u.phone && u.phone.includes(search));
+        return matchesSearch && (!companyFilter || (u.companyId || u.companyName || "") === companyFilter)
+          && (!teamRoleFilter || (u.teamRole || "") === teamRoleFilter)
+          && (!employmentFilter || (u.employmentStatus || "active") === employmentFilter);
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--muted);">ไม่พบข้อมูลผู้ใช้</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--muted);">ไม่พบข้อมูลผู้ใช้</td></tr>';
         return;
       }
 
@@ -717,6 +784,8 @@
         const isAdmin = u.role === "admin" || u.email === "bestcynix@gmail.com";
         const isVerified = u.emailVerified === true;
         const avatarUrl = u.photoURL || 'assets/photo/bcxlogo2.png';
+        const employmentStatus = u.employmentStatus || 'active';
+        const statusText = { active: '🟢 อยู่ในทีม', suspended: '🟡 พักงาน', exited: '🔴 พ้นสภาพ', terminated: '🔴 เลิกสัญญา' }[employmentStatus] || employmentStatus;
 
         tr.innerHTML = `
           <td>
@@ -731,6 +800,8 @@
           <td>
             <span class="badge ${isAdmin ? 'badge-admin' : 'badge-user'}">${isAdmin ? '⚡ Admin' : '👤 User'}</span>
           </td>
+          <td><div>${escapeHTML(u.companyName || u.companyId || '-')}</div><small style="color:var(--muted);">${escapeHTML(u.teamRole || 'ยังไม่ระบุยศ')}</small></td>
+          <td><span class="badge ${employmentStatus === 'active' ? 'admin-status-active' : 'admin-status-exited'}">${statusText}</span></td>
           <td>
             <span class="badge ${isVerified ? 'badge-verified' : 'badge-unverified'}">${isVerified ? '🟢 ยืนยันแล้ว' : '🟡 รอยืนยัน'}</span>
           </td>
@@ -742,7 +813,7 @@
           </td>
           <td>
             <div class="action-btn-row">
-              <button type="button" class="btn-action-sm btn-edit-user" data-uid="${u.uid}">✏️ แก้ไข</button>
+              <button type="button" class="btn-action-sm btn-edit-user" data-uid="${u.uid}">✏️ ดู/แก้ไข</button>
               <a href="admin-chats" class="btn-action-sm">💬 แชท</a>
             </div>
           </td>
@@ -807,6 +878,13 @@
       document.getElementById("editRole").value = (u.role === "admin" || u.email === "bestcynix@gmail.com") ? "admin" : "user";
       document.getElementById("editPhone").value = u.phone || "";
       document.getElementById("editBio").value = u.bio || "";
+      document.getElementById("editCompanyId").value = u.companyId || "";
+      document.getElementById("editCompanyName").value = u.companyName || "";
+      document.getElementById("editTeamRole").value = u.teamRole || "";
+      document.getElementById("editEmploymentStatus").value = u.employmentStatus || "active";
+      document.getElementById("editEmploymentNote").value = u.employmentNote || "";
+      document.getElementById("editContracts").innerHTML = '<span style="color:var(--muted);">กำลังโหลดสัญญาของสมาชิก...</span>';
+      loadUserContracts(u);
 
       // Avatar
       const avatarSrc = u.photoURL || "assets/photo/bcxlogo2.png";
@@ -858,7 +936,7 @@
       }
 
       const userName = document.getElementById("editDisplayName")?.value || "ผู้ใช้งาน";
-      const confirmSend = confirm(`🔑 ต้องการส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมล:\n${emailVal}\nสำหรับสมาชิก: ${userName}\nใช่หรือไม่?`);
+      const confirmSend = window.bcxConfirm ? await window.bcxConfirm('ส่งลิงก์รีเซ็ตรหัสผ่าน', `ส่งไปยัง ${emailVal} สำหรับสมาชิก ${userName} ใช่หรือไม่?`) : confirm(`🔑 ต้องการส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมล:\n${emailVal}\nสำหรับสมาชิก: ${userName}\nใช่หรือไม่?`);
       if (!confirmSend) return;
 
       const resetBtn = document.getElementById("btnSendPasswordReset");
@@ -916,8 +994,9 @@
     });
 
     // Avatar Remove / Reset
-    document.getElementById("btnRemoveAvatar")?.addEventListener("click", () => {
-      if (!confirm("⚠️ ต้องการลบรูปโปรไฟล์และคืนค่าเป็นรูปเริ่มต้นใช่หรือไม่?")) return;
+    document.getElementById("btnRemoveAvatar")?.addEventListener("click", async () => {
+      const accepted = window.bcxConfirm ? await window.bcxConfirm('ลบรูปโปรไฟล์', 'คืนค่าเป็นรูปเริ่มต้นใช่หรือไม่?') : confirm("⚠️ ต้องการลบรูปโปรไฟล์และคืนค่าเป็นรูปเริ่มต้นใช่หรือไม่?");
+      if (!accepted) return;
       document.getElementById("editAvatarImg").src = "assets/photo/bcxlogo2.png";
       document.getElementById("editPhotoUrl").value = "";
       if (editAvatarFileInput) editAvatarFileInput.value = "";
@@ -939,6 +1018,11 @@
       const newPhone = document.getElementById("editPhone").value.trim();
       const newBio = document.getElementById("editBio").value.trim();
       const newPhotoURL = document.getElementById("editPhotoUrl").value.trim() || null;
+      const newCompanyId = document.getElementById("editCompanyId").value.trim();
+      const newCompanyName = document.getElementById("editCompanyName").value.trim();
+      const newTeamRole = document.getElementById("editTeamRole").value.trim();
+      const newEmploymentStatus = document.getElementById("editEmploymentStatus").value;
+      const newEmploymentNote = document.getElementById("editEmploymentNote").value.trim();
 
       const btn = document.getElementById("btnSaveUser");
       btn.disabled = true;
@@ -951,6 +1035,13 @@
           phone: newPhone,
           bio: newBio,
           photoURL: newPhotoURL,
+          companyId: newCompanyId,
+          companyName: newCompanyName,
+          teamRole: newTeamRole,
+          employmentStatus: newEmploymentStatus,
+          employmentNote: newEmploymentNote,
+          employmentChangedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          employmentChangedBy: currentUserObj?.uid || '',
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
 
@@ -1004,5 +1095,6 @@
   <script src="js/shared-ui.js?v=20260829_1"></script>
   <script src="js/notifications.js?v=20260826_115"></script>
   <script src="js/audit-logger.js?v=20260826_22"></script>
+  <script src="js/admin-users-extensions.js?v=20260829_1"></script>
 </body>
 </html>

@@ -121,6 +121,20 @@
         flex-wrap: wrap !important;
       }
     }
+    .jt-interview-admin-box { border:1px solid rgba(50,255,201,.22); border-radius:12px; padding:.9rem; background:rgba(50,255,201,.05); }
+    .jt-interview-admin-head, .jt-interview-admin-actions { display:flex; justify-content:space-between; align-items:center; gap:.7rem; flex-wrap:wrap; }
+    .jt-interview-admin-head strong { color:#fff; display:block; }
+    .jt-interview-admin-head small { color:var(--muted); display:block; margin-top:.2rem; }
+    .jt-interview-admin-state { color:var(--accent); font-size:.78rem; font-weight:700; }
+    .jt-interview-admin-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:.7rem; margin-top:.8rem; }
+    .jt-interview-admin-grid label { color:var(--muted); font-size:.78rem; font-weight:700; }
+    .jt-interview-admin-grid .jt-input, .jt-interview-admin-grid .jt-select, .jt-interview-admin-grid .jt-textarea { width:100%; margin-top:.3rem; box-sizing:border-box; }
+    .jt-interview-admin-messages { display:grid; gap:.45rem; max-height:220px; overflow:auto; margin-top:.8rem; }
+    .jt-interview-admin-message { padding:.55rem .7rem; border-radius:10px; background:rgba(255,255,255,.05); overflow-wrap:anywhere; }
+    .jt-interview-admin-message small { color:var(--muted); display:block; margin-bottom:.15rem; }
+    .jt-interview-admin-composer { display:flex; gap:.45rem; margin-top:.7rem; }
+    .jt-interview-admin-composer .jt-input { flex:1; min-width:0; }
+    @media (max-width: 560px) { .jt-interview-admin-composer { display:grid; grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -383,6 +397,8 @@
                   <option value="">📋 ทุกสถานะ</option>
                   <option value="submitted">📩 ส่งใบสมัครแล้ว (Submitted)</option>
                   <option value="reviewing">🔍 กำลังพิจารณา (Reviewing)</option>
+                  <option value="interview">🗣️ รอสัมภาษณ์ (Interview)</option>
+                  <option value="trial">🧪 ทดลองงาน (Trial)</option>
                   <option value="approved">✅ ผ่านการอนุมัติ (Approved)</option>
                   <option value="rejected">❌ ปฏิเสธ (Rejected)</option>
                   <option value="revision">📝 ขอให้แก้ไขข้อมูล (Needs Fix)</option>
@@ -668,6 +684,8 @@
             <select id="modalStatusSelect" class="jt-select" disabled style="padding:.4rem .8rem;font-size:.85rem;width:auto;flex:1;">
               <option value="submitted">📩 ส่งใบสมัครแล้ว (Submitted)</option>
               <option value="reviewing">🔍 กำลังพิจารณา (Reviewing)</option>
+              <option value="interview">🗣️ รอสัมภาษณ์ (Interview)</option>
+              <option value="trial">🧪 ทดลองงาน (Trial)</option>
               <option value="approved">✅ ผ่านการอนุมัติ & ให้เซ็นสัญญา (Approved)</option>
               <option value="rejected">❌ ปฏิเสธการรับสมัคร (Rejected)</option>
               <option value="revision">📝 ขอให้ผู้สมัครแก้ไขข้อมูล (Needs Fix)</option>
@@ -718,6 +736,24 @@
           </div>
         </div>
 
+        <!-- Private interview/trial room -->
+        <div id="modalInterviewWrap" class="jt-interview-admin-box">
+          <div class="jt-interview-admin-head">
+            <div><strong>🗣️ ห้องสัมภาษณ์ / ทดลองงาน</strong><small>สร้างห้องส่วนตัวสำหรับผู้สมัครคนนี้ และแจ้งกำหนดการผ่านระบบ</small></div>
+            <span id="modalInterviewRoomState" class="jt-interview-admin-state">ยังไม่มีห้อง</span>
+          </div>
+          <div class="jt-interview-admin-grid">
+            <label>สถานะห้อง<select id="modalInterviewStatus" class="jt-select"><option value="open">เปิดห้อง</option><option value="scheduled">นัดหมายแล้ว</option><option value="closed">ปิดห้อง</option><option value="cancelled">ยกเลิก</option></select></label>
+            <label>วัน-เวลาสัมภาษณ์<input id="modalInterviewAt" type="datetime-local" class="jt-input" /></label>
+            <label>วัน-เวลาเริ่มทดลองงาน<input id="modalTrialAt" type="datetime-local" class="jt-input" /></label>
+            <label>วัน-เวลาสิ้นสุดทดลองงาน<input id="modalTrialEndAt" type="datetime-local" class="jt-input" /></label>
+            <label style="grid-column:1/-1;">ประกาศถึงผู้สมัคร<textarea id="modalInterviewNotice" class="jt-textarea" maxlength="3000" placeholder="เช่น นัดสัมภาษณ์ผ่าน Google Meet เวลา... หรือรายละเอียดการทดลองงาน"></textarea></label>
+          </div>
+          <div class="jt-interview-admin-actions"><button type="button" id="btnSaveInterviewRoom" class="jt-admin-btn primary">💾 บันทึกนัดหมายและเปิดห้อง</button><button type="button" id="btnCopyInterviewRoom" class="jt-admin-btn secondary" style="display:none;">📋 คัดลอกลิงก์ห้อง</button></div>
+          <div id="modalInterviewMessages" class="jt-interview-admin-messages"></div>
+          <form id="modalInterviewMessageForm" class="jt-interview-admin-composer"><input id="modalInterviewMessageInput" class="jt-input" maxlength="1500" placeholder="ตอบผู้สมัครในห้องนี้..." /><button class="jt-admin-btn secondary" type="submit">ส่ง</button></form>
+        </div>
+
         <!-- Footer Buttons -->
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.6rem;margin-top:0.4rem;">
           <button id="btnDeleteApp" class="jt-admin-btn danger" style="padding:0.45rem 0.9rem;font-size:0.84rem;display:none;">🗑️ ลบใบสมัคร</button>
@@ -749,6 +785,7 @@
   <script src="js/shared-ui.js?v=20260829_2"></script>
   <script src="js/notifications.js?v=20260826_115"></script>
   <script src="js/audit-logger.js?v=20260826_22"></script>
-  <script src="js/join-team-admin.js?v=20260829_33"></script>
+  <script src="js/join-team-admin.js?v=20260830_1"></script>
+  <script src="js/join-team-interview-admin.js?v=20260830_1"></script>
 </body>
 </html>

@@ -20,6 +20,81 @@ service cloud.firestore {
       return field is string && field.size() <= maxLength;
     }
 
+    function validUrl(field) {
+      return field is string && field.size() <= 1000 && field.matches('^https?://.*');
+    }
+
+    function isGroupMember(groupId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/teamGroups/$(groupId)/members/$(request.auth.uid));
+    }
+
+    function isGroupManager(groupId) {
+      return isAdmin() || (isGroupMember(groupId)
+        && get(/databases/$(database)/documents/teamGroups/$(groupId)/members/$(request.auth.uid)).data.role in ['owner', 'admin', 'lead']);
+    }
+
+    function validTeamGroup() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['id', 'name', 'organization', 'description', 'imageUrl', 'ownerUid', 'managerUids', 'memberUids', 'lastMemberUid', 'lastJoinInviteId', 'active', 'createdAt', 'updatedAt'])
+        && validText(data.id, 128)
+        && validText(data.name, 120)
+        && validText(data.organization, 120)
+        && validText(data.description, 1000)
+        && (data.imageUrl == null || validUrl(data.imageUrl))
+        && validText(data.ownerUid, 128)
+        && data.managerUids is list && data.managerUids.size() <= 20
+        && data.memberUids is list && data.memberUids.size() <= 500
+        && validText(data.lastMemberUid, 128)
+        && data.active is bool;
+    }
+
+    function validTeamMember() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['uid', 'displayName', 'email', 'photoURL', 'role', 'online', 'lastSeen', 'joinedAt', 'updatedAt', 'inviteId'])
+        && validText(data.uid, 128)
+        && validText(data.displayName, 120)
+        && validText(data.email, 150)
+        && (data.photoURL == null || validUrl(data.photoURL))
+        && data.role in ['owner', 'admin', 'lead', 'staff', 'member']
+        && data.online is bool;
+    }
+
+    function validTeamMessage() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['senderUid', 'senderName', 'senderPhoto', 'senderOnline', 'text', 'attachmentUrl', 'attachmentType', 'attachmentName', 'replyTo', 'pinned', 'readBy', 'createdAt', 'updatedAt'])
+        && validText(data.senderUid, 128)
+        && validText(data.senderName, 120)
+        && (data.senderPhoto == null || validUrl(data.senderPhoto))
+        && data.senderOnline is bool
+        && validText(data.text, 2500)
+        && (data.attachmentUrl == null || validUrl(data.attachmentUrl))
+        && (data.attachmentType == null || validText(data.attachmentType, 100))
+        && (data.attachmentName == null || validText(data.attachmentName, 180))
+        && (data.replyTo == null || data.replyTo is map)
+        && data.pinned is bool
+        && (!('readBy' in data) || (data.readBy is map && data.readBy.keys().size() <= 500));
+    }
+
+    function validTeamDocument() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['title', 'description', 'url', 'createdBy', 'createdAt', 'updatedAt'])
+        && validText(data.title, 160)
+        && validText(data.description, 800)
+        && validUrl(data.url)
+        && validText(data.createdBy, 128);
+    }
+
+    function validTeamMeeting() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['title', 'url', 'startsAt', 'createdBy', 'responses', 'createdAt', 'updatedAt'])
+        && validText(data.title, 160)
+        && validUrl(data.url)
+        && validText(data.startsAt, 80)
+        && validText(data.createdBy, 128)
+        && data.responses is map;
+    }
+
     function isValidUserDoc(userId) {
       let data = request.resource.data;
       return data.uid == userId
@@ -29,6 +104,216 @@ service cloud.firestore {
         && (!('email' in data) || validText(data.email, 150))
         && (isAdmin() || !('role' in data) || data.role == 'user'
           || (resource != null && data.role == resource.data.role));
+    }
+
+    function validAdminCompanyProfile() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['id', 'name', 'displayName', 'logoUrl', 'sealUrl', 'active', 'defaultSignatureId', 'createdAt', 'updatedAt', 'updatedBy'])
+        && validText(data.id, 128)
+        && validText(data.name, 160)
+        && validText(data.displayName, 160)
+        && (data.logoUrl == null || validUrl(data.logoUrl))
+        && (data.sealUrl == null || validUrl(data.sealUrl))
+        && data.active is bool
+        && (data.defaultSignatureId == null || validText(data.defaultSignatureId, 128))
+        && validText(data.updatedBy, 128);
+    }
+
+    function validDevSignature() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['name', 'signerName', 'signerTitle', 'companyName', 'imageUrl', 'active', 'isDefault', 'createdAt', 'updatedAt', 'updatedBy'])
+        && validText(data.name, 160)
+        && validText(data.signerName, 160)
+        && validText(data.signerTitle, 160)
+        && validText(data.companyName, 160)
+        && (data.imageUrl == null || validUrl(data.imageUrl))
+        && data.active is bool
+        && data.isDefault is bool
+        && validText(data.updatedBy, 128);
+    }
+
+    function isInterviewRoomMember(roomId) {
+      return isAdmin() || (isSignedIn()
+        && get(/databases/$(database)/documents/joinTeamInterviewRooms/$(roomId)).data.applicantUid == request.auth.uid);
+    }
+
+    function validInterviewRoom() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['id', 'applicationId', 'applicantUid', 'projectSlug', 'projectName', 'title', 'status', 'interviewAt', 'trialAt', 'trialEndAt', 'notice', 'createdBy', 'createdAt', 'updatedAt', 'lastMessageAt'])
+        && validText(data.id, 128)
+        && validText(data.applicationId, 128)
+        && validText(data.applicantUid, 128)
+        && validText(data.projectSlug, 100)
+        && validText(data.projectName, 200)
+        && validText(data.title, 200)
+        && data.status in ['open', 'scheduled', 'closed', 'cancelled']
+        && (!('interviewAt' in data) || data.interviewAt == null || data.interviewAt is timestamp)
+        && (!('trialAt' in data) || data.trialAt == null || data.trialAt is timestamp)
+        && (!('trialEndAt' in data) || data.trialEndAt == null || data.trialEndAt is timestamp)
+        && validText(data.notice, 3000)
+        && validText(data.createdBy, 128);
+    }
+
+    function validInterviewMessage() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['senderUid', 'senderName', 'text', 'createdAt', 'updatedAt'])
+        && validText(data.senderUid, 128)
+        && validText(data.senderName, 160)
+        && validText(data.text, 1500)
+        && data.createdAt is timestamp;
+    }
+
+    function validEmploymentRecord() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['userUid', 'companyId', 'companyName', 'teamName', 'teamRole', 'status', 'reason', 'noticeTitle', 'noticeMessage', 'applicationId', 'createdAt', 'updatedAt', 'createdBy'])
+        && validText(data.userUid, 128)
+        && validText(data.companyId, 128)
+        && validText(data.companyName, 160)
+        && (!('teamName' in data) || validText(data.teamName, 160))
+        && validText(data.teamRole, 120)
+        && data.status in ['active', 'suspended', 'exited', 'terminated']
+        && validText(data.reason, 1000)
+        && validText(data.noticeTitle, 200)
+        && validText(data.noticeMessage, 2500)
+        && (!('applicationId' in data) || validText(data.applicationId, 128))
+        && (!('createdAt' in data) || data.createdAt == null || data.createdAt is timestamp)
+        && (!('updatedAt' in data) || data.updatedAt == null || data.updatedAt is timestamp)
+        && validText(data.createdBy, 128);
+    }
+
+    function validAttendanceRecord() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['uid', 'date', 'checkIn', 'checkOut', 'hours', 'status', 'note', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'])
+        && validText(data.uid, 128)
+        && validText(data.date, 10)
+        && data.date.matches('^\\\\d{4}-\\\\d{2}-\\\\d{2}$')
+        && data.checkIn is timestamp
+        && (data.checkOut == null || data.checkOut is timestamp)
+        && data.hours is number && data.hours >= 0 && data.hours <= 24
+        && data.status in ['open', 'closed']
+        && validText(data.note, 500)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && validText(data.createdBy, 128)
+        && validText(data.updatedBy, 128);
+    }
+
+    function validPaymentProfile() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['uid', 'bankName', 'accountName', 'accountNumber', 'taxId', 'version', 'activeHistoryId', 'createdAt', 'updatedAt', 'updatedBy'])
+        && validText(data.uid, 128)
+        && validText(data.bankName, 120)
+        && validText(data.accountName, 160)
+        && validText(data.accountNumber, 40)
+        && validText(data.taxId, 40)
+        && (!('version' in data) || (data.version is int && data.version >= 1 && data.version <= 1000000))
+        && (!('activeHistoryId' in data) || data.activeHistoryId == null || validText(data.activeHistoryId, 128))
+        && (!('createdAt' in data) || data.createdAt == null || data.createdAt is timestamp)
+        && data.updatedAt is timestamp
+        && validText(data.updatedBy, 128);
+    }
+
+    function validPaymentChangeRequest() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['userUid', 'newBankName', 'newAccountName', 'newAccountNumber', 'newTaxId', 'reason', 'status', 'requestedAt', 'requestedBy', 'reviewedAt', 'reviewedBy', 'reviewNote', 'approvedVersion'])
+        && validText(data.userUid, 128)
+        && validText(data.newBankName, 120)
+        && validText(data.newAccountName, 160)
+        && validText(data.newAccountNumber, 40)
+        && validText(data.newTaxId, 40)
+        && validText(data.reason, 1000)
+        && data.status in ['pending', 'approved', 'rejected']
+        && data.requestedAt is timestamp
+        && validText(data.requestedBy, 128)
+        && (!('reviewedAt' in data) || data.reviewedAt == null || data.reviewedAt is timestamp)
+        && (!('reviewedBy' in data) || data.reviewedBy == null || validText(data.reviewedBy, 128))
+        && (!('reviewNote' in data) || data.reviewNote == null || validText(data.reviewNote, 1000))
+        && (!('approvedVersion' in data) || data.approvedVersion == null || (data.approvedVersion is int && data.approvedVersion >= 1));
+    }
+
+    function validPaymentProfileHistory() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['userUid', 'version', 'bankName', 'accountName', 'accountNumber', 'taxId', 'status', 'sourceRequestId', 'createdAt', 'createdBy'])
+        && validText(data.userUid, 128)
+        && data.version is int && data.version >= 1 && data.version <= 1000000
+        && validText(data.bankName, 120)
+        && validText(data.accountName, 160)
+        && validText(data.accountNumber, 40)
+        && validText(data.taxId, 40)
+        && data.status in ['active', 'archived']
+        && (!('sourceRequestId' in data) || data.sourceRequestId == null || validText(data.sourceRequestId, 128))
+        && data.createdAt is timestamp
+        && validText(data.createdBy, 128);
+    }
+
+    function validPayrollRecord() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['uid', 'companyId', 'companyName', 'teamName', 'period', 'baseSalary', 'bonus', 'deductions', 'netSalary', 'paymentStatus', 'paidAt', 'slipUrl', 'slipPath', 'note', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'])
+        && validText(data.uid, 128)
+        && (!('companyId' in data) || validText(data.companyId, 128))
+        && validText(data.companyName, 160)
+        && validText(data.teamName, 160)
+        && validText(data.period, 7)
+        && data.period.matches('^\\\\d{4}-\\\\d{2}$')
+        && data.baseSalary is number && data.baseSalary >= 0 && data.baseSalary <= 100000000
+        && data.bonus is number && data.bonus >= 0 && data.bonus <= 100000000
+        && data.deductions is number && data.deductions >= 0 && data.deductions <= 100000000
+        && data.netSalary is number && data.netSalary >= 0 && data.netSalary <= 200000000
+        && data.netSalary == data.baseSalary + data.bonus - data.deductions
+        && data.paymentStatus in ['draft', 'approved', 'paid']
+        && (!('paidAt' in data) || data.paidAt == null || data.paidAt is timestamp)
+        && (!('slipUrl' in data) || data.slipUrl == null || validUrl(data.slipUrl))
+        && (!('slipPath' in data) || data.slipPath == null || (validText(data.slipPath, 300) && data.slipPath.matches('^private-personal/.*')))
+        && validText(data.note, 1000)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && validText(data.createdBy, 128)
+        && validText(data.updatedBy, 128);
+    }
+
+    function validIdentityDocument() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['userUid', 'kind', 'fileName', 'storagePath', 'downloadUrl', 'createdAt', 'updatedAt', 'createdBy'])
+        && validText(data.userUid, 128)
+        && data.kind in ['id-card', 'bankbook', 'tax-document', 'other']
+        && validText(data.fileName, 180)
+        && validText(data.storagePath, 300)
+        && data.storagePath.matches('^private-personal/' + data.userUid + '/identity/.*')
+        && (!('downloadUrl' in data) || data.downloadUrl == null || validUrl(data.downloadUrl))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && validText(data.createdBy, 128);
+    }
+
+    function validFinanceEntry() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['type', 'amount', 'category', 'companyId', 'companyName', 'teamName', 'period', 'note', 'receiptUrl', 'receiptPath', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'])
+        && data.type in ['income', 'expense']
+        && data.amount is number && data.amount >= 0 && data.amount <= 1000000000
+        && validText(data.category, 120)
+        && (!('companyId' in data) || validText(data.companyId, 128))
+        && validText(data.companyName, 160)
+        && (!('teamName' in data) || validText(data.teamName, 160))
+        && validText(data.period, 7)
+        && data.period.matches('^\\\\d{4}-\\\\d{2}$')
+        && validText(data.note, 1000)
+        && (!('receiptUrl' in data) || data.receiptUrl == null || validUrl(data.receiptUrl))
+        && (!('receiptPath' in data) || data.receiptPath == null || (validText(data.receiptPath, 300) && data.receiptPath.matches('^private-personal/.*')))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && validText(data.createdBy, 128)
+        && validText(data.updatedBy, 128);
+    }
+
+    function validAdminAnnouncement() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['targetUid', 'title', 'message', 'type', 'url', 'createdAt', 'createdBy'])
+        && validText(data.targetUid, 128)
+        && validText(data.title, 200)
+        && validText(data.message, 2500)
+        && validText(data.type, 80)
+        && (data.url == null || validUrl(data.url))
+        && validText(data.createdBy, 128);
     }
 
     function validChatId(chatId) {
@@ -180,12 +465,250 @@ service cloud.firestore {
         && validText(request.resource.data.positionName, 200);
     }
 
+    // Interview rooms are private per application. Public users cannot list or read them.
+    match /joinTeamInterviewRooms/{roomId} {
+      allow read: if isInterviewRoomMember(roomId);
+      allow create: if isAdmin() && request.resource.data.id == roomId && validInterviewRoom();
+      allow update: if isAdmin() && validInterviewRoom();
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isInterviewRoomMember(roomId);
+        allow create: if isInterviewRoomMember(roomId)
+          && request.resource.data.senderUid == request.auth.uid
+          && validInterviewMessage();
+        allow update: if isAdmin() && validInterviewMessage()
+          || (isSignedIn() && resource.data.senderUid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'updatedAt'])
+            && validInterviewMessage());
+        allow delete: if isAdmin() || (isSignedIn() && resource.data.senderUid == request.auth.uid);
+      }
+    }
+
     match /admin_integrations/{docId} {
       allow read, write: if isAdmin();
     }
 
     match /admin_settings/{docId} {
       allow read, write: if isAdmin();
+    }
+
+    // Dev-only control plane for company identity, signatures and employment history.
+    match /adminCompanyProfiles/{companyId} {
+      allow read, delete: if isAdmin();
+      allow create, update: if isAdmin() && request.resource.data.id == companyId && validAdminCompanyProfile();
+    }
+
+    match /devSignatures/{signatureId} {
+      allow read: if isSignedIn();
+      allow delete: if isAdmin();
+      allow create, update: if isAdmin() && validDevSignature();
+    }
+
+    match /employmentRecords/{recordId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userUid == request.auth.uid);
+      allow create: if isAdmin() && validEmploymentRecord();
+      allow update: if isAdmin() && validEmploymentRecord();
+      allow delete: if isAdmin();
+    }
+
+    match /attendanceRecords/{recordId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && recordId == request.auth.uid + '_' + request.resource.data.date
+        && validAttendanceRecord()
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAdmin() && validAttendanceRecord()
+        || (isSignedIn()
+          && resource.data.uid == request.auth.uid
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.date == resource.data.date
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.createdBy == resource.data.createdBy
+          && validAttendanceRecord()
+          && request.resource.data.updatedBy == request.auth.uid);
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+    }
+
+    match /paymentProfiles/{userUid} {
+      allow read: if isAdmin() || isOwner(userUid);
+      // The current profile is an approved snapshot. Members can only submit a request;
+      // Dev/CEO is the sole writer so previous values remain in the history collection.
+      allow create: if isAdmin()
+        && request.resource.data.uid == userUid
+        && validPaymentProfile()
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow update: if isAdmin()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.uid == userUid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && validPaymentProfile()
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if false;
+    }
+
+    match /paymentChangeRequests/{requestId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userUid == request.auth.uid);
+      allow create: if isSignedIn()
+        && request.resource.data.userUid == request.auth.uid
+        && request.resource.data.requestedBy == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && validPaymentChangeRequest();
+      allow update: if isAdmin()
+        && validPaymentChangeRequest()
+        && request.resource.data.userUid == resource.data.userUid
+        && request.resource.data.requestedAt == resource.data.requestedAt
+        && request.resource.data.requestedBy == resource.data.requestedBy;
+      allow delete: if false;
+    }
+
+    match /paymentProfileHistory/{historyId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userUid == request.auth.uid);
+      allow create: if isAdmin() && validPaymentProfileHistory();
+      allow update, delete: if false;
+    }
+
+    match /payrollRecords/{recordId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isAdmin() && validPayrollRecord() && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAdmin()
+        && validPayrollRecord()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+
+    match /identityDocuments/{documentId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userUid == request.auth.uid);
+      allow create: if (isAdmin() || (isSignedIn() && request.resource.data.userUid == request.auth.uid))
+        && validIdentityDocument()
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAdmin()
+        && validIdentityDocument()
+        && request.resource.data.userUid == resource.data.userUid
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.userUid == request.auth.uid);
+    }
+
+    match /financeEntries/{entryId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && validFinanceEntry() && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAdmin()
+        && validFinanceEntry()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if isAdmin();
+    }
+
+    match /adminAnnouncements/{announcementId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.targetUid == request.auth.uid);
+      allow create: if isAdmin() && validAdminAnnouncement();
+      allow update, delete: if isAdmin();
+    }
+
+    // Private workspaces: every child collection is protected by group membership.
+    // The memberUids field is only a query index; the member document is the authority.
+    match /teamGroups/{groupId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.active == true && request.auth.uid in resource.data.memberUids);
+      allow create: if isAdmin() && validTeamGroup() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if (isGroupManager(groupId) && validTeamGroup())
+        || (isSignedIn()
+          && resource.data.active == true
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'lastMemberUid', 'lastJoinInviteId', 'updatedAt'])
+          && request.resource.data.lastMemberUid == request.auth.uid
+          && request.resource.data.memberUids.size() == resource.data.memberUids.size() + 1
+          && request.resource.data.memberUids.hasAll(resource.data.memberUids)
+          && request.resource.data.lastJoinInviteId is string
+          && get(/databases/$(database)/documents/teamInvites/$(request.resource.data.lastJoinInviteId)).data.groupId == groupId
+          && get(/databases/$(database)/documents/teamInvites/$(request.resource.data.lastJoinInviteId)).data.active == true
+          && get(/databases/$(database)/documents/teamInvites/$(request.resource.data.lastJoinInviteId)).data.uses < get(/databases/$(database)/documents/teamInvites/$(request.resource.data.lastJoinInviteId)).data.maxUses);
+      allow delete: if isGroupManager(groupId);
+
+      match /members/{memberUid} {
+        allow read: if isGroupMember(groupId) || isAdmin();
+        allow create: if (isGroupManager(groupId) && validTeamMember() && request.resource.data.uid == memberUid)
+          || (isSignedIn()
+            && request.auth.uid == memberUid
+            && validTeamMember()
+            && request.resource.data.role == 'member'
+            && request.resource.data.inviteId is string
+            && get(/databases/$(database)/documents/teamInvites/$(request.resource.data.inviteId)).data.groupId == groupId
+            && get(/databases/$(database)/documents/teamInvites/$(request.resource.data.inviteId)).data.active == true);
+        allow update: if (isGroupManager(groupId) && validTeamMember()
+            && request.resource.data.uid == memberUid
+            && resource.data.uid == memberUid)
+          || (isSignedIn() && request.auth.uid == memberUid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL', 'online', 'lastSeen', 'updatedAt'])
+            && request.resource.data.uid == resource.data.uid);
+        allow delete: if isGroupManager(groupId) || (isSignedIn() && request.auth.uid == memberUid);
+      }
+
+      match /messages/{messageId} {
+        allow read: if isGroupMember(groupId) || isAdmin();
+        allow create: if (isGroupMember(groupId) || isAdmin())
+          && request.resource.data.senderUid == request.auth.uid
+          && validTeamMessage();
+        allow update: if (isGroupManager(groupId) && validTeamMessage())
+          || (isGroupMember(groupId) && resource.data.senderUid == request.auth.uid
+            && validTeamMessage()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'updatedAt']))
+          // Every member may change only their own read flag. The map is
+          // bounded and legacy messages without readBy can be initialized
+          // with the current user's flag only.
+          || (isGroupMember(groupId)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'updatedAt'])
+            && request.resource.data.readBy is map
+            && request.resource.data.readBy.keys().size() <= 500
+            && request.resource.data.readBy[request.auth.uid] is bool
+            && ((!('readBy' in resource.data)
+              && request.resource.data.readBy.keys().hasOnly([request.auth.uid]))
+              || (('readBy' in resource.data)
+                && request.resource.data.readBy.diff(resource.data.readBy).affectedKeys().hasOnly([request.auth.uid]))));
+        allow delete: if isGroupManager(groupId) || (isGroupMember(groupId) && resource.data.senderUid == request.auth.uid);
+      }
+
+      match /documents/{documentId} {
+        allow read: if isGroupMember(groupId) || isAdmin();
+        allow create: if isGroupManager(groupId)
+          && validTeamDocument()
+          && request.resource.data.createdBy == request.auth.uid;
+        allow update: if isGroupManager(groupId) && validTeamDocument();
+        allow delete: if isGroupManager(groupId);
+      }
+
+      match /meetings/{meetingId} {
+        allow read: if isGroupMember(groupId) || isAdmin();
+        allow create: if isGroupManager(groupId)
+          && validTeamMeeting()
+          && request.resource.data.createdBy == request.auth.uid;
+        allow update: if (isGroupManager(groupId) && validTeamMeeting())
+          || (isGroupMember(groupId)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['responses'])
+            && request.resource.data.responses[request.auth.uid] in ['accepted', 'rejected']);
+        allow delete: if isGroupManager(groupId);
+      }
+    }
+
+    match /teamInvites/{inviteId} {
+      allow read: if isSignedIn() && (resource.data.active == true || isGroupManager(resource.data.groupId));
+      allow create: if isGroupManager(request.resource.data.groupId)
+        && request.resource.data.keys().hasOnly(['id', 'groupId', 'groupName', 'createdBy', 'active', 'expiresAt', 'uses', 'maxUses', 'createdAt'])
+        && request.resource.data.id == inviteId
+        && validText(request.resource.data.groupId, 128)
+        && validText(request.resource.data.groupName, 120)
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.active is bool
+        && request.resource.data.uses is int
+        && request.resource.data.maxUses is int
+        && request.resource.data.maxUses > 0 && request.resource.data.maxUses <= 1000;
+      allow update: if isGroupManager(resource.data.groupId)
+        || (isSignedIn()
+          && resource.data.active == true
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uses'])
+          && request.resource.data.uses == resource.data.uses + 1
+          && request.resource.data.uses <= resource.data.maxUses);
+      allow delete: if isGroupManager(resource.data.groupId);
     }
 
     function isValidSiteDocument() {
@@ -210,7 +733,7 @@ service cloud.firestore {
 
     match /auditLogs/{logId} {
       allow read: if isAdmin();
-      allow create: if isSignedIn()
+      allow create: if isAdmin()
         && request.resource.data.adminUid == request.auth.uid
         && validText(request.resource.data.action, 120);
       allow update, delete: if false;

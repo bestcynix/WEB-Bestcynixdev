@@ -1,0 +1,154 @@
+/* Shared promotional video component */
+.promo-video-section {
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto 2.5rem;
+  padding: clamp(1.1rem, 3vw, 2rem);
+  border: 1px solid rgba(50, 255, 201, 0.34);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(83, 93, 255, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(8, 28, 51, 0.97), rgba(4, 14, 27, 0.98));
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.32), 0 0 32px rgba(50, 255, 201, 0.08);
+}
+
+.promo-video-section::after {
+  position: absolute;
+  inset: auto -8rem -8rem auto;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 50%;
+  background: rgba(50, 255, 201, 0.08);
+  content: '';
+  pointer-events: none;
+  filter: blur(22px);
+}
+
+.promo-video-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.2rem);
+}
+
+.promo-video-copy {
+  min-width: 0;
+}
+
+.promo-video-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  color: #32ffc9;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.promo-video-title {
+  margin: 0 0 0.65rem;
+  color: #fff;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: clamp(1.45rem, 3vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.promo-video-description {
+  margin: 0;
+  color: #a6c2df;
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.promo-video-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1.15rem;
+}
+
+.promo-video-sound-toggle,
+.promo-video-link {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.62rem 0.95rem;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.promo-video-sound-toggle {
+  border: 1px solid rgba(50, 255, 201, 0.52);
+  background: rgba(50, 255, 201, 0.13);
+  color: #8effe3;
+  cursor: pointer;
+}
+
+.promo-video-link {
+  border: 1px solid rgba(124, 58, 237, 0.6);
+  background: rgba(124, 58, 237, 0.22);
+  color: #e9ddff;
+}
+
+.promo-video-sound-toggle:hover,
+.promo-video-link:hover {
+  transform: translateY(-2px);
+  border-color: #32ffc9;
+}
+
+.promo-video-frame {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 18px;
+  background: #020811;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45);
+}
+
+.promo-video-frame video {
+  display: block;
+  width: 100%;
+  max-height: min(62vh, 620px);
+  aspect-ratio: 16 / 9;
+  background: #020811;
+  object-fit: cover;
+}
+
+.promo-video-status {
+  display: block;
+  min-height: 1.2em;
+  margin-top: 0.55rem;
+  color: #86a9cb;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 780px) {
+  .promo-video-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .promo-video-copy {
+    order: 0;
+  }
+
+  .promo-video-frame {
+    order: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo-video-sound-toggle,
+  .promo-video-link {
+    transition: none;
+  }
+}

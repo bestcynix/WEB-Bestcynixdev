@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>ข้อผิดพลาด HTTP • BestCyniX Dev</title>
+  <link rel="icon" href="assets/photo/bcxlogo2.png">
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1">
+  <style>
+    :root{--bg:#050b14;--panel:rgba(9,25,44,.9);--border:rgba(255,255,255,.13);--text:#e6f3ff;--muted:#8aa9c7;--red:#ff5574;--cyan:#32ffc9}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 10% 0,rgba(239,68,68,.18),transparent 34rem),var(--bg);color:var(--text);font-family:Prompt,system-ui,sans-serif;display:grid;place-items:center;padding:1.25rem}.error-shell{width:min(920px,100%)}.error-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem}.brand{display:flex;align-items:center;gap:.7rem;color:#fff;text-decoration:none;font:800 1.15rem 'Chakra Petch',sans-serif}.brand img{width:42px;height:42px;border:2px solid var(--cyan);border-radius:50%}.nav-link,.action{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border:1px solid var(--border);border-radius:11px;padding:.65rem .9rem;color:var(--text);background:rgba(255,255,255,.06);text-decoration:none;cursor:pointer;font:700 .82rem Prompt,sans-serif}.error-card{background:linear-gradient(150deg,rgba(18,34,55,.97),rgba(6,17,30,.98));border:1px solid rgba(255,85,116,.5);border-radius:24px;padding:clamp(1.2rem,4vw,3rem);box-shadow:0 24px 80px rgba(0,0,0,.5)}.eyebrow{color:#fda4af;font-size:.76rem;font-weight:800;letter-spacing:.12em}.error-code{font:900 clamp(4.5rem,15vw,9rem)/.95 'Chakra Petch',sans-serif;color:#fff;text-shadow:0 0 28px rgba(255,85,116,.35);margin:.45rem 0}.error-title{font-size:clamp(1.25rem,3vw,2rem);margin:0 0 .55rem;color:#fff}.error-detail{color:var(--muted);line-height:1.7;max-width:70ch}.error-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:1.5rem 0}.meta{padding:.8rem;border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,.15);min-width:0}.meta small,.meta strong{display:block}.meta small{color:var(--muted);font-size:.72rem}.meta strong{overflow-wrap:anywhere;margin-top:.25rem}.json-box{position:relative;margin-top:1rem;background:#030811;border:1px solid var(--border);border-radius:14px;padding:1rem}.json-box pre{margin:0;overflow:auto;white-space:pre-wrap;word-break:break-word;color:#a5f3fc;font:700 .78rem/1.6 'JetBrains Mono',monospace}.copy{position:absolute;right:.7rem;top:.7rem;padding:.35rem .6rem;font-size:.72rem}.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.4rem}.action-primary{background:var(--cyan);border-color:var(--cyan);color:#04131d}.note{margin-top:1.2rem;color:var(--muted);font-size:.8rem}.note a{color:var(--cyan)}@media(max-width:640px){.error-nav{align-items:flex-start;flex-direction:column}.nav-link{width:100%}.error-meta{grid-template-columns:1fr}.actions>*{flex:1 1 100%}}
+  </style>
+</head>
+<body>
+  <main class="error-shell">
+    <nav class="error-nav"><a class="brand" href="/"><img src="assets/photo/bcxlogo2.png" alt="BestCyniX Dev"><span>BestCyniX Dev</span></a><a class="nav-link" href="/http-errors">📖 ไปสารบัญอ้างอิง HTTP</a></nav>
+    <section class="error-card" aria-live="polite">
+      <span class="eyebrow">LIVE HTTP ERROR RESPONSE</span>
+      <div id="errorCode" class="error-code">500</div>
+      <h1 id="errorTitle" class="error-title">ตรวจพบข้อผิดพลาด HTTP</h1>
+      <p id="errorDetail" class="error-detail">ระบบไม่สามารถดำเนินการตามคำขอได้ในขณะนี้</p>
+      <div class="error-meta"><div class="meta"><small>เส้นทางที่ร้องขอ</small><strong id="errorInstance">—</strong></div><div class="meta"><small>Request ID</small><strong id="errorRequestId">—</strong></div><div class="meta"><small>ตรวจพบเมื่อ</small><strong id="errorTime">—</strong></div></div>
+      <h2 style="font-size:1rem;margin:1.3rem 0 .25rem">RFC 7807 Problem Details</h2>
+      <div class="json-box"><button id="copyProblem" class="action copy" type="button">📋 คัดลอก JSON</button><pre id="problemJson">{}</pre></div>
+      <div class="actions"><button id="retry" class="action action-primary" type="button">🔄 ลองอีกครั้ง</button><a class="action" href="/">🏠 กลับหน้าหลัก</a></div>
+      <p class="note">หน้านี้ใช้แสดงข้อผิดพลาดของ request ที่เกิดขึ้นจริงเท่านั้น ไม่ใช่สารบัญรหัส HTTP • <a href="/http-errors">อ่านคู่มือและสารบัญรหัส</a></p>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const rawStatus = Number.parseInt(params.get('status') || params.get('code') || '500', 10);
+      const status = rawStatus >= 100 && rawStatus <= 599 ? rawStatus : 500;
+      const defaults = {400:['คำขอไม่ถูกต้อง','รูปแบบคำขอหรือพารามิเตอร์ไม่ถูกต้อง'],401:['ต้องเข้าสู่ระบบ','ต้องยืนยันตัวตนก่อนเข้าถึงทรัพยากรนี้'],403:['ปฏิเสธการเข้าถึง','บัญชีนี้ไม่มีสิทธิ์เข้าถึงทรัพยากรนี้'],404:['ไม่พบทรัพยากร','ไม่พบหน้าเว็บหรือข้อมูลที่ร้องขอ'],408:['หมดเวลารอคำขอ','เซิร์ฟเวอร์รอการตอบกลับนานเกินกำหนด'],429:['ส่งคำขอถี่เกินไป','กรุณารอสักครู่แล้วลองใหม่'],500:['เซิร์ฟเวอร์เกิดข้อผิดพลาด','เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์'],502:['เกตเวย์ขัดข้อง','เซิร์ฟเวอร์ต้นทางตอบกลับไม่ถูกต้อง'],503:['บริการไม่พร้อมใช้งาน','บริการอาจอยู่ระหว่างปรับปรุงหรือมีภาระสูง'],504:['เกตเวย์หมดเวลา','เซิร์ฟเวอร์ต้นทางไม่ตอบกลับภายในเวลาที่กำหนด']};
+      const fallback = defaults[status] || ['ข้อผิดพลาด HTTP','ระบบไม่สามารถดำเนินการตามคำขอได้'];
+      const title = params.get('title') || fallback[0]; const detail = params.get('detail') || fallback[1]; const instance = params.get('instance') || (location.pathname === '/http-error' ? 'request' : location.pathname); const requestId = params.get('requestId') || 'ไม่ได้ระบุ'; const checkedAt = new Date().toISOString();
+      const problem = { type:`https://bestcynixdev.web.app/problems/http-${status}`, title, status, detail, instance, requestId, timestamp:checkedAt };
+      document.title = `${status} ${title} • BestCyniX Dev`; document.getElementById('errorCode').textContent = status; document.getElementById('errorTitle').textContent = `${title} (${status})`; document.getElementById('errorDetail').textContent = detail; document.getElementById('errorInstance').textContent = instance; document.getElementById('errorRequestId').textContent = requestId; document.getElementById('errorTime').textContent = new Date(checkedAt).toLocaleString('th-TH'); document.getElementById('problemJson').textContent = JSON.stringify(problem,null,2);
+      document.getElementById('copyProblem').addEventListener('click', async () => { try { await navigator.clipboard.writeText(JSON.stringify(problem,null,2)); document.getElementById('copyProblem').textContent='✅ คัดลอกแล้ว'; } catch {} }); document.getElementById('retry').addEventListener('click', () => location.reload());
+    })();
+  </script>
+</body>
+</html>

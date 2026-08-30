@@ -12,6 +12,7 @@
   <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css?v=20260829_2" />
   <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+  <link rel="stylesheet" href="css/promo-video.css?v=20260829_1" />
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -426,6 +427,28 @@
               </div>
             </div>
 
+            <!-- Mc-Skyline Promotional Video (enabled only for the Mc-Skyline project) -->
+            <section class="promo-video-section" id="mcSkylineProjectPromo" data-promo-video style="display: none;" aria-labelledby="mcSkylineProjectPromoTitle">
+              <div class="promo-video-layout">
+                <div class="promo-video-copy">
+                  <div class="promo-video-kicker">⚡ MC-SKYLINE.ONLINE • PROMO</div>
+                  <h2 class="promo-video-title" id="mcSkylineProjectPromoTitle">คลิปโปรโมต Mc-Skyline.online</h2>
+                  <p class="promo-video-description">รับชมคลิปแนะนำโปรเจกต์ พร้อมเปิดหรือปิดเสียงได้ตามต้องการ</p>
+                  <div class="promo-video-actions">
+                    <button type="button" class="promo-video-sound-toggle" data-promo-sound-toggle aria-pressed="false">🔇 เปิดเสียง</button>
+                    <a class="promo-video-link" href="/join-team/mc-skyline">🚀 ร่วมทีมโปรเจกต์</a>
+                  </div>
+                  <span class="promo-video-status" data-promo-video-status aria-live="polite">กำลังเตรียมคลิป • เริ่มต้นแบบปิดเสียง</span>
+                </div>
+                <div class="promo-video-frame">
+                  <video controls autoplay muted loop playsinline preload="metadata" poster="assets/photo/mc-skyline.png" aria-label="คลิปโปรโมต Mc-Skyline.online">
+                    <source src="https://bestcynixdev.web.app/assets/video/mc-skyline-promo.mp4" type="video/mp4" />
+                    เบราว์เซอร์นี้ไม่รองรับการเล่นวิดีโอ
+                  </video>
+                </div>
+              </div>
+            </section>
+
             <!-- Deep Technical Architecture & Story -->
             <div class="proj-section-block">
               <h3>📖 รายละเอียดเชิงลึก & เบื้องหลังการพัฒนา</h3>
@@ -491,5 +514,6 @@
   <script src="js/shared-ui.js?v=20260829_1"></script>
   <script src="js/cms-loader.js?v=20260829_3"></script>
   <script src="js/project-detail.js?v=20260829_1"></script>
+  <script src="js/promo-video.js?v=20260829_1"></script>
 </body>
 </html>

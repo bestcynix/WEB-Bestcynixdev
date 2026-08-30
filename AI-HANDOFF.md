@@ -35,3 +35,12 @@
 - Project CMS records support `showWebsite`, `showCommunity`, and `communityUrl`; missing legacy flags preserve the old website button behavior, while community buttons remain off unless explicitly enabled by Dev.
 - The canonical public community invite is `https://discord.gg/M8k2N3XgYF`, and the business contact email is `bestcynix@gmail.com`. Legacy CMS values are normalized at render time.
 - The status page renders real per-service check ratios and detailed selectable bar tooltips (time range, status, latency, passed checks, and failed services).
+- Team workspaces live in `public/team-workspace.html`, `public/js/team-workspace.js`, and `public/css/team-workspace.css`. They use `teamGroups` with member subcollections for private group chat, documents, meetings, roles, invite links, media attachments, and presence. Rules are in `firestore.rules` and `storage.rules`; see `docs/TEAM-WORKSPACE-DATA-MODEL.md` before extending the schema.
+
+## Admin users / company / signature control plane
+
+- Admin UI: `public/admin-users.html` + `public/js/admin-users-extensions.js`
+- Data model and safety boundaries: `docs/ADMIN-CONTROL-PLANE.md`
+- Firestore collections: `adminCompanyProfiles`, `devSignatures`, `employmentRecords`, `adminAnnouncements`
+- All writes are restricted by `isAdmin()` in `firestore.rules`; `devSignatures` read is signed-in only for contract rendering.
+- User removal is intentionally a Firestore profile delete only; Firebase Auth and contracts remain.

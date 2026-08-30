@@ -2,7 +2,7 @@
  * BestCyniX Dev - Service Worker (PWA & Offline Cache Engine)
  */
 
-const CACHE_NAME = 'bestcynix-cache-v20260829_01';
+const CACHE_NAME = 'bestcynix-cache-v20260829_03';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -10,6 +10,13 @@ const STATIC_ASSETS = [
   '/js/shared-ui.js',
   '/js/main.js',
   '/js/protection.js',
+  '/login.html',
+  '/register.html',
+  '/css/auth-modern.css',
+  '/css/promo-video.css',
+  '/js/auth-ui.js',
+  '/js/promo-video.js',
+  '/assets/photo/auth-portal.png',
   '/assets/photo/bcxlogo2.png',
   '/assets/photo/bestcynixprodev.png'
 ];
@@ -54,10 +61,12 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 3. Network First with Cache Fallback for same-origin assets
+  const isDocument = event.request.destination === 'document' || event.request.headers.get('accept')?.includes('text/html');
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+        // Always revalidate HTML documents so clean URLs cannot keep an old shell.
+        if (!isDocument && networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);

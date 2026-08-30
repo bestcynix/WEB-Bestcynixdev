@@ -86,6 +86,7 @@
   <!-- Modular CSS Stylesheet -->
   <link rel="stylesheet" href="css/style.css?v=20260829_2" />
   <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+  <link rel="stylesheet" href="css/promo-video.css?v=20260829_1" />
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -339,6 +340,15 @@
             <span class="drawer-arrow">›</span>
           </a>
 
+          <a href="team-workspace" class="drawer-nav-item nav-workspace-item">
+            <div class="drawer-nav-icon">🧩</div>
+            <div class="drawer-nav-content">
+              <span class="drawer-nav-title">พื้นที่ทำงานทีม</span>
+              <span class="drawer-nav-subtitle">แชท เอกสาร ประชุม และสมาชิกแต่ละกลุ่ม</span>
+            </div>
+            <span class="drawer-nav-arrow">›</span>
+          </a>
+
           <!-- 5. ติดต่อเรา -->
           <a href="#contact" class="drawer-nav-item nav-contact-item">
             <span class="drawer-icon-box blue-alt">💬</span>
@@ -362,11 +372,11 @@
 
         <div class="mobile-drawer-divider"></div>
         <button type="button" class="mobile-chat-trigger" id="btnMobileOpenChat">
-          <span class="chat-trigger-icon">💬</span>
-          <div class="chat-trigger-text">
-            <strong>เปิดแชทสดติดต่อทีมพัฒนา (Live Chat)</strong>
-            <small>ปรึกษาเรื่องบอทและเว็บไซต์ได้ตลอด 24 ชม.</small>
-          </div>
+          <span class="chat-trigger-icon" aria-hidden="true">💬</span>
+          <span class="chat-trigger-text">
+            <strong>เปิดแชทสดติดต่อทีมพัฒนา</strong>
+            <small>(Live Chat) · ปรึกษาเรื่องบอทและเว็บไซต์ได้ตลอด 24 ชม.</small>
+          </span>
         </button>
       </nav>
 
@@ -396,6 +406,9 @@
             <div class="user-dropdown-menu" id="userDropdownMenu">
               <a href="profile" class="user-dropdown-item">
                 <span>👤 โปรไฟล์และการจัดการบัญชี</span>
+              </a>
+              <a href="team-workspace" class="user-dropdown-item">
+                <span>🧩 พื้นที่ทำงานทีม</span>
               </a>
               <button type="button" class="user-dropdown-item" id="btnOpenChatFromMenu">
                 <span>💬 แชทติดต่อ Dev</span>
@@ -745,6 +758,28 @@
         <a href="join-team" class="btn-primary" style="padding: 0.85rem 1.8rem; font-size: 1rem; font-weight: 700; white-space: nowrap; text-decoration: none;">
           <span>🚀 ดูตำแหน่งและกรอกใบสมัคร →</span>
         </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mc-Skyline Promotional Video -->
+  <section class="promo-video-section container" id="mcSkylinePromo" data-promo-video aria-labelledby="mcSkylinePromoTitle">
+    <div class="promo-video-layout">
+      <div class="promo-video-copy">
+        <div class="promo-video-kicker">⚡ MC-SKYLINE.ONLINE • COMING SOON</div>
+        <h2 class="promo-video-title" id="mcSkylinePromoTitle">เตรียมพบกับ Mc-Skyline.online</h2>
+        <p class="promo-video-description">คลิปโปรโมตโปรเจกต์ Minecraft รุ่นใหม่จากทีม Mc-Skyline.online รับชมบรรยากาศและเรื่องราวของโปรเจกต์ได้ที่นี่</p>
+        <div class="promo-video-actions">
+          <button type="button" class="promo-video-sound-toggle" data-promo-sound-toggle aria-pressed="false">🔇 เปิดเสียง</button>
+          <a class="promo-video-link" href="project?id=mc-skyline">📁 ดูหน้าโปรเจกต์</a>
+        </div>
+        <span class="promo-video-status" data-promo-video-status aria-live="polite">กำลังเตรียมคลิป • เริ่มต้นแบบปิดเสียง</span>
+      </div>
+      <div class="promo-video-frame">
+        <video controls autoplay muted loop playsinline preload="metadata" poster="assets/photo/mc-skyline.png" aria-label="คลิปโปรโมต Mc-Skyline.online">
+          <source src="https://bestcynixdev.web.app/assets/video/mc-skyline-promo.mp4" type="video/mp4" />
+          เบราว์เซอร์นี้ไม่รองรับการเล่นวิดีโอ
+        </video>
       </div>
     </div>
   </section>
@@ -1270,5 +1305,6 @@
   <script src="js/main.js?v=20260826_95"></script>
   <script src="js/chat.js?v=20260826_22"></script>
   <script src="js/auth.js?v=20260826_22"></script>
+  <script src="js/promo-video.js?v=20260829_1"></script>
 </body>
 </html>

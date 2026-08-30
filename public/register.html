@@ -357,19 +357,33 @@
     .toast-info { border-color: var(--accent-blue); color: #90d5ff; }
   </style>
   <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+  <link rel="stylesheet" href="css/auth-modern.css?v=20260829_2" />
 </head>
-<body>
+<body class="auth-modern-page">
   <div class="toast-container" id="toastContainer"></div>
 
-  <div class="container">
-    <div class="brand-header">
-      <a href="/" class="brand-link">
-        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
-        <span>BESTCYNIX DEV</span>
-      </a>
-    </div>
+  <div class="container auth-container">
+    <div class="auth-shell">
+      <aside class="auth-visual" aria-label="ร่วมทีม BestCyniX Dev">
+        <span class="auth-visual-kicker">BESTCYNIX DEV • JOIN THE TEAM</span>
+        <h2>สร้างบัญชี แล้วเริ่มสร้างสิ่งใหม่ไปด้วยกัน</h2>
+        <p>สมัครสมาชิกเพื่อเข้าถึงพื้นที่ทีม งานโปรเจกต์ และช่องทางติดต่อที่จัดไว้ให้เป็นระบบ</p>
+        <ul class="auth-feature-list">
+          <li>สมัครง่ายในไม่กี่ขั้นตอน</li>
+          <li>ยืนยันอีเมลอัตโนมัติ</li>
+          <li>ใช้ได้ทุกขนาดหน้าจอ</li>
+        </ul>
+      </aside>
 
-    <div class="auth-card">
+      <section class="auth-content">
+        <div class="brand-header">
+          <a href="/" class="brand-link">
+            <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
+            <span>BESTCYNIX DEV</span>
+          </a>
+        </div>
+
+        <div class="auth-card">
       <!-- Standard Register Form View -->
       <div id="registerFormView">
         <h1 class="auth-title">✨ สมัครสมาชิกใหม่</h1>
@@ -457,10 +471,12 @@
           </a>
         </div>
       </div>
-    </div>
+        </div>
 
-    <div class="back-home-wrap">
-      <a href="/" class="btn-back-home">← กลับไปที่หน้าหลัก</a>
+        <div class="back-home-wrap">
+          <a href="/" class="btn-back-home">← กลับไปที่หน้าหลัก</a>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -629,32 +645,65 @@
       return "/";
     };
 
-    // Google Register
-    document.getElementById("btnGoogleRegister").addEventListener("click", async () => {
+    const saveGoogleUser = async (user) => {
+      if (!db || !user) return;
+      await db.collection("users").doc(user.uid).set({
+        uid: user.uid,
+        displayName: user.displayName || "Google User",
+        email: user.email,
+        photoURL: user.photoURL || "assets/photo/bcxlogo2.png",
+        role: (user.email === "bestcynix@gmail.com" || user.email === "admin@email.com") ? "admin" : "user",
+        emailVerified: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    };
+
+    const completeGoogleRegister = async (user) => {
+      await saveGoogleUser(user);
+      showToast("สมัครสมาชิกด้วย Google สำเร็จ! (ยืนยันอีเมลอัตโนมัติ)", "success");
+      window.setTimeout(() => { window.location.href = getRedirectTarget(); }, 900);
+    };
+
+    auth.getRedirectResult().then(async (result) => {
+      if (result?.user) await completeGoogleRegister(result.user);
+    }).catch((err) => {
+      if (err?.code) showToast(`Google Auth ไม่สำเร็จ: ${err.message}`, "error");
+    });
+
+    // Google Register: allow only one popup request at a time.
+    let googleRegisterInFlight = false;
+    const googleRegisterButton = document.getElementById("btnGoogleRegister");
+    googleRegisterButton.addEventListener("click", async () => {
+      if (googleRegisterInFlight) return;
+      googleRegisterInFlight = true;
+      googleRegisterButton.disabled = true;
+      googleRegisterButton.classList.add("is-loading");
+      googleRegisterButton.querySelector("span").textContent = "กำลังเปิด Google...";
+
       try {
         const provider = new firebase.auth.GoogleAuthProvider();
         const result = await auth.signInWithPopup(provider);
-        const user = result.user;
-
-        if (db && user) {
-          await db.collection("users").doc(user.uid).set({
-            uid: user.uid,
-            displayName: user.displayName || "Google User",
-            email: user.email,
-            photoURL: user.photoURL || "assets/photo/bcxlogo2.png",
-            role: (user.email === "bestcynix@gmail.com" || user.email === "admin@email.com") ? "admin" : "user",
-            emailVerified: true,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
-        }
-
-        showToast("สมัครสมาชิกด้วย Google สำเร็จ! (ยืนยันอีเมลอัตโนมัติ)", "success");
-        setTimeout(() => {
-          window.location.href = getRedirectTarget();
-        }, 1200);
+        await completeGoogleRegister(result.user);
       } catch (err) {
-        showToast(`Google Auth ไม่สำเร็จ: ${err.message}`, "error");
+        const popupFallbackCodes = ["auth/popup-blocked", "auth/operation-not-supported-in-this-environment", "auth/web-storage-unsupported"];
+        if (popupFallbackCodes.includes(err?.code)) {
+          showToast("เบราว์เซอร์บล็อกหน้าต่าง Google ระบบจะเปลี่ยนไปใช้หน้าเข้าสู่ระบบแบบปลอดภัย", "info");
+          await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+          return;
+        }
+        if (err?.code === "auth/popup-closed-by-user") {
+          showToast("หน้าต่าง Google ถูกปิดก่อนสมัครสมาชิก กรุณากดอีกครั้งเพียงครั้งเดียว", "error");
+        } else if (err?.code === "auth/cancelled-popup-request") {
+          showToast("คำขอ Google ก่อนหน้ายังทำงานอยู่ กรุณารอสักครู่และอย่ากดซ้ำ", "error");
+        } else {
+          showToast(`Google Auth ไม่สำเร็จ: ${err.message}`, "error");
+        }
+      } finally {
+        googleRegisterInFlight = false;
+        googleRegisterButton.disabled = false;
+        googleRegisterButton.classList.remove("is-loading");
+        googleRegisterButton.querySelector("span").textContent = "ดำเนินการต่อด้วย Google (ไม่ต้องยืนยันอีเมล)";
       }
     });
 
@@ -671,6 +720,7 @@
       }
     });
   </script>
+  <script src="js/auth-ui.js?v=20260829_2"></script>
   <script src="js/shared-ui.js?v=20260829_1"></script>
 </body>
 </html>

@@ -8,6 +8,7 @@
   <title>สมัครร่วมทีม • BestCyniX Dev</title>
   <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
   <meta name="theme-color" content="#050b14" />
+  <base href="/" />
   <meta property="og:title" content="สมัครร่วมทีม BestCyniX Dev" />
   <meta property="og:description" content="เข้าร่วมทีมพัฒนา Bot Discord, Web Application และระบบสุดเจ๋ง" />
   <meta property="og:image" content="https://bestcynixdev.web.app/assets/photo/bcxlogo2.png" />
@@ -15,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20260829_2" />
+  <link rel="stylesheet" href="css/style.css?v=20260830_1" />
   <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -72,7 +73,7 @@
         <a id="jtProjectWebsiteLink" class="btn-secondary" href="#" target="_blank" rel="noopener noreferrer">🌐 เปิดหน้าเว็บไซต์โปรเจกต์ →</a>
       </section>
 
-      <section id="jtRecruitmentOverview" class="jt-recruitment-overview" aria-labelledby="jtOverviewTitle">
+      <section id="jtRecruitmentOverview" class="jt-recruitment-overview" style="display:none;" aria-labelledby="jtOverviewTitle">
         <div class="jt-overview-head">
           <div>
             <span class="jt-overview-kicker">OPEN ROLES DIRECTORY</span>
@@ -104,6 +105,20 @@
         <div style="font-size:2.2rem;margin-bottom:0.8rem;">⚡</div>
         <p style="color:var(--muted);font-size:0.95rem;">กำลังโหลดข้อมูลและสถานะการรับสมัคร...</p>
       </div>
+
+      <!-- Private interview/trial updates for the signed-in applicant. -->
+      <section id="jtInterviewPanel" class="jt-interview-panel" style="display:none;" aria-live="polite">
+        <div class="jt-interview-panel-head">
+          <div><span class="jt-overview-kicker">PRIVATE APPLICATION ROOM</span><h2>💬 ห้องสัมภาษณ์และประกาศนัดหมาย</h2><p>แสดงเฉพาะผู้สมัครเจ้าของใบสมัครและทีมงานที่ได้รับสิทธิ์เท่านั้น</p></div>
+          <a id="jtInterviewRoomLink" class="btn-secondary" href="#" target="_blank" rel="noopener">เปิดห้องแชท →</a>
+        </div>
+        <div id="jtInterviewNotice" class="jt-interview-notice">กำลังตรวจสอบห้องสัมภาษณ์...</div>
+        <div id="jtInterviewMessages" class="jt-interview-messages"></div>
+        <form id="jtInterviewMessageForm" class="jt-interview-composer" autocomplete="off">
+          <input id="jtInterviewMessageInput" class="jt-input" maxlength="1500" placeholder="พิมพ์ข้อความถึง Dev..." />
+          <button class="btn-primary" type="submit">ส่งข้อความ</button>
+        </form>
+      </section>
 
       <!-- Benefits -->
       <section id="jtBenefitsSection" style="margin-bottom:2.5rem;display:none;">
@@ -354,6 +369,7 @@
 
   <script src="js/shared-ui.js?v=20260829_2"></script>
   <script src="js/notifications.js?v=20260826_115"></script>
-  <script src="js/join-team.js?v=20260829_23"></script>
+  <script src="js/join-team-interview.js?v=20260830_1"></script>
+  <script src="js/join-team.js?v=20260830_1"></script>
 </body>
 </html>

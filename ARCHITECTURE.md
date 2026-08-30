@@ -47,6 +47,7 @@ WEB-Bestcynixdev/
 │   ├── ⚡ หน้าผู้ดูแลระบบ (Admin Portals)
 │   │   ├── admin-dashboard.html# ศูนย์ควบคุมหลักของผู้ดูแลระบบ & สถิติรวม
 │   │   ├── admin-join-team.html# ระบบบริหารจัดการรับสมัครงาน, พิจารณาใบสมัคร, ตั้งเวลา
+│   │   ├── team-workspace.html # พื้นที่ทำงานส่วนตัวแยกกลุ่ม: แชท เอกสาร ประชุม สมาชิก
 │   │   ├── admin-content.html  # ระบบ CMS จัดการโปรเจกต์, สปอยล์, แผนพัฒนา
 │   │   ├── admin-chats.html    # ระบบห้องแชทสด Real-Time ตอบข้อความลูกค้า
 │   │   └── admin-users.html    # ระบบจัดการสมาชิกและกำหนดสิทธิ์ (User/Admin Roles)
@@ -116,6 +117,7 @@ WEB-Bestcynixdev/
 | **ดีล Affiliate และลิงก์สร้างค่าคอมมิชชัน** | `public/js/affiliate.js`<br/>`AFFILIATE-OPERATIONS.md` | กรอง tracking URL, ตรวจสัญญาณค่าคอมมิชชัน และกำหนด contract สำหรับระบบ Sync ฝั่ง server |
 | **สถานะระบบและ Uptime จริง** | `functions/index.js`<br/>`public/js/status-monitor.js` | ตรวจบริการฝั่ง server, บันทึก current/history/daily และแสดงผลโดยไม่สร้างค่าจำลอง |
 | **ศูนย์เอกสาร, นโยบาย และข้อตกลงต่างๆ** | `public/docs.html`<br/>`public/work-policy.html`<br/>`public/pdpa.html` | หน้าเอกสารและนโยบายข้อบังคับทางการทั้งหมด |
+| **พื้นที่ทำงานแต่ละกลุ่ม/บริษัท** | `public/team-workspace.html`<br/>`public/js/team-workspace.js`<br/>`firestore.rules` | แชทส่วนตัว เอกสาร นัดหมาย สมาชิก ยศ และลิงก์เชิญ โดยตรวจสมาชิกจาก Firestore |
 
 ---
 

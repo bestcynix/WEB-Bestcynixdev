@@ -36,6 +36,11 @@
       "name": "แชทสดติดต่อ Dev",
       "url": "/#contact",
       "description": "ติดต่อและปรึกษาทีมพัฒนา"
+    },
+    {
+      "name": "พื้นที่ทำงานทีม",
+      "url": "/team-workspace",
+      "description": "แชท เอกสาร ประชุม และสมาชิกของแต่ละกลุ่ม"
     }
   ],
   "categories": ["developer", "productivity", "utilities"]

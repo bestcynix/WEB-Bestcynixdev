@@ -59,6 +59,10 @@ node_modules/
 # Output of 'npm pack'
 *.tgz
 
+# Large public promo media is served from Firebase Hosting and kept out of
+# normal Git history because GitHub rejects files larger than 100 MB.
+public/assets/video/
+
 # Yarn Integrity file
 .yarn-integrity
 

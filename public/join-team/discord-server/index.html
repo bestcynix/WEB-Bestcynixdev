@@ -1,1 +1,375 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>รับสมัครทีม Discord Server • BestCyniX Dev</title></head><body><script>fetch('/join-team.html').then(function(r){return r.text();}).then(function(html){document.open();document.write(html.replace('<head>','<head><base href="/">'));document.close();}).catch(function(){location.href='/join-team.html?project=discord-server';});</script></body></html>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
+  <meta name="description" content="สมัครเข้าร่วมทีม BestCyniX Dev — ร่วมพัฒนา Bot, Web และโปรเจกต์สุดแนว" />
+  <title>สมัครร่วมทีม • BestCyniX Dev</title>
+  <link rel="icon" type="image/png" href="assets/photo/bcxlogo2.png" />
+  <meta name="theme-color" content="#050b14" />
+  <base href="/" />
+  <meta property="og:title" content="สมัครร่วมทีม BestCyniX Dev" />
+  <meta property="og:description" content="เข้าร่วมทีมพัฒนา Bot Discord, Web Application และระบบสุดเจ๋ง" />
+  <meta property="og:image" content="https://bestcynixdev.web.app/assets/photo/bcxlogo2.png" />
+  <meta property="og:url" content="https://bestcynixdev.web.app/join-team" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=20260830_1" />
+  <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      projectId: "bestcynixdev",
+      appId: "1:172682556745:web:457116d929345ad70f1698",
+      databaseURL: "https://bestcynixdev-default-rtdb.asia-southeast1.firebasedatabase.app",
+      storageBucket: "bestcynixdev.firebasestorage.app",
+      apiKey: "AIzaSyA20pomQmBi9122UZ5WLGADoLwYIw8rxpU",
+      authDomain: "bestcynixdev.firebaseapp.com",
+      messagingSenderId: "172682556745",
+      measurementId: "G-710F6F2YG5",
+      projectNumber: "172682556745"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="particle-layer"></div>
+
+  <header class="topbar">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;padding-top:.75rem;padding-bottom:.75rem;">
+      <a href="/" style="display:inline-flex;align-items:center;gap:.65rem;text-decoration:none;color:#fff;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:1.05rem;">
+        <img src="assets/photo/bcxlogo2.png" alt="Logo" style="width:32px;height:32px;border-radius:50%;border:2px solid var(--accent);" />
+        BestCyniX Dev
+      </a>
+      <a href="/" style="font-size:.84rem;color:var(--muted);text-decoration:none;">← กลับหน้าหลัก</a>
+    </div>
+  </header>
+
+  <main style="padding-top:4rem;">
+    <div class="container">
+
+      <!-- Hero -->
+      <section class="jt-hero">
+        <div id="jtStatusBadge" class="jt-status-badge" style="display:none;"></div>
+        <h1 class="jt-hero-title" id="jtHeroTitle">สมัครร่วมทีม</h1>
+        <p class="jt-hero-sub" id="jtHeroSub">เป็นส่วนหนึ่งในการพัฒนาโปรเจกต์สุดเจ๋งกับ BestCyniX Dev</p>
+        <div class="jt-meta-row" id="jtMetaRow" style="display:none;">
+          <div class="jt-meta-chip">👥 ตำแหน่ง: <span class="val" id="jtPositionCount">-</span></div>
+          <div class="jt-meta-chip" id="jtAgeChip">🎂 อายุ: <span class="val">-</span></div>
+          <div class="jt-meta-chip">🏠 Community: <span class="val" id="jtCommunity">BestCyniX Dev</span></div>
+        </div>
+      </section>
+
+      <!-- Project-specific links are filled by join-team.js for each recruitment route. -->
+      <section id="jtProjectLinks" class="jt-project-links" style="display:none;" aria-label="ลิงก์โปรเจกต์และชุมชน">
+        <a id="jtProjectCommunityLink" class="btn-primary" href="#" target="_blank" rel="noopener noreferrer">💬 เข้าร่วมชุมชนโปรเจกต์</a>
+        <a id="jtProjectWebsiteLink" class="btn-secondary" href="#" target="_blank" rel="noopener noreferrer">🌐 เปิดหน้าเว็บไซต์โปรเจกต์ →</a>
+      </section>
+
+      <section id="jtRecruitmentOverview" class="jt-recruitment-overview" style="display:none;" aria-labelledby="jtOverviewTitle">
+        <div class="jt-overview-head">
+          <div>
+            <span class="jt-overview-kicker">OPEN ROLES DIRECTORY</span>
+            <h2 id="jtOverviewTitle">📣 ตำแหน่งที่เปิดรับและโปรเจกต์ทั้งหมด</h2>
+            <p>ค้นหาและเลือกดูรายละเอียดการรับสมัครของแต่ละโปรเจกต์จากข้อมูลตำแหน่งที่ระบบโหลดอยู่ในขณะนี้</p>
+          </div>
+          <a class="jt-overview-link" href="#jtRoleDirectory">ดูตำแหน่งทุกทีม →</a>
+        </div>
+        <div class="jt-overview-poster-wrap">
+          <img src="assets/photo/team-recruitment-poster.png" alt="โปสเตอร์รับสมัครทีมงานหลายสายของ BestCyniX Dev: Web, Discord, Bot และ Minecraft" loading="lazy" />
+          <div>
+            <h3>เปิดรับหลายโปรเจกต์ในทีมเดียว</h3>
+            <p>สมัคร Mc-Skyline.online, Discord Bot, Discord Server, Web Development หรือทีมพัฒนา BestCyniX Dev ได้จากหน้าเดียว โดยแต่ละโปรเจกต์มี URL และตำแหน่งของตัวเอง</p>
+          </div>
+        </div>
+        <div class="jt-overview-filters">
+          <input id="jtRoleSearch" class="jt-input" type="search" placeholder="ค้นหาตำแหน่ง หน้าที่ หรือโปรเจกต์..." autocomplete="off" />
+          <select id="jtRoleStatusFilter" class="jt-select" aria-label="กรองสถานะตำแหน่ง">
+            <option value="all">ทุกสถานะ</option>
+            <option value="open">ยังเปิดรับ</option>
+            <option value="full">เต็มแล้ว</option>
+          </select>
+        </div>
+        <div id="jtRoleDirectory" class="jt-role-directory" aria-live="polite"></div>
+      </section>
+
+      <!-- Loading State Indicator (Prevents Flash of Form when Closed) -->
+      <div id="jtLoadingState" style="text-align:center;padding:4rem 1rem;">
+        <div style="font-size:2.2rem;margin-bottom:0.8rem;">⚡</div>
+        <p style="color:var(--muted);font-size:0.95rem;">กำลังโหลดข้อมูลและสถานะการรับสมัคร...</p>
+      </div>
+
+      <!-- Private interview/trial updates for the signed-in applicant. -->
+      <section id="jtInterviewPanel" class="jt-interview-panel" style="display:none;" aria-live="polite">
+        <div class="jt-interview-panel-head">
+          <div><span class="jt-overview-kicker">PRIVATE APPLICATION ROOM</span><h2>💬 ห้องสัมภาษณ์และประกาศนัดหมาย</h2><p>แสดงเฉพาะผู้สมัครเจ้าของใบสมัครและทีมงานที่ได้รับสิทธิ์เท่านั้น</p></div>
+          <a id="jtInterviewRoomLink" class="btn-secondary" href="#" target="_blank" rel="noopener">เปิดห้องแชท →</a>
+        </div>
+        <div id="jtInterviewNotice" class="jt-interview-notice">กำลังตรวจสอบห้องสัมภาษณ์...</div>
+        <div id="jtInterviewMessages" class="jt-interview-messages"></div>
+        <form id="jtInterviewMessageForm" class="jt-interview-composer" autocomplete="off">
+          <input id="jtInterviewMessageInput" class="jt-input" maxlength="1500" placeholder="พิมพ์ข้อความถึง Dev..." />
+          <button class="btn-primary" type="submit">ส่งข้อความ</button>
+        </form>
+      </section>
+
+      <!-- Benefits -->
+      <section id="jtBenefitsSection" style="margin-bottom:2.5rem;display:none;">
+        <h2 style="font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:.8rem;">🎁 สิ่งที่คุณจะได้รับ</h2>
+        <div class="jt-benefits-grid" id="jtBenefitsGrid"></div>
+      </section>
+
+      <!-- Closed State Showcase (Rich, Beautiful & Interactive) -->
+      <div id="jtClosedBanner" class="jt-closed-showcase" style="display:none;">
+        <div class="jt-closed-card">
+          <div class="jt-lock-pulsar">
+            <span class="lock-icon">🔒</span>
+          </div>
+          <h2 class="jt-closed-title" id="jtClosedTitle">ขณะนี้ระบบปิดรับสมัครชั่วคราว</h2>
+          <p class="jt-closed-desc" id="jtClosedText">
+            ทีมงาน BestCyniX Dev กำลังดำเนินการคัดเลือกและจัดสรรตำแหน่ง กรุณาติดตามการประกาศเปิดรับสมัครรอบถัดไปผ่านช่องทาง Discord หรือหน้าเว็บไซต์
+          </p>
+
+          <!-- Dynamic Countdown Timer (when auto schedule is set) -->
+          <div id="jtScheduleCountdownWrap" class="jt-schedule-countdown" style="display: none;">
+            <div class="countdown-label">⏳ กำหนดการเปิดรับสมัครรอบถัดไป:</div>
+            <div class="countdown-boxes" id="jtCountdownBoxes">
+              <div class="cbox"><span class="cval" id="cdDays">00</span><span class="clbl">วัน</span></div>
+              <div class="cbox"><span class="cval" id="cdHours">00</span><span class="clbl">ชั่วโมง</span></div>
+              <div class="cbox"><span class="cval" id="cdMinutes">00</span><span class="clbl">นาที</span></div>
+              <div class="cbox"><span class="cval" id="cdSeconds">00</span><span class="clbl">วินาที</span></div>
+            </div>
+            <div class="schedule-note" id="jtScheduleNote"></div>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="jt-closed-actions">
+            <a href="https://discord.gg/M8k2N3XgYF" data-global-link="discord" target="_blank" rel="noopener noreferrer" class="btn-closed-action discord">
+              <span>💬 เข้าร่วม Discord ของเรา</span>
+            </a>
+            <a href="/" class="btn-closed-action home">
+              <span>🏠 สำรวจหน้าหลักและผลงาน</span>
+            </a>
+            <a href="status" class="btn-closed-action status">
+              <span>🟢 ตรวจสอบสถานะระบบ</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Project & Community Highlights -->
+        <div class="jt-closed-highlights">
+          <h3 class="highlight-head">🌟 กิจกรรมและโปรเจกต์ที่เรากำลังพัฒนา</h3>
+          <div class="highlight-grid">
+            <div class="highlight-card">
+              <div class="h-icon">🤖</div>
+              <h4>SkyLineBOT & Discord Bots</h4>
+              <p>ระบบบอทเพลง จัดการเซิร์ฟเวอร์ และคอมมูนิตี้สำหรับผู้ใช้งานนับหมื่นคน</p>
+            </div>
+            <div class="highlight-card">
+              <div class="h-icon">💻</div>
+              <h4>Modern Web Solutions</h4>
+              <p>แพลตฟอร์มเว็บแอปพลิเคชัน โซลูชันคลาวด์ และระบบสมาชิก Real-Time</p>
+            </div>
+            <div class="highlight-card">
+              <div class="h-icon">🚀</div>
+              <h4>Community & Creativity</h4>
+              <p>พื้นที่แลกเปลี่ยนไอเดีย พัฒนาทักษะ และสร้างสรรค์ผลงานร่วมกัน</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Application Form (Hidden by default until status is verified) -->
+      <div id="jtFormWrap" style="display:none;">
+        <form id="jtForm" novalidate>
+
+          <!-- Personal Info -->
+          <div class="jt-form-section">
+            <h3>👤 ข้อมูลส่วนตัว</h3>
+            <div class="jt-form-grid">
+              <!-- Photo Upload Field -->
+              <div class="jt-form-group" style="grid-column:1/-1;">
+                <label for="jtPhotoInput">📸 รูปถ่ายผู้สมัคร (รูปสุภาพ หน้าตรง) <span class="req">*</span></label>
+                <div style="display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap;background:rgba(5,11,22,0.6);border:1px dashed var(--border);border-radius:14px;padding:1.2rem;">
+                  <div style="width:90px;height:110px;border-radius:10px;border:2px solid var(--accent);overflow:hidden;background:#030810;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <img id="jtPhotoPreview" src="assets/photo/bcxlogo2.png" alt="Preview" style="width:100%;height:100%;object-fit:cover;" />
+                  </div>
+                  <div style="flex:1;min-width:220px;">
+                    <input type="file" id="jtPhotoInput" accept="image/*" class="jt-input" style="padding:0.4rem;font-size:0.85rem;" required />
+                    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.4rem;">
+                      กรุณาเลือกไฟล์ภาพถ่ายหน้าตรง สุภาพ (ขนาดไม่เกิน 5MB, รองรับ JPG/PNG) สำหรับใช้ประกอบการพิจารณาเท่านั้น<br/>
+                      <strong style="color:#facc15;">ห้ามอัปโหลดสำเนาบัตรประชาชน สมุดบัญชี หรือเอกสารภาษีในฟอร์มนี้</strong> — เอกสารยืนยันตัวตนจะขอเฉพาะผู้ผ่านการคัดเลือกผ่านช่องทางส่วนตัวที่กำหนด
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="jt-form-group" style="grid-column:1/-1;">
+                <label for="jtPosition">ตำแหน่งที่สมัคร <span class="req">*</span></label>
+                <select id="jtPosition" name="positionId" class="jt-select" required>
+                  <option value="">กำลังโหลดตำแหน่ง...</option>
+                </select>
+                <div id="jtPositionAgeNote" class="jt-pos-age-badge" style="display:none;"></div>
+              </div>
+              <div class="jt-form-group">
+                <label for="jtFirstName">ชื่อ <span class="req">*</span></label>
+                <input id="jtFirstName" name="firstName" class="jt-input" placeholder="ชื่อจริง" required />
+              </div>
+              <div class="jt-form-group">
+                <label for="jtLastName">นามสกุล <span class="req">*</span></label>
+                <input id="jtLastName" name="lastName" class="jt-input" placeholder="นามสกุล" required />
+              </div>
+              <div class="jt-form-group">
+                <label for="jtNickname">ชื่อเล่น <span class="req">*</span></label>
+                <input id="jtNickname" name="nickname" class="jt-input" placeholder="ชื่อเล่น" required />
+              </div>
+              <div class="jt-form-group">
+                <label for="jtDob">วัน/เดือน/ปีเกิด <span class="req">*</span></label>
+                <input id="jtDob" name="dob" type="date" class="jt-input" required />
+              </div>
+              <div class="jt-form-group">
+                <label>อายุ (คำนวณอัตโนมัติ)</label>
+                <input id="jtAgeDisplay" class="jt-input" readonly placeholder="จะคำนวณหลังกรอกวันเกิด" style="cursor:not-allowed;opacity:.7;" />
+                <input id="jtAgeHidden" name="age" type="hidden" />
+              </div>
+              <div class="jt-form-group">
+                <label for="jtGender">เพศ <span class="req">*</span></label>
+                <select id="jtGender" name="gender" class="jt-select" required>
+                  <option value="">เลือกเพศ</option>
+                  <option>ชาย</option>
+                  <option>หญิง</option>
+                  <option>LGBTQ+</option>
+                  <option>ไม่ระบุ</option>
+                </select>
+              </div>
+              <div class="jt-form-group">
+                <label for="jtPlatform">ทำงานบนอุปกรณ์ไหน <span class="req">*</span></label>
+                <select id="jtPlatform" name="platform" class="jt-select" required>
+                  <option value="">เลือกอุปกรณ์</option>
+                  <option value="โทรศัพท์">โทรศัพท์</option>
+                  <option value="แท็บเล็ต">แท็บเล็ต</option>
+                  <option value="ไอแพด">ไอแพด</option>
+                  <option value="คอม/โน้ตบุ๊ก">คอม/โน้ตบุ๊ก</option>
+                  <option value="อื่น ๆ">อื่น ๆ</option>
+                </select>
+              </div>
+              <div class="jt-form-group" id="jtPlatformOtherWrap" style="display:none;">
+                <label for="jtPlatformOther">ระบุอุปกรณ์อื่นๆ</label>
+                <input id="jtPlatformOther" name="platformOther" class="jt-input" placeholder="ระบุ..." />
+              </div>
+              <div class="jt-form-group" id="jtOsWrap" style="display:none;">
+                <label for="jtOs">ระบบปฏิบัติการ (สำหรับคอม) <span class="req">*</span></label>
+                <select id="jtOs" name="deviceOS" class="jt-select">
+                  <option value="">เลือก OS</option>
+                  <option value="Windows">Windows</option>
+                  <option value="Linux">Linux</option>
+                  <option value="macOS">macOS</option>
+                  <option value="อื่น ๆ">อื่น ๆ</option>
+                </select>
+              </div>
+              <div class="jt-form-group" id="jtOsOtherWrap" style="display:none;">
+                <label for="jtOsOther">ระบุ OS อื่นๆ</label>
+                <input id="jtOsOther" name="deviceOSOther" class="jt-input" placeholder="ระบุชื่อ OS..." />
+              </div>
+              <div class="jt-form-group">
+                <label for="jtMic">มีไมค์ไหม <span class="req">*</span></label>
+                <select id="jtMic" name="hasMic" class="jt-select" required>
+                  <option value="">เลือก...</option>
+                  <option>มีไมค์</option>
+                  <option>ไม่มีไมค์</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule -->
+          <div class="jt-form-section">
+            <h3>📅 วัน & เวลาที่สะดวก</h3>
+            <div>
+              <p style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem;">เลือกวันที่สามารถทำงานได้ <span style="color:var(--accent-red);">*</span></p>
+              <div class="jt-day-grid" id="jtDayGrid"></div>
+              <p style="font-size:.78rem;color:var(--muted);margin-top:.4rem;">กด "ทุกวัน" เพื่อเลือกทุกวัน หรือคลิกเลือกเฉพาะวันที่สะดวก</p>
+            </div>
+            <div class="jt-time-row" style="margin-top:1.2rem;">
+              <div class="jt-form-group">
+                <label for="jtTimeStart">เวลาเริ่มต้น</label>
+                <input id="jtTimeStart" name="availableTimeStart" type="time" class="jt-input" />
+              </div>
+              <div class="jt-form-group">
+                <label for="jtTimeEnd">เวลาสิ้นสุด</label>
+                <input id="jtTimeEnd" name="availableTimeEnd" type="time" class="jt-input" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Social Links -->
+          <div class="jt-form-section">
+            <h3>🔗 ช่องทางติดตาม (ไม่บังคับ)</h3>
+            <p style="font-size:.84rem;color:var(--muted);margin-bottom:.75rem;">กดที่ไอคอนเพื่อเพิ่มช่องกรอกลิงก์</p>
+            <div class="jt-social-picker" id="jtSocialPicker"></div>
+            <div id="jtSocialCards" class="jt-social-cards-grid"></div>
+          </div>
+
+          <!-- Custom Questions -->
+          <div id="jtCustomQuestionsSection" class="jt-form-section" style="display:none;">
+            <h3>❓ คำถามเพิ่มเติม</h3>
+            <div id="jtCustomQuestionsWrap" class="jt-form-grid"></div>
+          </div>
+
+          <!-- Motivation -->
+          <div class="jt-form-section">
+            <h3>💡 เหตุผลที่อยากร่วมทีม</h3>
+            <div class="jt-form-group">
+              <label for="jtMotivation">บอกเราสักหน่อยว่าคุณจะนำอะไรมาให้ทีม <span class="req">*</span></label>
+              <textarea id="jtMotivation" name="motivation" class="jt-textarea" placeholder="เขียนเหตุผลของคุณที่นี่..." required style="min-height:150px;"></textarea>
+            </div>
+          </div>
+
+          <!-- PDPA & Terms Consent -->
+          <div class="jt-form-section" style="background:rgba(5,15,30,0.85);border-color:rgba(50,255,201,0.3);">
+            <h3>🛡️ ข้อตกลงและความยินยอมตามกฎหมาย PDPA</h3>
+            <div style="background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.3);border-radius:10px;padding:.75rem .9rem;margin-bottom:.9rem;color:#fde68a;font-size:.82rem;line-height:1.7;">
+              🔐 ระบบรับสมัครนี้ไม่รับเอกสารสำเนาบัตรประชาชน หน้าสมุดบัญชี เลขบัญชี หรือเลขประจำตัวผู้เสียภาษีในขั้นตอน Public หากผ่านการคัดเลือก ทีมงานจะแจ้งวัตถุประสงค์ รายการเอกสาร ผู้มีสิทธิ์เข้าถึง และกำหนดลบข้อมูลให้ทราบก่อนส่งเอกสาร
+            </div>
+            <label style="display:flex;gap:0.75rem;align-items:flex-start;cursor:pointer;font-size:0.9rem;color:#e2e8f0;">
+              <input type="checkbox" id="jtPdpaConsent" required style="accent-color:var(--accent);width:18px;height:18px;margin-top:3px;flex-shrink:0;" />
+              <div>
+                <span>ข้าพเจ้ายินยอมให้ <strong>BestCyniX Dev</strong> เก็บรวบรวม ใช้ และประมวลผลข้อมูลส่วนบุคคลและรูปถ่ายที่ได้ระบุในใบสมัครนี้ เพื่อวัตถุประสงค์ในการคัดเลือก ติดต่อประสานงาน และจัดทำเอกสารสัญญาการร่วมทีมตาม</span>
+                <a href="pdpa" target="_blank" style="color:var(--accent);text-decoration:underline;">นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)</a>,
+                <a href="work-policy" target="_blank" style="color:var(--accent);text-decoration:underline;">นโยบายและระเบียบการร่วมทีม</a> และ
+                <a href="terms" target="_blank" style="color:var(--accent);text-decoration:underline;">เงื่อนไขการใช้งาน</a>
+                <span style="color:var(--accent-red);font-weight:700;"> *</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Submit -->
+          <div class="jt-submit-row" style="padding-bottom:1.5rem;">
+            <button type="submit" id="jtSubmitBtn" class="btn-primary">🚀 ส่งใบสมัคร</button>
+            <span id="jtSubmitMsg" class="jt-submit-msg"></span>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer style="text-align:center;color:var(--muted);font-size:0.85rem;padding:2rem 0;border-top:1px solid var(--border);margin-top:2rem;">
+    © 2026 BestCyniX Dev. สงวนลิขสิทธิ์ทุกประการ • <a href="pdpa" style="color:var(--accent);text-decoration:none;">PDPA</a> • <a href="work-policy" style="color:var(--accent);text-decoration:none;">นโยบายร่วมทีม</a> • <a href="terms" style="color:var(--accent);text-decoration:none;">เงื่อนไขการใช้งาน</a> • <a href="docs" style="color:var(--accent);text-decoration:none;">ศูนย์เอกสาร</a>
+  </footer>
+
+  <div id="jtToastWrap" class="jt-notif-toast-wrap"></div>
+
+  <script src="js/shared-ui.js?v=20260829_2"></script>
+  <script src="js/notifications.js?v=20260826_115"></script>
+  <script src="js/join-team-interview.js?v=20260830_1"></script>
+  <script src="js/join-team.js?v=20260830_1"></script>
+</body>
+</html>

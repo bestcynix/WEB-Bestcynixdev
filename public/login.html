@@ -323,19 +323,33 @@
     .toast-info { border-color: var(--accent-blue); color: #90d5ff; }
   </style>
   <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
+  <link rel="stylesheet" href="css/auth-modern.css?v=20260829_2" />
 </head>
-<body>
+<body class="auth-modern-page">
   <div class="toast-container" id="toastContainer"></div>
 
-  <div class="container">
-    <div class="brand-header">
-      <a href="/" class="brand-link">
-        <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
-        <span>BESTCYNIX DEV</span>
-      </a>
-    </div>
+  <div class="container auth-container">
+    <div class="auth-shell">
+      <aside class="auth-visual" aria-label="เกี่ยวกับ BestCyniX Dev">
+        <span class="auth-visual-kicker">BESTCYNIX DEV • SECURE ACCESS</span>
+        <h2>เข้าสู่ระบบ แล้วไปต่อกับทีมของเรา</h2>
+        <p>พื้นที่ทำงานสำหรับสมาชิก นักพัฒนา และผู้ร่วมทีม พร้อมระบบบัญชีที่ใช้งานง่ายในทุกอุปกรณ์</p>
+        <ul class="auth-feature-list">
+          <li>เข้าสู่ระบบปลอดภัย</li>
+          <li>จัดการโปรไฟล์</li>
+          <li>ติดต่อทีมงาน</li>
+        </ul>
+      </aside>
 
-    <div class="auth-card">
+      <section class="auth-content">
+        <div class="brand-header">
+          <a href="/" class="brand-link">
+            <img src="assets/photo/bcxlogo2.png" alt="BestCyniX Logo" />
+            <span>BESTCYNIX DEV</span>
+          </a>
+        </div>
+
+        <div class="auth-card">
       <h1 class="auth-title">🔐 เข้าสู่ระบบ</h1>
       <p class="auth-subtitle">เข้าถึงระบบสมาชิก ติดต่อพูดคุยสด และจัดการโปรไฟล์ของคุณ</p>
 
@@ -392,10 +406,12 @@
       <div class="auth-footer-text">
         ยังไม่มีบัญชีผู้ใช้? <a href="register" class="link-accent" style="font-weight: 600;">สมัครสมาชิกใหม่ที่นี่ ✨</a>
       </div>
-    </div>
+        </div>
 
-    <div class="back-home-wrap">
-      <a href="/" class="btn-back-home">← กลับไปที่หน้าหลัก</a>
+        <div class="back-home-wrap">
+          <a href="/" class="btn-back-home">← กลับไปที่หน้าหลัก</a>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -536,31 +552,64 @@
       }
     });
 
-    // Google Sign In
-    document.getElementById("btnGoogleLogin").addEventListener("click", async () => {
+    const saveGoogleUser = async (user) => {
+      if (!db || !user) return;
+      await db.collection("users").doc(user.uid).set({
+        uid: user.uid,
+        displayName: user.displayName || "Google User",
+        email: user.email,
+        photoURL: user.photoURL || "assets/photo/bcxlogo2.png",
+        role: (user.email === "bestcynix@gmail.com" || user.email === "admin@email.com") ? "admin" : "user",
+        emailVerified: true,
+        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    };
+
+    const completeGoogleLogin = async (user) => {
+      await saveGoogleUser(user);
+      showToast("เข้าสู่ระบบด้วย Google สำเร็จ!", "success");
+      window.setTimeout(() => { window.location.href = getRedirectTarget(); }, 900);
+    };
+
+    auth.getRedirectResult().then(async (result) => {
+      if (result?.user) await completeGoogleLogin(result.user);
+    }).catch((err) => {
+      if (err?.code) showToast(`Google Sign-in ไม่สำเร็จ: ${err.message}`, "error");
+    });
+
+    // Google Sign In: allow only one popup request at a time.
+    let googleLoginInFlight = false;
+    const googleLoginButton = document.getElementById("btnGoogleLogin");
+    googleLoginButton.addEventListener("click", async () => {
+      if (googleLoginInFlight) return;
+      googleLoginInFlight = true;
+      googleLoginButton.disabled = true;
+      googleLoginButton.classList.add("is-loading");
+      googleLoginButton.querySelector("span").textContent = "กำลังเปิด Google...";
+
       try {
         const provider = new firebase.auth.GoogleAuthProvider();
         const result = await auth.signInWithPopup(provider);
-        const user = result.user;
-
-        if (db && user) {
-          await db.collection("users").doc(user.uid).set({
-            uid: user.uid,
-            displayName: user.displayName || "Google User",
-            email: user.email,
-            photoURL: user.photoURL || "assets/photo/bcxlogo2.png",
-            role: (user.email === "bestcynix@gmail.com" || user.email === "admin@email.com") ? "admin" : "user",
-            emailVerified: true,
-            lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
-        }
-
-        showToast("เข้าสู่ระบบด้วย Google สำเร็จ!", "success");
-        setTimeout(() => {
-          window.location.href = getRedirectTarget();
-        }, 1200);
+        await completeGoogleLogin(result.user);
       } catch (err) {
-        showToast(`Google Sign-in ไม่สำเร็จ: ${err.message}`, "error");
+        const popupFallbackCodes = ["auth/popup-blocked", "auth/operation-not-supported-in-this-environment", "auth/web-storage-unsupported"];
+        if (popupFallbackCodes.includes(err?.code)) {
+          showToast("เบราว์เซอร์บล็อกหน้าต่าง Google ระบบจะเปลี่ยนไปใช้หน้าเข้าสู่ระบบแบบปลอดภัย", "info");
+          await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+          return;
+        }
+        if (err?.code === "auth/popup-closed-by-user") {
+          showToast("หน้าต่าง Google ถูกปิดก่อนเข้าสู่ระบบ กรุณากดอีกครั้งเพียงครั้งเดียว", "error");
+        } else if (err?.code === "auth/cancelled-popup-request") {
+          showToast("คำขอ Google ก่อนหน้ายังทำงานอยู่ กรุณารอสักครู่และอย่ากดซ้ำ", "error");
+        } else {
+          showToast(`Google Sign-in ไม่สำเร็จ: ${err.message}`, "error");
+        }
+      } finally {
+        googleLoginInFlight = false;
+        googleLoginButton.disabled = false;
+        googleLoginButton.classList.remove("is-loading");
+        googleLoginButton.querySelector("span").textContent = "เข้าสู่ระบบด้วย Google";
       }
     });
 
@@ -577,6 +626,7 @@
       }
     });
   </script>
+  <script src="js/auth-ui.js?v=20260829_2"></script>
   <script src="js/shared-ui.js?v=20260829_1"></script>
 </body>
 </html>

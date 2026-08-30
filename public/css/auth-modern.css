@@ -1,0 +1,294 @@
+/* Shared compact auth experience for Login and Register. */
+:root {
+  --auth-panel: rgba(7, 19, 35, 0.88);
+  --auth-panel-strong: rgba(5, 14, 27, 0.96);
+  --auth-line: rgba(128, 183, 227, 0.2);
+}
+
+body.auth-modern-page {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(22, 163, 255, 0.2), transparent 34%),
+    radial-gradient(circle at 88% 80%, rgba(50, 255, 201, 0.14), transparent 36%),
+    #050b14;
+}
+
+.auth-container {
+  width: min(1160px, calc(100% - 2rem));
+  padding: clamp(1rem, 3vw, 2.5rem) 0;
+}
+
+.auth-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  gap: clamp(1.25rem, 4vw, 4rem);
+  align-items: center;
+  min-height: min(760px, calc(100dvh - 3rem));
+}
+
+.auth-visual {
+  position: relative;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  border: 1px solid rgba(50, 255, 201, 0.24);
+  border-radius: 30px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(145deg, rgba(8, 28, 50, 0.92), rgba(4, 12, 24, 0.86)),
+    url("../assets/photo/auth-portal.png") center / cover;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(50, 255, 201, 0.1);
+  animation: authEnter 0.65s ease both;
+}
+
+.auth-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(5, 11, 20, 0.96) 0%, rgba(5, 11, 20, 0.54) 52%, rgba(5, 11, 20, 0.1) 100%);
+}
+
+.auth-visual::after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  right: -90px;
+  bottom: -100px;
+  border-radius: 50%;
+  background: rgba(50, 255, 201, 0.2);
+  filter: blur(50px);
+  z-index: -1;
+}
+
+.auth-visual-kicker {
+  width: fit-content;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid rgba(50, 255, 201, 0.45);
+  border-radius: 999px;
+  color: var(--accent);
+  background: rgba(50, 255, 201, 0.08);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.auth-visual h2 {
+  max-width: 540px;
+  margin-top: 1rem;
+  color: #fff;
+  font-family: "Chakra Petch", sans-serif;
+  font-size: clamp(2rem, 4vw, 3.7rem);
+  line-height: 1.05;
+}
+
+.auth-visual p {
+  max-width: 500px;
+  margin-top: 1rem;
+  color: #a5c7e8;
+  font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+}
+
+.auth-feature-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  padding: 0;
+  list-style: none;
+  color: #d9f5ff;
+  font-size: 0.9rem;
+}
+
+.auth-feature-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.auth-feature-list li::before {
+  content: "✦";
+  color: var(--accent);
+}
+
+.auth-content {
+  width: 100%;
+  min-width: 0;
+  animation: authEnter 0.65s 0.08s ease both;
+}
+
+.auth-content .brand-header {
+  margin-bottom: 0.9rem;
+  text-align: left;
+}
+
+.auth-content .brand-link {
+  font-size: 1.15rem;
+}
+
+.auth-content .brand-link img {
+  width: 38px;
+  height: 38px;
+}
+
+.auth-content .auth-card {
+  max-height: min(720px, calc(100dvh - 7rem));
+  padding: clamp(1.15rem, 3vw, 2rem);
+  overflow-y: auto;
+  background: linear-gradient(165deg, var(--auth-panel), var(--auth-panel-strong));
+  border-color: var(--auth-line);
+  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.58), 0 0 28px rgba(50, 255, 201, 0.08);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(50, 255, 201, 0.45) transparent;
+}
+
+.auth-content .auth-title {
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+}
+
+.auth-content .auth-subtitle {
+  margin-bottom: 1.1rem;
+}
+
+.auth-content .auth-divider {
+  margin: 1rem 0;
+}
+
+.auth-content .form-group {
+  margin-bottom: 0.82rem;
+}
+
+.auth-content .form-input,
+.auth-content .btn-google,
+.auth-content .btn-submit {
+  min-height: 44px;
+}
+
+.auth-content .form-row-between {
+  margin-bottom: 1rem;
+}
+
+.auth-content .auth-footer-text {
+  margin-top: 1.15rem;
+  padding-top: 0.9rem;
+}
+
+.auth-content .back-home-wrap {
+  margin-top: 0.85rem;
+}
+
+.auth-content .auth-card a,
+.auth-content button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-content .btn-google:hover,
+.auth-content .btn-submit:hover {
+  transform: translateY(-2px);
+}
+
+.auth-content .btn-google:disabled,
+.auth-content .btn-submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.auth-content .btn-google.is-loading,
+.auth-content .btn-submit.is-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.auth-content .btn-google.is-loading::after,
+.auth-content .btn-submit.is-loading::after {
+  content: "";
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-left: 0.45rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: authSpin 0.7s linear infinite;
+}
+
+.auth-leaving .auth-shell {
+  animation: authLeave 0.18s ease both;
+}
+
+@keyframes authEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes authLeave {
+  to { opacity: 0; transform: translateY(-8px) scale(0.99); }
+}
+
+@keyframes authSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .auth-shell {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .auth-visual {
+    min-height: 260px;
+    padding: 1.5rem;
+  }
+
+  .auth-visual h2 {
+    max-width: 620px;
+    font-size: clamp(1.85rem, 7vw, 3rem);
+  }
+
+  .auth-feature-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .auth-container {
+    width: min(100% - 1rem, 540px);
+    padding: 0.5rem 0;
+  }
+
+  .auth-visual {
+    min-height: 190px;
+    border-radius: 20px;
+  }
+
+  .auth-visual p,
+  .auth-feature-list {
+    display: none;
+  }
+
+  .auth-visual h2 {
+    margin-top: 0.65rem;
+    font-size: 2rem;
+  }
+
+  .auth-content .auth-card {
+    max-height: none;
+    border-radius: 18px;
+  }
+
+  .auth-content .brand-header {
+    margin-left: 0.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell,
+  .auth-content,
+  .auth-visual {
+    animation: none !important;
+  }
+}

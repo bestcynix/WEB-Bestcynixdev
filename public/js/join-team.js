@@ -6,8 +6,11 @@
   'use strict';
 
   const ROUTE_PARTS = window.location.pathname.split('/').filter(Boolean);
+  // /join-team is the public directory; /join-team/:slug is the only route
+  // that may display an application form. Keep the legacy ?project= URL working.
   const ROUTE_PROJECT_SLUG = new URLSearchParams(window.location.search).get('project')
     || (ROUTE_PARTS[0] === 'join-team' && ROUTE_PARTS[1] ? ROUTE_PARTS[1] : null);
+  const IS_DIRECTORY_ROUTE = !ROUTE_PROJECT_SLUG;
   const FORM_DOC_ID = ROUTE_PROJECT_SLUG || 'default';
   const APPLICATIONS_COL = 'joinTeamApplications';
   const FORMS_COL = 'joinTeamForms';
@@ -187,13 +190,17 @@
       });
   };
 
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  }[char]));
+
   const renderRoleDirectory = (cfg) => {
     const wrap = $('jtRoleDirectory');
     if (!wrap) return;
     const search = ($('jtRoleSearch')?.value || '').trim().toLowerCase();
     const filter = $('jtRoleStatusFilter')?.value || 'all';
     const projectRows = getProjectRows(cfg);
-    const roles = projectRows.flatMap(({ slug, project, positions, isOpen }) => positions.filter(p => p.active !== false).map((p) => ({ ...p, projectSlug: slug, projectName: project.title || project.communityName || slug, projectOpen: isOpen }))).filter((p) => {
+    const roles = projectRows.flatMap(({ slug, project, positions, isOpen }) => positions.filter(p => p.active !== false).map((p) => ({ ...p, projectSlug: slug, projectName: project.title || project.communityName || slug, projectSummary: project.subtitle || project.summary || '', communityName: project.communityName || '', projectOpen: isOpen }))).filter((p) => {
       const approved = Number(p.approvedCount || 0);
       const unlimited = !p.maxSlots || p.maxSlots <= 0 || p.unlimited === true;
       const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
@@ -205,14 +212,24 @@
       wrap.innerHTML = '<div style="grid-column:1/-1;padding:1rem;color:var(--muted);text-align:center;border:1px dashed rgba(255,255,255,.15);border-radius:12px;">ไม่พบตำแหน่งตามตัวกรอง</div>';
       return;
     }
-    wrap.innerHTML = roles.map((p) => {
+    const grouped = roles.reduce((map, role) => {
+      if (!map.has(role.projectSlug)) map.set(role.projectSlug, { ...role, roles: [] });
+      map.get(role.projectSlug).roles.push(role);
+      return map;
+    }, new Map());
+
+    wrap.innerHTML = Array.from(grouped.values()).map((project) => {
+      const projectHref = `/join-team/${encodeURIComponent(project.projectSlug)}`;
+      const roleCards = project.roles.map((p) => {
       const approved = Number(p.approvedCount || 0);
       const unlimited = !p.maxSlots || p.maxSlots <= 0 || p.unlimited === true;
       const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
       const status = !p.projectOpen ? '🔴 ปิดรับสมัคร' : (unlimited || left > 0 ? '🟢 ยังเปิดรับ' : '🔴 เต็มแล้ว');
       const quota = unlimited ? 'ไม่จำกัดจำนวน' : `ว่าง ${left}/${p.maxSlots} คน`;
-      const href = p.projectSlug ? `/join-team/${p.projectSlug}` : '#';
-      return `<article class="jt-role-card"><div style="color:var(--accent);font-size:.75rem;font-weight:700;">${p.projectName || ''}</div><h3>${p.name || 'ตำแหน่งทีมงาน'}</h3><p>${p.description || 'ร่วมพัฒนาโปรเจกต์กับทีม'}</p><div class="jt-role-meta"><span>${status}</span><span>👥 ${quota}</span><span>🎯 ไม่จำกัดอายุ</span></div><a class="btn-secondary" style="display:inline-flex;margin-top:.7rem;" href="${href}">ดูรายละเอียด/สมัคร →</a></article>`;
+      return `<article class="jt-role-card"><h3>${escapeHtml(p.name || 'ตำแหน่งทีมงาน')}</h3><p>${escapeHtml(p.description || 'ร่วมพัฒนาโปรเจกต์กับทีม')}</p><div class="jt-role-meta"><span>${status}</span><span>👥 ${quota}</span><span>🎯 ไม่จำกัดอายุ</span></div></article>`;
+      }).join('');
+      const projectStatus = project.projectOpen ? '🟢 เปิดรับสมัครอยู่' : '🔴 ปิดรับสมัคร';
+      return `<section class="jt-project-group"><div class="jt-project-group-head"><div><span class="jt-project-kicker">PROJECT / TEAM</span><h3>${escapeHtml(project.projectName || project.projectSlug)}</h3><p>${escapeHtml(project.projectSummary || 'รายละเอียดการรับสมัครของทีมนี้')}</p><div class="jt-project-group-meta"><span>${projectStatus}</span><span>🧩 ${project.roles.length} ตำแหน่ง</span></div></div><a class="btn-secondary jt-project-open-link" href="${projectHref}">เปิดหน้าทีม →</a></div><div class="jt-project-role-grid">${roleCards}</div><a class="jt-project-apply-link" href="${projectHref}">ดูรายละเอียดและสมัครในหน้านี้ →</a></section>`;
     }).join('');
   };
 
@@ -395,7 +412,11 @@
     const autoOpen = cfg.statusConfig?.autoOpenAt ? new Date(cfg.statusConfig.autoOpenAt).getTime() : null;
 
     if (badge) {
-      show(badge);
+      if (IS_DIRECTORY_ROUTE) {
+        hide(badge);
+      } else {
+        show(badge);
+      }
       if (isOpen) {
         badge.className = 'jt-status-badge jt-status-open';
         badge.style.background = '';
@@ -417,12 +438,12 @@
       }
     }
 
-    if ($('jtHeroTitle')) $('jtHeroTitle').textContent = cfg.title || 'สมัครร่วมทีม';
-    if ($('jtHeroSub')) $('jtHeroSub').textContent = cfg.subtitle || '';
+    if ($('jtHeroTitle')) $('jtHeroTitle').textContent = IS_DIRECTORY_ROUTE ? 'เปิดรับสมัครทีมงานหลายโปรเจกต์' : (cfg.title || 'สมัครร่วมทีม');
+    if ($('jtHeroSub')) $('jtHeroSub').textContent = IS_DIRECTORY_ROUTE ? 'เลือกทีมและตำแหน่งที่สนใจเพื่ออ่านรายละเอียดและเปิดฟอร์มสมัครเฉพาะของทีมนั้น' : (cfg.subtitle || '');
     if ($('jtCommunity')) $('jtCommunity').textContent = cfg.communityName || 'BestCyniX Dev';
 
     const routeLinks = $('jtProjectLinks');
-    if (routeLinks && (cfg.communityUrl || cfg.websiteUrl)) {
+    if (!IS_DIRECTORY_ROUTE && routeLinks && (cfg.communityUrl || cfg.websiteUrl)) {
       show(routeLinks);
       const communityLink = $('jtProjectCommunityLink');
       const websiteLink = $('jtProjectWebsiteLink');
@@ -450,10 +471,13 @@
 
     const positions = (cfg.positions || []).filter(p => p.active !== false);
     if ($('jtPositionCount')) $('jtPositionCount').textContent = positions.length;
+    if ($('jtRecruitmentOverview')) {
+      $('jtRecruitmentOverview').style.display = IS_DIRECTORY_ROUTE ? '' : 'none';
+    }
     renderRoleDirectory(cfg);
 
     // Benefits
-    if (cfg.benefits && cfg.benefits.length && isOpen) {
+    if (!IS_DIRECTORY_ROUTE && cfg.benefits && cfg.benefits.length && isOpen) {
       const sec = $('jtBenefitsSection');
       const grid = $('jtBenefitsGrid');
       if (sec && grid) {
@@ -508,7 +532,12 @@
     const closedBanner = $('jtClosedBanner');
     const metaRow = $('jtMetaRow');
 
-    if (isOpen) {
+    if (IS_DIRECTORY_ROUTE) {
+      hide(formWrap);
+      hide(closedBanner);
+      hide(metaRow);
+      hide($('jtBenefitsSection'));
+    } else if (isOpen) {
       show(formWrap);
       show(metaRow);
       hide(closedBanner);

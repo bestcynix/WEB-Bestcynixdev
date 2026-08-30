@@ -1669,6 +1669,10 @@
         return `<span style="background:rgba(2,132,199,0.15);border:1px solid rgba(2,132,199,0.4);color:#38bdf8;padding:0.25rem 0.65rem;border-radius:999px;font-size:0.78rem;font-weight:700;">📩 ส่งใบสมัครแล้ว</span>`;
       case 'reviewing':
         return `<span style="background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.4);color:#facc15;padding:0.25rem 0.65rem;border-radius:999px;font-size:0.78rem;font-weight:700;">🔍 กำลังพิจารณา</span>`;
+      case 'interview':
+        return `<span style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:#7dd3fc;padding:0.25rem 0.65rem;border-radius:999px;font-size:0.78rem;font-weight:700;">🗣️ รอสัมภาษณ์</span>`;
+      case 'trial':
+        return `<span style="background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);color:#d8b4fe;padding:0.25rem 0.65rem;border-radius:999px;font-size:0.78rem;font-weight:700;">🧪 ทดลองงาน</span>`;
       case 'approved':
         return `<span style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);color:#4ade80;padding:0.25rem 0.65rem;border-radius:999px;font-size:0.78rem;font-weight:700;">✅ ผ่านการอนุมัติ</span>`;
       case 'rejected':
@@ -1699,6 +1703,7 @@
 
   window._openAppModal = (appId) => {
     currentAppId = appId;
+    window._currentJoinApplicationId = appId;
     const app = allApplications.find(a => a.id === appId);
     if (!app) return;
 
@@ -1707,6 +1712,7 @@
     const modal = $('appDetailModal');
     const body = $('modalBodyContent');
     const statusSel = $('modalStatusSelect');
+    if (modal) modal.dataset.applicationId = appId;
 
     const a = app.applicant || {};
     const refNo = app.contractRefNo || `BCX-CTR-2026-${appId.slice(0, 6).toUpperCase()}`;
@@ -1831,6 +1837,14 @@
         notifTitle = `🔍 ใบสมัครตำแหน่ง "${app?.positionName || ''}" กำลังอยู่ระหว่างการพิจารณา`;
         notifBody = note || 'ทีมงานกำลังตรวจสอบคุณสมบัติและข้อมูลใบสมัครของคุณ';
         notifUrl = `${window.location.origin}/join-team`;
+      } else if (status === 'interview') {
+        notifTitle = `🗣️ ใบสมัครตำแหน่ง "${app?.positionName || ''}" รอสัมภาษณ์`;
+        notifBody = note || 'ทีมงานได้เปิดห้องสัมภาษณ์ส่วนตัวให้คุณแล้ว กรุณาเปิดลิงก์จากหน้าใบสมัคร';
+        notifUrl = `${window.location.origin}/join-team/${app?.projectSlug || ''}#jtInterviewPanel`;
+      } else if (status === 'trial') {
+        notifTitle = `🧪 ใบสมัครตำแหน่ง "${app?.positionName || ''}" เข้าสู่ขั้นทดลองงาน`;
+        notifBody = note || 'ทีมงานได้แจ้งรายละเอียดการทดลองงานไว้ในห้องส่วนตัวของคุณ';
+        notifUrl = `${window.location.origin}/join-team/${app?.projectSlug || ''}#jtInterviewPanel`;
       } else if (status === 'submitted') {
         notifTitle = `📩 ได้รับใบสมัครตำแหน่ง "${app?.positionName || ''}" แล้ว`;
         notifBody = note || 'ใบสมัครของคุณเข้าสู่ระบบเรียบร้อยแล้ว';

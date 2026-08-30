@@ -484,6 +484,18 @@
     @keyframes guardSpin {
       to { transform: rotate(360deg); }
     }
+    /* Audit log table: action identifiers are tokens, not prose. Keep them on one line. */
+    .audit-log-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .audit-log-table { width:100%; min-width:820px; table-layout:fixed; }
+    .audit-log-table .audit-action-cell { width:220px; white-space:nowrap; }
+    .audit-log-table .audit-action-badge { display:inline-flex; align-items:center; max-width:100%; white-space:nowrap; word-break:normal; overflow-wrap:normal; }
+    .audit-log-table .audit-admin-cell { width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .audit-log-table .audit-detail-cell { overflow-wrap:anywhere; word-break:normal; }
+    @media (max-width: 768px) {
+      .audit-log-table { min-width:760px; }
+      .audit-log-table .audit-action-cell { width:205px; }
+      .audit-log-table .audit-admin-cell { width:180px; }
+    }
   </style>
 </head>
 <body>
@@ -775,8 +787,8 @@
       </div>
 
       <!-- Audit Logs Table -->
-      <div style="overflow-x: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; background: rgba(0,0,0,0.3);">
-        <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+      <div class="audit-log-table-wrap" style="border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; background: rgba(0,0,0,0.3);">
+        <table class="audit-log-table" style="border-collapse: collapse; font-size: 0.84rem; text-align: left;">
           <thead>
             <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--muted); background: rgba(4, 12, 22, 0.8);">
               <th style="padding: 0.65rem 0.85rem; width: 150px;">เวลา</th>
@@ -998,13 +1010,13 @@
         return `
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background 0.15s;">
             <td style="padding: 0.65rem 0.85rem; color: var(--muted); white-space: nowrap;">${time}</td>
-            <td style="padding: 0.65rem 0.85rem;">
-              <span style="${badgeStyle} padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.74rem; font-weight: 700; font-family: 'Chakra Petch', sans-serif;">
+            <td class="audit-action-cell" style="padding: 0.65rem 0.85rem;">
+              <span class="audit-action-badge" title="${d.action}" style="${badgeStyle} padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.74rem; font-weight: 700; font-family: 'Chakra Petch', sans-serif;">
                 ${d.action}
               </span>
             </td>
-            <td style="padding: 0.65rem 0.85rem; color: #fff; white-space: nowrap;">${d.adminEmail || d.adminDisplayName || 'Dev Admin'}</td>
-            <td style="padding: 0.65rem 0.85rem; color: #cbd5e1;">${d.summary || '-'}</td>
+            <td class="audit-admin-cell" style="padding: 0.65rem 0.85rem; color: #fff;">${d.adminEmail || d.adminDisplayName || 'Dev Admin'}</td>
+            <td class="audit-detail-cell" style="padding: 0.65rem 0.85rem; color: #cbd5e1;">${d.summary || '-'}</td>
           </tr>
         `;
       }).join('');

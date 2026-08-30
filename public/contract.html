@@ -683,13 +683,13 @@
       <div class="ctr-sign-block">
         <!-- Dev Signature -->
         <div class="ctr-sign-col">
-          <div class="sign-space">
+          <div class="sign-space" id="ctrDevSignatureSpace">
             <span style="font-family: 'Brush Script MT', cursive; font-size: 1.6rem; color: #0284c7;">BestCyniX Dev</span>
           </div>
           <div class="sign-line"></div>
-          <div class="sign-name">BestCyniX Dev Representative</div>
-          <div class="sign-role">ผู้แทน / ผู้บริหาร BestCyniX Dev</div>
-          <div class="signed-badge-seal">🛡️ ได้รับการรับรองอย่างเป็นทางการ</div>
+          <div class="sign-name" id="ctrDevSignerName">BestCyniX Dev Representative</div>
+          <div class="sign-role" id="ctrDevSignerRole">ผู้แทน / ผู้บริหาร BestCyniX Dev</div>
+          <div class="signed-badge-seal" id="ctrDevSignerCompany">🛡️ ได้รับการรับรองอย่างเป็นทางการ</div>
         </div>
 
         <!-- Applicant Signature -->
@@ -1140,6 +1140,22 @@
           const fullName = ((a.firstName || '') + ' ' + (a.lastName || '')).trim() || a.nickname || 'ผู้สมัคร';
           $('ctrApplicantPrintName').textContent = '( ' + fullName + ' )';
           $('inputSignerName').value = fullName;
+
+          // Load the central Dev signature. It is optional and never blocks the contract.
+          try {
+            const companyName = app.companyName || app.organization || a.companyName || 'BestCyniX Dev';
+            const sigSnap = await db.collection('devSignatures').where('isDefault', '==', true).limit(1).get();
+            const sigDoc = sigSnap.empty ? null : sigSnap.docs[0].data();
+            const signerName = sigDoc?.signerName || 'นายพงศ์ภรณ์ ทองศิริ';
+            const signerTitle = sigDoc?.signerTitle || 'CEO / Owner';
+            const signerCompany = sigDoc?.companyName || companyName;
+            $('ctrDevSignerName').textContent = signerName;
+            $('ctrDevSignerRole').textContent = signerTitle;
+            $('ctrDevSignerCompany').textContent = '🛡️ ' + signerCompany + ' • ลายเซ็น Dev กลาง';
+            if (sigDoc?.imageUrl) $('ctrDevSignatureSpace').innerHTML = '<img src="' + sigDoc.imageUrl + '" alt="ลายเซ็น Dev" class="applicant-sig-img" />';
+          } catch (signatureError) {
+            console.warn('Central Dev signature unavailable:', signatureError);
+          }
 
           const isSigned = app.contract && app.contract.signed && app.contract.signatureDataUrl;
           if (isSigned) {

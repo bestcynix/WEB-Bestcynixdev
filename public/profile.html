@@ -455,6 +455,52 @@
     }
     .cropper-stage:active { cursor: grabbing; }
     .cropper-stage canvas { width: 100%; height: 100%; }
+
+    /* Workforce, attendance and finance workspace */
+    .profile-workspace { display: grid; gap: 1.4rem; margin: 1.8rem 0; }
+    .workspace-card { background: rgba(10, 24, 42, 0.9); border: 1px solid var(--border); border-radius: 18px; padding: 1.5rem; box-shadow: 0 15px 35px rgba(0,0,0,.3); }
+    .workspace-card h2, .workspace-card h3 { color: #fff; display: flex; align-items: center; gap: .55rem; margin-bottom: .35rem; }
+    .workspace-card h2 { font-size: 1.35rem; }
+    .workspace-card h3 { font-size: 1.08rem; }
+    .workspace-subtitle { color: var(--muted); font-size: .84rem; margin-bottom: 1rem; line-height: 1.6; }
+    .workspace-grid, .workspace-grid-wide { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+    .workspace-toolbar { display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap; margin-bottom: .9rem; }
+    .workspace-toolbar select, .workspace-toolbar input, .workspace-form input, .workspace-form select, .workspace-form textarea { min-width: 0; padding: .65rem .8rem; background: rgba(4,12,22,.82); border: 1px solid rgba(255,255,255,.15); border-radius: 9px; color: #fff; font: inherit; }
+    .workspace-form { display: grid; gap: .75rem; }
+    .workspace-form .form-group { margin: 0; }
+    .workspace-form textarea { resize: vertical; }
+    .workspace-actions { display: flex; gap: .55rem; flex-wrap: wrap; align-items: center; }
+    .workspace-btn { border: 1px solid rgba(50,255,201,.45); background: rgba(50,255,201,.1); color: var(--accent); border-radius: 9px; padding: .55rem .8rem; font: inherit; font-weight: 600; cursor: pointer; }
+    .workspace-btn:hover { background: rgba(50,255,201,.2); }
+    .workspace-btn.secondary { border-color: rgba(148,163,184,.35); color: #d4e5f5; background: rgba(148,163,184,.1); }
+    .workspace-btn.danger { border-color: rgba(248,113,113,.5); color: #fca5a5; background: rgba(248,113,113,.1); }
+    .workspace-btn:disabled { opacity: .55; cursor: wait; }
+    .workspace-stat-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .65rem; margin: .9rem 0; }
+    .workspace-stat { padding: .8rem; border-radius: 11px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+    .workspace-stat strong { display: block; color: var(--accent); font-size: 1.2rem; }
+    .workspace-stat small { color: var(--muted); font-size: .75rem; }
+    .workspace-list { display: grid; gap: .7rem; }
+    .workspace-item { padding: .85rem; border-radius: 12px; background: rgba(3,10,20,.55); border: 1px solid rgba(255,255,255,.08); }
+    .workspace-item-head { display: flex; justify-content: space-between; align-items: flex-start; gap: .7rem; flex-wrap: wrap; }
+    .workspace-item strong { color: #fff; }
+    .workspace-item small, .workspace-item p { color: var(--muted); font-size: .8rem; line-height: 1.55; margin: .22rem 0 0; }
+    .workspace-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: .18rem .55rem; font-size: .72rem; font-weight: 700; border: 1px solid rgba(50,255,201,.4); color: var(--accent); background: rgba(50,255,201,.1); }
+    .workspace-badge.warn { color: #facc15; border-color: rgba(250,204,21,.4); background: rgba(250,204,21,.1); }
+    .workspace-badge.danger { color: #fca5a5; border-color: rgba(248,113,113,.45); background: rgba(248,113,113,.1); }
+    .workspace-table-wrap { overflow-x: auto; }
+    .workspace-table { width: 100%; border-collapse: collapse; min-width: 650px; font-size: .82rem; }
+    .workspace-table th, .workspace-table td { padding: .65rem .55rem; border-bottom: 1px solid rgba(255,255,255,.08); text-align: left; vertical-align: top; }
+    .workspace-table th { color: #b8d3ec; font-weight: 600; white-space: nowrap; }
+    .workspace-table td { color: #e6f3ff; }
+    .workspace-empty { text-align: center; padding: 1.5rem 1rem; color: var(--muted); border: 1px dashed rgba(255,255,255,.14); border-radius: 11px; }
+    .workspace-private-note { color: #fef08a; background: rgba(234,179,8,.08); border: 1px solid rgba(234,179,8,.25); border-radius: 10px; padding: .75rem .85rem; font-size: .78rem; line-height: 1.55; margin-bottom: .9rem; }
+    .workspace-admin { border-color: rgba(168,85,247,.45); background: linear-gradient(135deg, rgba(168,85,247,.08), rgba(50,255,201,.05)); }
+    .workspace-file { color: var(--accent); font-size: .8rem; overflow-wrap: anywhere; }
+    @media (max-width: 700px) {
+      .workspace-grid, .workspace-grid-wide { grid-template-columns: 1fr; }
+      .workspace-card { padding: 1.1rem; }
+      .workspace-stat-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -586,6 +632,145 @@
         </div>
       </div>
     </div>
+
+    <!-- Customer-only profile summary. Workforce data is never loaded for this mode. -->
+    <section class="profile-workspace" id="profileCustomerWorkspace" style="display:none;" aria-label="โปรไฟล์ลูกค้า">
+      <div class="workspace-card">
+        <h2>👤 โปรไฟล์ลูกค้า</h2>
+        <p class="workspace-subtitle">บัญชีนี้ยังไม่มีข้อมูลการเข้าร่วมทีมที่ผ่านการเซ็นเอกสารและยืนยันโดย Dev/CEO</p>
+        <div class="workspace-private-note">ประวัติการทำงาน เอกสารส่วนตัว เวลาเข้างาน และข้อมูลรับเงินจะแสดงเฉพาะบัญชีทีมงานที่มีข้อมูลสัญญาหรือสถานะการทำงานที่ตรวจสอบแล้ว</div>
+        <div class="workspace-actions"><a class="workspace-btn" href="join-team">🚀 สมัครร่วมทีม</a></div>
+      </div>
+    </section>
+
+    <!-- Workforce, attendance, payroll and private documents -->
+    <section class="profile-workspace" id="profileWorkWorkspace" style="display:none;" aria-label="ข้อมูลการทำงานและการเงิน">
+      <div class="workspace-card">
+        <h2>🧭 ประวัติการทำงานและเอกสาร</h2>
+        <p class="workspace-subtitle">สรุปทีม/บริษัท ตำแหน่ง วันที่สมัคร ผลการพิจารณา การเซ็นเอกสาร และสถานะการทำงานของบัญชีนี้</p>
+        <div id="workHistoryList" class="workspace-list"><div class="workspace-empty">กำลังโหลดประวัติการทำงาน...</div></div>
+      </div>
+
+      <div class="workspace-grid-wide">
+        <div class="workspace-card">
+          <div class="workspace-toolbar">
+            <div><h3>⏱️ ลงชื่อทำงาน</h3><p class="workspace-subtitle" style="margin:0;">บันทึกเวลาเข้า/ออกงานและดูสรุปรายเดือน</p></div>
+            <input type="month" id="attendanceMonth" aria-label="เลือกเดือนประวัติการทำงาน" />
+          </div>
+          <div class="workspace-actions">
+            <button type="button" class="workspace-btn" id="btnCheckIn">🟢 ลงชื่อเข้างาน</button>
+            <button type="button" class="workspace-btn secondary" id="btnCheckOut">🔴 ลงชื่อออกงาน</button>
+          </div>
+          <div class="workspace-stat-row">
+            <div class="workspace-stat"><strong id="attendanceDays">0</strong><small>วันที่มีบันทึก</small></div>
+            <div class="workspace-stat"><strong id="attendanceHours">0</strong><small>ชั่วโมงรวม</small></div>
+            <div class="workspace-stat"><strong id="attendanceAverage">0</strong><small>ชั่วโมงเฉลี่ย/วัน</small></div>
+          </div>
+          <div id="attendanceList" class="workspace-list"><div class="workspace-empty">ยังไม่มีรายการเวลา</div></div>
+          <div id="adminAttendanceEditor" class="workspace-form" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.1);">
+            <strong style="color:#fff;">🛠️ แก้ไขเวลาโดย Dev</strong>
+            <input type="hidden" id="attendanceEditId" />
+            <div class="workspace-grid">
+              <div class="form-group"><label class="form-label" for="attendanceEditCheckIn">เวลาเข้า</label><input type="datetime-local" id="attendanceEditCheckIn" /></div>
+              <div class="form-group"><label class="form-label" for="attendanceEditCheckOut">เวลาออก</label><input type="datetime-local" id="attendanceEditCheckOut" /></div>
+            </div>
+            <textarea id="attendanceEditNote" maxlength="500" rows="2" placeholder="หมายเหตุการแก้ไข"></textarea>
+            <div class="workspace-actions"><button type="button" class="workspace-btn" id="btnSaveAttendanceEdit">💾 บันทึกเวลา</button><button type="button" class="workspace-btn secondary" id="btnCancelAttendanceEdit">ยกเลิก</button></div>
+          </div>
+        </div>
+
+        <div class="workspace-card">
+          <h3>💳 ข้อมูลรับเงินของสมาชิก</h3>
+          <p class="workspace-subtitle">ข้อมูลนี้เป็นข้อมูลส่วนตัว เจ้าของบัญชีและ Dev/CEO ที่ได้รับสิทธิ์เท่านั้นจึงจะเห็น</p>
+          <div class="workspace-private-note">ห้ามส่งข้อมูลบัญชีผ่านหน้า Public ระบบจะเก็บไว้ในพื้นที่ที่จำกัดสิทธิ์</div>
+          <form id="paymentProfileForm" class="workspace-form">
+            <div class="form-group"><label class="form-label" for="paymentBankName">ธนาคาร</label><input id="paymentBankName" maxlength="120" placeholder="ชื่อธนาคาร" /></div>
+            <div class="form-group"><label class="form-label" for="paymentAccountName">ชื่อบัญชี</label><input id="paymentAccountName" maxlength="160" placeholder="ชื่อเจ้าของบัญชี" /></div>
+            <div class="form-group"><label class="form-label" for="paymentAccountNumber">เลขบัญชี</label><input id="paymentAccountNumber" maxlength="40" inputmode="numeric" placeholder="เลขบัญชี" /></div>
+            <div class="form-group"><label class="form-label" for="paymentTaxId">เลขประจำตัวผู้เสียภาษี (ถ้ามี)</label><input id="paymentTaxId" maxlength="40" placeholder="ข้อมูลภาษี" /></div>
+            <div class="form-group"><label class="form-label" for="paymentChangeReason">เหตุผลการเพิ่ม/เปลี่ยนข้อมูล</label><textarea id="paymentChangeReason" maxlength="1000" rows="2" placeholder="เช่น ขอเปลี่ยนบัญชีรับเงินเดือน / เพิ่มข้อมูลครั้งแรก"></textarea></div>
+            <div class="workspace-actions"><button type="submit" class="workspace-btn" id="btnSavePaymentProfile">📨 ยื่นคำขอข้อมูลรับเงิน</button></div>
+          </form>
+          <div class="workspace-private-note" style="margin-top:1rem;">ประวัติบัญชีเดิมจะไม่ถูกลบหรือเขียนทับ คำขอใหม่ต้องผ่านการอนุมัติจาก Dev/CEO ก่อนจึงใช้โอนเงินได้</div>
+          <h4 style="margin:1.2rem 0 .65rem;">🧾 ประวัติข้อมูลบัญชีและการเปลี่ยนแปลง</h4>
+          <div id="paymentChangeHistory" class="workspace-list"><div class="workspace-empty">กำลังโหลดประวัติ...</div></div>
+          <div id="paymentChangeAdminRequests" class="workspace-list" style="margin-top:1rem;display:none;"></div>
+        </div>
+      </div>
+
+      <div class="workspace-card">
+        <div class="workspace-toolbar">
+          <div><h3>🧾 ประวัติการจ่ายเงินเดือน/ส่วนแบ่ง</h3><p class="workspace-subtitle" style="margin:0;">ดูยอดก่อนหัก รายการหัก ยอดสุทธิ สถานะ และสลิปของแต่ละเดือน</p></div>
+          <strong id="payrollTotal" style="color:var(--accent);">รวมสุทธิ 0 บาท</strong>
+        </div>
+        <div id="payrollList" class="workspace-list"><div class="workspace-empty">ยังไม่มีรายการจ่ายเงิน</div></div>
+      </div>
+
+      <div class="workspace-card">
+        <h3>🪪 เอกสารยืนยันตัวตนและเอกสารรับเงินส่วนตัว</h3>
+        <p class="workspace-subtitle">อัปโหลดได้เฉพาะในพื้นที่ส่วนตัว ไม่แสดงในหน้า Public และลบเอกสารของตัวเองได้</p>
+        <form id="identityDocumentForm" class="workspace-form">
+          <div class="form-group"><label class="form-label" for="identityDocumentType">ประเภทเอกสาร</label><select id="identityDocumentType"><option value="id-card">สำเนาบัตรประชาชน</option><option value="bankbook">หน้าสมุดบัญชีธนาคาร</option><option value="tax-document">เอกสารภาษี</option><option value="other">เอกสารอื่น ๆ</option></select></div>
+          <div class="form-group"><label class="form-label" for="identityDocumentFile">ไฟล์ภาพหรือ PDF</label><input type="file" id="identityDocumentFile" accept="image/*,application/pdf" required /></div>
+          <div class="workspace-actions"><button type="submit" class="workspace-btn" id="btnUploadIdentity">🔐 อัปโหลดเอกสารส่วนตัว</button></div>
+        </form>
+        <div id="identityDocumentList" class="workspace-list" style="margin-top:1rem;"><div class="workspace-empty">ยังไม่มีเอกสารส่วนตัว</div></div>
+      </div>
+
+      <div class="workspace-card workspace-admin" id="profileAdminWorkspace" style="display:none;">
+        <h2>🛡️ Dev / CEO Control Center</h2>
+        <p class="workspace-subtitle">จัดการสถานะการทำงาน ประกาศแจ้ง และติดตามบัญชีนี้จากหน้า Profile โดยทุกการเปลี่ยนแปลงจะบันทึกผู้ดำเนินการและเวลา</p>
+        <form id="employmentControlForm" class="workspace-form">
+          <div class="workspace-grid">
+            <div class="form-group"><label class="form-label" for="employmentCompanyId">รหัสบริษัท/กลุ่ม</label><input id="employmentCompanyId" maxlength="128" placeholder="เช่น mc-skyline" /></div>
+            <div class="form-group"><label class="form-label" for="employmentCompanyName">ชื่อบริษัท/กลุ่ม</label><input id="employmentCompanyName" maxlength="160" placeholder="ชื่อทีม/บริษัท" /></div>
+            <div class="form-group"><label class="form-label" for="employmentTeamName">ชื่อทีม</label><input id="employmentTeamName" maxlength="160" placeholder="ชื่อทีมย่อย" /></div>
+            <div class="form-group"><label class="form-label" for="employmentRole">ตำแหน่ง/ยศ</label><input id="employmentRole" maxlength="120" placeholder="Developer / Admin / Staff" /></div>
+            <div class="form-group"><label class="form-label" for="employmentStatus">สถานะ</label><select id="employmentStatus"><option value="active">อยู่ในทีม</option><option value="suspended">พักงาน</option><option value="exited">พ้นสภาพ</option><option value="terminated">เลิกสัญญา/ไล่ออก</option></select></div>
+            <div class="form-group"><label class="form-label" for="employmentReason">เหตุผล/ประกาศ</label><textarea id="employmentReason" maxlength="1000" rows="2" placeholder="เหตุผลการเปลี่ยนสถานะ"></textarea></div>
+          </div>
+          <div class="workspace-actions"><button type="submit" class="workspace-btn" id="btnSaveEmployment">💾 บันทึกสถานะและส่งประกาศ</button></div>
+        </form>
+
+        <hr style="border:0;border-top:1px solid rgba(255,255,255,.1);margin:1.3rem 0;" />
+        <h3>💰 บันทึกรายรับรายจ่าย</h3>
+        <form id="financeEntryForm" class="workspace-form">
+          <div class="workspace-grid">
+            <div class="form-group"><label class="form-label" for="financeType">ประเภท</label><select id="financeType"><option value="income">รายรับ</option><option value="expense">รายจ่าย/ต้นทุน</option></select></div>
+            <div class="form-group"><label class="form-label" for="financeAmount">จำนวนเงิน (บาท)</label><input id="financeAmount" type="number" min="0" max="100000000" step="0.01" required /></div>
+            <div class="form-group"><label class="form-label" for="financeCategory">หมวดหมู่</label><input id="financeCategory" maxlength="120" placeholder="ค่า VPS / โดเมน / งานบริการ" required /></div>
+            <div class="form-group"><label class="form-label" for="financeCompany">บริษัท/กลุ่ม</label><input id="financeCompany" maxlength="160" placeholder="ชื่อบริษัท/กลุ่ม" /></div>
+            <div class="form-group"><label class="form-label" for="financePeriod">เดือนบัญชี</label><input id="financePeriod" type="month" required /></div>
+            <div class="form-group"><label class="form-label" for="financeNote">รายละเอียด</label><textarea id="financeNote" maxlength="1000" rows="2" placeholder="รายละเอียดรายการ"></textarea></div>
+            <div class="form-group"><label class="form-label" for="financeReceiptFile">สลิป/เอกสารประกอบ (ถ้ามี)</label><input id="financeReceiptFile" type="file" accept="image/*,application/pdf" /></div>
+          </div>
+          <div class="workspace-actions"><button type="submit" class="workspace-btn" id="btnSaveFinance">➕ เพิ่มรายการบัญชี</button></div>
+        </form>
+        <div class="workspace-stat-row">
+          <div class="workspace-stat"><strong id="financeIncome">0</strong><small>รายรับรวม (บาท)</small></div>
+          <div class="workspace-stat"><strong id="financeExpense">0</strong><small>ต้นทุน/รายจ่ายรวม (บาท)</small></div>
+          <div class="workspace-stat"><strong id="financeProfit">0</strong><small>กำไรคงเหลือ (บาท)</small></div>
+        </div>
+        <div id="financeEntryList" class="workspace-list"><div class="workspace-empty">ยังไม่มีรายการบัญชี</div></div>
+
+        <hr style="border:0;border-top:1px solid rgba(255,255,255,.1);margin:1.3rem 0;" />
+        <h3>🧮 คำนวณและบันทึกเงินเดือน/ส่วนแบ่ง</h3>
+        <form id="payrollAdminForm" class="workspace-form">
+          <div class="workspace-grid">
+            <div class="form-group"><label class="form-label" for="payrollPeriod">เดือนจ่าย</label><input id="payrollPeriod" type="month" required /></div>
+            <div class="form-group"><label class="form-label" for="payrollCompany">บริษัท/กลุ่ม</label><input id="payrollCompany" maxlength="160" placeholder="ชื่อบริษัท/กลุ่ม" /></div>
+            <div class="form-group"><label class="form-label" for="payrollTeam">ทีม</label><input id="payrollTeam" maxlength="160" placeholder="ทีมย่อย" /></div>
+            <div class="form-group"><label class="form-label" for="payrollBase">เงินพื้นฐาน/ส่วนแบ่งก่อนหัก</label><input id="payrollBase" type="number" min="0" max="100000000" step="0.01" required /></div>
+            <div class="form-group"><label class="form-label" for="payrollBonus">โบนัส/เพิ่มเติม</label><input id="payrollBonus" type="number" min="0" max="100000000" step="0.01" value="0" /></div>
+            <div class="form-group"><label class="form-label" for="payrollDeductions">หักต้นทุน/ภาษี/รายการหัก</label><input id="payrollDeductions" type="number" min="0" max="100000000" step="0.01" value="0" /></div>
+            <div class="form-group"><label class="form-label" for="payrollStatus">สถานะการจ่าย</label><select id="payrollStatus"><option value="draft">ร่าง</option><option value="approved">อนุมัติยอด</option><option value="paid">โอนแล้ว</option></select></div>
+            <div class="form-group"><label class="form-label" for="payrollSlipFile">สลิปเงินเดือน/หลักฐานการโอน</label><input id="payrollSlipFile" type="file" accept="image/*,application/pdf" /></div>
+          </div>
+          <textarea id="payrollNote" maxlength="1000" rows="2" placeholder="หมายเหตุ เช่น หักค่า VPS/โดเมน หรือรายละเอียดตามสัญญา"></textarea>
+          <div class="workspace-actions"><button type="submit" class="workspace-btn" id="btnSavePayroll">💾 บันทึกรายการจ่ายเงิน</button></div>
+        </form>
+      </div>
+    </section>
 
     <!-- Settings Forms Grid -->
     <div class="profile-cards-grid">
@@ -847,7 +1032,7 @@
 
       if (!isViewingSelf && !isDevAdmin) {
         // Normal user attempting to inspect another UID -> Redirect to 403
-        window.location.replace("http-errors?code=403&msg=ForbiddenUserInspection");
+        window.location.replace("http-error?status=403&detail=บัญชีนี้ไม่มีสิทธิ์เข้าถึงข้อมูลส่วนตัวของผู้ใช้อื่น");
         return;
       }
 
@@ -1499,5 +1684,6 @@
   </script>
   <script src="js/shared-ui.js?v=20260829_1"></script>
   <script src="js/notifications.js?v=20260826_115"></script>
+  <script src="js/profile-workforce.js?v=20260830_3"></script>
 </body>
 </html>

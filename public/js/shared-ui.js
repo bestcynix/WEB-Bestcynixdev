@@ -862,6 +862,37 @@ window.bringToFront = function (el) {
     }
   };
 
+  // Load Vercel telemetry only after the visitor has opted into analytics.
+  // The scripts are intentionally limited to the Vercel deployment host so
+  // the Firebase-hosted copy does not request Vercel-only assets.
+  const syncVercelAnalytics = () => {
+    const isVercelHost = window.location.hostname.endsWith('.vercel.app');
+    let consent = '';
+    let analyticsAllowed = false;
+    try {
+      consent = localStorage.getItem('bcx_pdpa_consent') || '';
+      analyticsAllowed = localStorage.getItem('bcx_cookie_analytics') !== 'false';
+    } catch (e) {}
+
+    const scripts = [
+      { id: 'vercel-web-analytics-script', src: '/_vercel/insights/script.js' },
+      { id: 'vercel-speed-insights-script', src: '/_vercel/speed-insights/script.js' }
+    ];
+    if (!isVercelHost || !consent || !analyticsAllowed) {
+      scripts.forEach(({ id }) => document.getElementById(id)?.remove());
+      return;
+    }
+    scripts.forEach(({ id, src }) => {
+      if (document.getElementById(id)) return;
+      const script = document.createElement('script');
+      script.id = id;
+      script.defer = true;
+      script.src = src;
+      script.onerror = () => script.remove();
+      document.head.appendChild(script);
+    });
+  };
+
   const mountCookieModal = () => {
     let modalDiv = document.getElementById('cookiePreferencesModal');
     if (!modalDiv) {
@@ -959,6 +990,7 @@ window.bringToFront = function (el) {
         banner.classList.remove('is-visible');
         banner.classList.remove('is-hidden-by-modal');
       }
+      syncVercelAnalytics();
     };
 
     document.getElementById('btnModalAcceptAll')?.addEventListener('click', () => {
@@ -1016,17 +1048,21 @@ window.bringToFront = function (el) {
     document.getElementById('btnPdpaAccept')?.addEventListener('click', () => {
       try {
         localStorage.setItem('bcx_pdpa_consent', 'all');
+        localStorage.setItem('bcx_cookie_analytics', 'true');
         localStorage.setItem('bcx_pdpa_time', new Date().toISOString());
       } catch (e) {}
       pdpaDiv.classList.remove('is-visible');
+      syncVercelAnalytics();
     });
 
     document.getElementById('btnPdpaReject')?.addEventListener('click', () => {
       try {
         localStorage.setItem('bcx_pdpa_consent', 'essential');
+        localStorage.setItem('bcx_cookie_analytics', 'false');
         localStorage.setItem('bcx_pdpa_time', new Date().toISOString());
       } catch (e) {}
       pdpaDiv.classList.remove('is-visible');
+      syncVercelAnalytics();
     });
   };
 
@@ -1146,6 +1182,7 @@ window.bringToFront = function (el) {
     mountSharedFooter();
     mountCookieModal();
     mountPdpaBanner();
+    syncVercelAnalytics();
     updateAllCopyrightYears();
     registerServiceWorker();
     syncGlobalCommunityLinks();

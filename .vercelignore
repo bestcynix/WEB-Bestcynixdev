@@ -1,0 +1,21 @@
+# Keep repository-only instructions, source rules, and local tooling out of Vercel.
+.git/
+.github/
+.agents/
+.claude/
+.windsurf/
+functions/
+supabase/
+docs/
+*.md
+*.rules
+firebase.json
+firestore.indexes.json
+skills-lock.json
+.env
+.env.*
+!.env.example
+
+# This public promotional video exceeds Vercel's per-file upload limit.
+# It remains served from the existing Firebase Hosting asset URL.
+public/assets/video/

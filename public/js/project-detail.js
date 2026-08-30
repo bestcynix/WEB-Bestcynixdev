@@ -36,6 +36,7 @@
   const projCoverBanner = document.getElementById('projCoverBanner');
   const projGalleryBox = document.getElementById('projGalleryBox');
   const projGalleryGrid = document.getElementById('projGalleryGrid');
+  const mcSkylineProjectPromo = document.getElementById('mcSkylineProjectPromo');
 
   let currentProjectData = null;
   let isDevAdmin = false;
@@ -139,6 +140,13 @@
     if (projPeriodBadge) projPeriodBadge.textContent = proj.period || '2026';
     if (projDesc) projDesc.textContent = proj.description || '';
     if (projDetails) projDetails.textContent = proj.details || proj.description || 'ไม่มีข้อมูลเพิ่มเติม';
+
+    // Keep the Mc-Skyline promotional media scoped to that project only.
+    if (mcSkylineProjectPromo) {
+      const projectKey = `${proj.id || ''} ${proj.title || ''} ${proj.url || ''}`.toLowerCase();
+      const isMcSkyline = projectKey.includes('mc-skyline') || projectKey.includes('mc-skyline.online');
+      mcSkylineProjectPromo.style.display = isMcSkyline ? 'block' : 'none';
+    }
 
     // Lightbox Popup Viewer Elements
     const lightboxModal = document.getElementById('lightboxModal');
