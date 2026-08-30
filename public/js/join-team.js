@@ -41,6 +41,13 @@
   ];
 
   const ALL_DAYS = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์', 'ทุกวัน'];
+  const asList = (value) => Array.isArray(value)
+    ? value.map((item) => String(item || '').trim()).filter(Boolean)
+    : String(value || '').split(/[\n,]/).map((item) => item.trim()).filter(Boolean);
+  const renderList = (value, empty = 'ยังไม่ได้ระบุ') => {
+    const items = asList(value);
+    return items.length ? `<ul class="jt-detail-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : `<p class="jt-detail-empty">${empty}</p>`;
+  };
 
   const MC_SKYLINE_DEFAULT = {
     formId: 'mc-skyline',
@@ -51,15 +58,22 @@
     communityName: 'Mc-Skyline.online',
     communityUrl: 'https://discord.gg/5eNFMMk3ak',
     websiteUrl: 'https://mc-skyline.online',
+    projectImage: 'assets/photo/mc-skyline.png',
+    projectBanner: 'assets/photo/mc-skyline-recruitment.png',
+    videoUrl: 'https://www.youtube.com/embed/gfn-GvBM9rs?si=kvbYqxLpHb_gIqI1',
+    projectIntro: 'จากตำนาน MC-Slashz, Mc-ctc และ Mc-Kileema สู่เซิร์ฟเวอร์ Minecraft ดินแดนลอยฟ้าที่รวม Survival, MMO RPG, Skyblock, Oneblock และ Acid Island ไว้ในโลกเดียว',
+    highlights: ['ระบบเควสต์ เนื้อเรื่อง และมอนสเตอร์บอส', 'ระบบอุณหภูมิและฤดูกาลสำหรับการปลูกพืช', 'ระบบเวทมนตร์ มานา อาชีพ ตลาดโลก Guild และแต่งงาน'],
+    modes: ['Survival', 'Survival MMO RPG', 'Skyblock', 'Oneblock', 'Acid Island'],
+    stack: ['Java', 'Paper / Spigot', 'Bukkit API', 'MySQL', 'Linux', 'Docker', 'Git'],
     ageRange: {},
     availableDays: ALL_DAYS,
     positions: [
-      { id: 'mc-dev', name: 'Developer', description: 'พัฒนาเว็บ บอท ปลั๊กอิน หรือระบบหลังบ้าน', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-builder', name: 'Builder', description: 'ออกแบบและสร้างแผนที่/สิ่งปลูกสร้างในเซิร์ฟเวอร์', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-systems', name: 'System / Item / Quest', description: 'ตั้งค่าระบบ ไอเทม เควสต์ และระบบภายในเกม', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-modeler', name: 'Modeler', description: 'สร้างโมเดลและองค์ประกอบ 3D สำหรับเกม', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-resource-pack', name: 'Resource Pack', description: 'จัดทำพื้นผิว เสียง และ resource pack', maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-other-staff', name: 'ทีมงานอื่น ๆ ตามความถนัด', description: 'ตำแหน่งเพิ่มเติมสำหรับผู้มีความสามารถเฉพาะด้าน', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
+      { id: 'mc-dev', name: 'Developer / DevMC', description: 'เขียนและแก้ไขโค้ดปลั๊กอิน ระบบเกม เว็บ และ API ของเซิร์ฟเวอร์', stack: ['Java', 'Paper / Spigot API', 'Bukkit API', 'Maven / Gradle', 'MySQL', 'Git'], responsibilities: ['พัฒนาปลั๊กอินและระบบเกมตามสเปก', 'แก้บั๊ก ปรับประสิทธิภาพ และดูแลความปลอดภัย', 'เชื่อมต่อเว็บ บอท ฐานข้อมูล และระบบหลังบ้าน'], requirements: ['เขียน Java ได้และอ่านโค้ดผู้อื่นได้', 'เข้าใจ event, command, permission และฐานข้อมูล', 'ทำงานผ่าน Git และเขียนคำอธิบายการติดตั้งได้'], preferred: ['เคยใช้ Paper, Spigot, PlaceholderAPI, Vault หรือ LuckPerms', 'มีผลงานปลั๊กอินหรือระบบ Minecraft ให้ทดลอง'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-builder', name: 'Builder', description: 'ออกแบบและสร้างแผนที่ เมือง ดันเจี้ยน และสิ่งปลูกสร้างในเซิร์ฟเวอร์', stack: ['WorldEdit', 'WorldPainter', 'VoxelSniper', 'FAWE', 'Minecraft Building'], responsibilities: ['สร้างพื้นที่ตามธีมและขนาดที่กำหนด', 'ทำงานร่วมกับทีม Quest, Item และ Model', 'ปรับแก้พื้นที่จาก feedback และรักษามาตรฐานงาน'], requirements: ['มีพื้นฐานการสร้างสไตล์ Minecraft และส่งภาพผลงานได้', 'ทำงานตามแบบและกำหนดเวลาได้'], preferred: ['ใช้ WorldEdit/FAWE หรือ WorldPainter เป็น', 'มี portfolio เมือง แผนที่ หรือดันเจี้ยน'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-systems', name: 'System / Item / Quest', description: 'วางระบบ ไอเทม เควสต์ เศรษฐกิจ และคอนเทนต์ภายในเกม', stack: ['MythicMobs', 'ItemsAdder / Oraxen', 'BetonQuest', 'MMOCore', 'PlaceholderAPI', 'YAML'], responsibilities: ['ออกแบบ flow เควสต์ ไอเทม มอนสเตอร์ และรางวัล', 'ตั้งค่า config และทดสอบความสมดุล', 'เขียนเอกสารให้ทีม Dev นำไปต่อยอดได้'], requirements: ['คิดระบบเป็นขั้นตอนและทดสอบ edge case ได้', 'อ่านและแก้ YAML/config ได้'], preferred: ['เคยตั้งค่า MythicMobs, ItemsAdder, Oraxen, MMOItems หรือ Quest plugin'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-modeler', name: 'Modeler', description: 'สร้างโมเดล 3D มอนสเตอร์ ไอเทม และองค์ประกอบสำหรับเกม', stack: ['Blockbench', 'ModelEngine', 'ItemsAdder', 'Oraxen', 'Resource Pack'], responsibilities: ['ทำโมเดลตาม concept และข้อจำกัดของ Minecraft', 'ส่งออกไฟล์พร้อม texture และ metadata', 'ปรับโมเดลให้เหมาะกับ performance'], requirements: ['ใช้ Blockbench ได้และมีตัวอย่างผลงาน', 'เข้าใจ texture และ resource pack เบื้องต้น'], preferred: ['เคยทำ ModelEngine, ItemsAdder หรือ Oraxen'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-resource-pack', name: 'Resource Pack', description: 'จัดทำพื้นผิว เสียง UI และ resource pack ให้เป็นธีมเดียวกัน', stack: ['Blockbench', 'Photoshop / Photopea', 'Aseprite', 'Minecraft Resource Pack', 'Git'], responsibilities: ['วาง art direction และโครงสร้าง resource pack', 'จัดการ texture, font, sound และ namespace', 'ทดสอบการโหลด pack ในหลายอุปกรณ์'], requirements: ['มีพื้นฐานงานภาพหรือเสียงและส่งไฟล์เป็นระบบได้'], preferred: ['เคยทำ pack สำหรับ ItemsAdder, Oraxen หรือ custom model data'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
+      { id: 'mc-other-staff', name: 'ทีมงานอื่น ๆ ตามความถนัด', description: 'ตำแหน่งเพิ่มเติมสำหรับผู้มีความสามารถเฉพาะด้าน เช่น Content, QA, Support หรือ Admin', stack: ['Discord', 'Notion / Docs', 'Git', 'Minecraft'], responsibilities: ['รับผิดชอบงานตามขอบเขตที่ตกลงกับหัวหน้าทีม', 'รายงานความคืบหน้าและปัญหาอย่างเป็นระบบ'], requirements: ['มีเวลาว่างและสื่อสารกับทีมได้สม่ำเสมอ'], preferred: ['มีผลงานหรือประสบการณ์ในตำแหน่งที่สมัคร'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
     ],
     benefits: [
       { icon: '🤝', title: 'ทำงานเป็นทีม', desc: 'ร่วมวางระบบและสร้างผลงานจริงกับทีม Mc-Skyline.online' },
@@ -74,6 +88,8 @@
     title: 'ร่วมพัฒนาโปรเจกต์กับทีม',
     subtitle: 'เลือกโปรเจกต์และตำแหน่งที่สนใจ แล้วกรอกข้อมูลเพื่อให้ทีมติดต่อกลับ',
     communityName: 'BestCyniX Dev', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app',
+    projectImage: 'assets/photo/bcxlogo2.png',
+    stack: ['Git', 'Discord', 'Documentation', 'Team Collaboration'],
     ageRange: {}, availableDays: ALL_DAYS,
     positions: [
       { id: 'general-dev', name: 'Developer', description: 'พัฒนาเว็บ บอท ระบบหลังบ้าน และเครื่องมือของทีม', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
@@ -99,18 +115,18 @@
 
   const PROJECT_CONFIGS = {
     'mc-skyline': MC_SKYLINE_DEFAULT,
-    'discord-bot': { ...GENERAL_DEFAULT, formId: 'discord-bot', projectSlug: 'discord-bot', title: 'รับสมัครทีม Discord Bot', subtitle: 'ร่วมพัฒนาบอท Discord ระบบอัตโนมัติ และเครื่องมือดูแลชุมชน', communityName: 'Discord Bot', positions: [
-      { id: 'bot-dev', name: 'Dev', description: 'พัฒนาบอท Discord, API และระบบอัตโนมัติ', maxSlots: 2, active: true, ageRule: 'unlimited' },
-      { id: 'bot-admin', name: 'Admin', description: 'ดูแลการตั้งค่า บริหารระบบ และจัดการชุมชน', maxSlots: 5, active: true, ageRule: 'unlimited' },
-      { id: 'bot-staff', name: 'Staff', description: 'ช่วยดูแลสมาชิกและงานประจำวันของชุมชน', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
+    'discord-bot': { ...GENERAL_DEFAULT, formId: 'discord-bot', projectSlug: 'discord-bot', title: 'รับสมัครทีม Discord Bot', subtitle: 'ร่วมพัฒนาบอท Discord ระบบอัตโนมัติ และเครื่องมือดูแลชุมชน', communityName: 'Discord Bot', projectImage: 'assets/photo/skylinebot-discord.png', stack: ['Node.js', 'JavaScript / TypeScript', 'discord.js', 'REST API', 'MongoDB / PostgreSQL', 'Docker', 'Git'], positions: [
+      { id: 'bot-dev', name: 'Bot Developer', description: 'พัฒนาบอท Discord, API และระบบอัตโนมัติ', stack: ['Node.js', 'TypeScript', 'discord.js', 'REST API', 'MongoDB'], responsibilities: ['ออกแบบ command, event และระบบ permission', 'เชื่อม API ภายนอกและฐานข้อมูล', 'ดูแล logging, error handling และ deployment'], requirements: ['เขียน JavaScript/TypeScript ได้', 'เข้าใจ async/await, API และ Git'], preferred: ['เคยทำบอท Discord ที่ใช้งานจริง', 'ใช้ Docker หรือเขียน test ได้'], maxSlots: 2, active: true, ageRule: 'unlimited' },
+      { id: 'bot-admin', name: 'Bot Admin / Config', description: 'ดูแลการตั้งค่า บริหารระบบ และจัดการชุมชน', stack: ['Discord', 'discord.js Config', 'YAML / JSON', 'Moderation Tools'], responsibilities: ['ตั้งค่า command, role, channel และ automation', 'ตรวจสอบ log และประสานงานเมื่อเกิดปัญหา', 'เขียนคู่มือให้ทีมใช้งานระบบได้'], requirements: ['เข้าใจโครงสร้าง Discord และ permission', 'สื่อสารและแก้ปัญหาเฉพาะหน้าได้'], preferred: ['เคยดูแลบอทหรือเซิร์ฟเวอร์ขนาดใหญ่'], maxSlots: 5, active: true, ageRule: 'unlimited' },
+      { id: 'bot-staff', name: 'Bot Support / Staff', description: 'ช่วยดูแลสมาชิกและงานประจำวันของชุมชน', stack: ['Discord', 'Ticket System', 'Google Docs / Notion'], responsibilities: ['ตอบคำถามและจัดการ ticket', 'รวบรวม bug report และส่งต่อ Dev', 'ช่วยตรวจสอบกิจกรรมของบอท'], requirements: ['สุภาพ รับผิดชอบ และออนไลน์ตามเวลาที่ตกลง'], preferred: ['มีประสบการณ์ดูแล community'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
     ], customQuestions: [] },
-    'discord-server': { ...GENERAL_DEFAULT, formId: 'discord-server', projectSlug: 'discord-server', title: 'รับสมัครทีม Discord Server', subtitle: 'ร่วมดูแลและพัฒนาเซิร์ฟเวอร์ Discord ให้เป็นระเบียบและปลอดภัย', communityName: 'Discord Server', positions: [
-      { id: 'server-dev', name: 'Dev', description: 'พัฒนาบอทและระบบเชื่อมต่อสำหรับเซิร์ฟเวอร์', maxSlots: 3, active: true, ageRule: 'unlimited' },
-      { id: 'server-admin', name: 'Admin', description: 'ดูแลกฎ การตั้งค่า สิทธิ์ และการจัดการเซิร์ฟเวอร์', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
-      { id: 'server-staff', name: 'Staff', description: 'ช่วยดูแลสมาชิก ตอบคำถาม และจัดกิจกรรม', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
+    'discord-server': { ...GENERAL_DEFAULT, formId: 'discord-server', projectSlug: 'discord-server', title: 'รับสมัครทีม Discord Server', subtitle: 'ร่วมดูแลและพัฒนาเซิร์ฟเวอร์ Discord ให้เป็นระเบียบและปลอดภัย', communityName: 'Discord Server', projectImage: 'assets/photo/ServerMinecraft2021.png', stack: ['Discord', 'Roles & Permissions', 'AutoMod', 'Bots', 'Community Management'], positions: [
+      { id: 'server-dev', name: 'Discord Systems Dev', description: 'พัฒนาบอทและระบบเชื่อมต่อสำหรับเซิร์ฟเวอร์', stack: ['discord.js', 'Node.js', 'Webhooks', 'Moderation API'], responsibilities: ['สร้างระบบต้อนรับ ticket log และ automation', 'แก้ไข permission และเชื่อมเว็บกับ Discord'], requirements: ['มีพื้นฐาน Node.js/JavaScript และ Discord API'], preferred: ['เคยดูแลบอทหรือระบบ moderation'], maxSlots: 3, active: true, ageRule: 'unlimited' },
+      { id: 'server-admin', name: 'Server Admin', description: 'ดูแลกฎ การตั้งค่า สิทธิ์ และการจัดการเซิร์ฟเวอร์', stack: ['Discord', 'Roles & Permissions', 'AutoMod', 'Server Insights'], responsibilities: ['วางโครงสร้าง role/channel และ security', 'ดูแลกฎ การประกาศ และการจัดการเหตุการณ์'], requirements: ['เข้าใจ permission hierarchy และรักษาความลับข้อมูลได้'], preferred: ['เคยดูแลเซิร์ฟเวอร์ community'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
+      { id: 'server-staff', name: 'Community Staff', description: 'ช่วยดูแลสมาชิก ตอบคำถาม และจัดกิจกรรม', stack: ['Discord', 'Ticket System', 'Event Tools', 'Google Docs'], responsibilities: ['ต้อนรับสมาชิก ดูแล ticket และรายงานปัญหา', 'ช่วยจัดกิจกรรมตามแผนของทีม'], requirements: ['มีมนุษยสัมพันธ์ดี ใจเย็น และทำงานเป็นทีม'], preferred: ['มีประสบการณ์ community moderation'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
     ], customQuestions: [] },
-    'dev-web': { ...GENERAL_DEFAULT, formId: 'dev-web', projectSlug: 'dev-web', title: 'รับสมัครทีม Web Development', subtitle: 'ร่วมสร้างเว็บไซต์ เว็บแอป และระบบหลังบ้านกับ BestCyniX Dev', communityName: 'Web Development', positions: [{ id: 'web-dev', name: 'Dev', description: 'พัฒนา Frontend, Backend, Full-stack และระบบคลาวด์', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }], customQuestions: [] },
-    'teamdev': { ...GENERAL_DEFAULT, formId: 'teamdev', projectSlug: 'teamdev', title: 'รับสมัครทีมพัฒนา BestCyniX Dev', subtitle: 'เปิดรับตำแหน่งตามความสามารถ ไม่จำกัดจำนวน พร้อมระบุความถนัดและตำแหน่งที่ต้องการรับผิดชอบ 1–3', communityName: 'ทีมพัฒนา BestCyniX Dev', positions: [{ id: 'teamdev-specialist', name: 'ทีมพัฒนาตามความสามารถ', description: 'ระบุความสามารถเด่นและตำแหน่งที่ต้องการรับผิดชอบ 1–3 ในคำถามเพิ่มเติม', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }], customQuestions: GENERAL_DEFAULT.customQuestions.slice(1) }
+    'dev-web': { ...GENERAL_DEFAULT, formId: 'dev-web', projectSlug: 'dev-web', title: 'รับสมัครทีม Web Development', subtitle: 'ร่วมสร้างเว็บไซต์ เว็บแอป และระบบหลังบ้านกับ BestCyniX Dev', communityName: 'Web Development', projectImage: 'assets/photo/bestcynixprodev.png', stack: ['HTML', 'CSS', 'JavaScript / TypeScript', 'React / Vue', 'Node.js', 'Firebase', 'Git'], positions: [{ id: 'web-dev', name: 'Web Developer / Full-stack', description: 'พัฒนา Frontend, Backend, Full-stack และระบบคลาวด์', stack: ['HTML/CSS', 'JavaScript / TypeScript', 'React / Vue', 'Node.js', 'Firebase', 'Git'], responsibilities: ['พัฒนา UX/UI ให้ responsive และเข้าถึงได้', 'สร้าง API, authentication และฐานข้อมูล', 'ทดสอบ แก้บั๊ก และ deploy ระบบจริง'], requirements: ['มีพื้นฐาน HTML, CSS, JavaScript และ Git', 'อ่าน requirement และทำงานผ่าน issue/task ได้'], preferred: ['React/Vue, Node.js, Firebase, testing หรือ CI/CD'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }], customQuestions: [] },
+    'teamdev': { ...GENERAL_DEFAULT, formId: 'teamdev', projectSlug: 'teamdev', title: 'รับสมัครทีมพัฒนา BestCyniX Dev', subtitle: 'เปิดรับตำแหน่งตามความสามารถ ไม่จำกัดจำนวน พร้อมระบุความถนัดและตำแหน่งที่ต้องการรับผิดชอบ 1–3', communityName: 'ทีมพัฒนา BestCyniX Dev', projectImage: 'assets/photo/bcxlogo2.png', stack: ['Git', 'Discord', 'Documentation', 'Project Management'], positions: [{ id: 'teamdev-specialist', name: 'ทีมพัฒนาตามความสามารถ', description: 'ระบุความสามารถเด่นและตำแหน่งที่ต้องการรับผิดชอบ 1–3 ในคำถามเพิ่มเติม', stack: ['ระบุ Stack ตามตำแหน่งที่สมัคร'], responsibilities: ['รับผิดชอบงานตามขอบเขตที่ตกลง', 'รายงานความคืบหน้าและส่งมอบงานตามรอบ', 'ช่วย review และพัฒนามาตรฐานของทีม'], requirements: ['มีความรับผิดชอบ สื่อสารชัดเจน และพร้อมเรียนรู้'], preferred: ['มี portfolio หรือผลงานที่ตรวจสอบได้'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }], customQuestions: GENERAL_DEFAULT.customQuestions.slice(1) }
   };
 
   const getRouteDefault = () => PROJECT_CONFIGS[ROUTE_PROJECT_SLUG] || GENERAL_DEFAULT;
@@ -129,7 +145,9 @@
       // Do not let an old generic/default CMS title leak into the project page.
       title: registry.title || (source.title && source.title !== 'สมัครร่วมทีม BestCyniX Dev' ? source.title : routeDefault.title),
       subtitle: source.subtitle && source.subtitle !== 'เป็นส่วนหนึ่งในการพัฒนาโปรเจกต์สุดเจ๋งกับ BestCyniX Dev' ? source.subtitle : routeDefault.subtitle,
-      positions: legacyGenericDefault ? routeDefault.positions : (Array.isArray(source.positions) && source.positions.length ? source.positions : routeDefault.positions),
+      positions: legacyGenericDefault ? routeDefault.positions : (Array.isArray(source.positions) && source.positions.length
+        ? source.positions.map((position) => ({ ...(routeDefault.positions || []).find((fallback) => fallback.id === position.id || fallback.name === position.name), ...position }))
+        : routeDefault.positions),
       benefits: legacyGenericDefault ? routeDefault.benefits : (Array.isArray(source.benefits) && source.benefits.length ? source.benefits : routeDefault.benefits),
       customQuestions: legacyGenericDefault ? routeDefault.customQuestions : (Array.isArray(source.customQuestions) ? source.customQuestions : routeDefault.customQuestions),
       availableDays: Array.isArray(source.availableDays) && source.availableDays.length ? source.availableDays : routeDefault.availableDays,
@@ -200,7 +218,7 @@
     const search = ($('jtRoleSearch')?.value || '').trim().toLowerCase();
     const filter = $('jtRoleStatusFilter')?.value || 'all';
     const projectRows = getProjectRows(cfg);
-    const roles = projectRows.flatMap(({ slug, project, positions, isOpen }) => positions.filter(p => p.active !== false).map((p) => ({ ...p, projectSlug: slug, projectName: project.title || project.communityName || slug, projectSummary: project.subtitle || project.summary || '', communityName: project.communityName || '', projectOpen: isOpen }))).filter((p) => {
+    const roles = projectRows.flatMap(({ slug, project, positions, isOpen }) => positions.filter(p => p.active !== false).map((p) => ({ ...p, projectSlug: slug, projectName: project.title || project.communityName || slug, projectSummary: project.subtitle || project.summary || '', projectIntro: project.projectIntro || '', projectImage: project.projectImage || '', projectStack: project.stack || [], communityName: project.communityName || '', projectOpen: isOpen }))).filter((p) => {
       const approved = Number(p.approvedCount || 0);
       const unlimited = !p.maxSlots || p.maxSlots <= 0 || p.unlimited === true;
       const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
@@ -226,11 +244,43 @@
       const left = p.slotsLeft !== undefined ? Number(p.slotsLeft) : (unlimited ? 9999 : Math.max(0, Number(p.maxSlots) - approved));
       const status = !p.projectOpen ? '🔴 ปิดรับสมัคร' : (unlimited || left > 0 ? '🟢 ยังเปิดรับ' : '🔴 เต็มแล้ว');
       const quota = unlimited ? 'ไม่จำกัดจำนวน' : `ว่าง ${left}/${p.maxSlots} คน`;
-      return `<article class="jt-role-card"><h3>${escapeHtml(p.name || 'ตำแหน่งทีมงาน')}</h3><p>${escapeHtml(p.description || 'ร่วมพัฒนาโปรเจกต์กับทีม')}</p><div class="jt-role-meta"><span>${status}</span><span>👥 ${quota}</span><span>🎯 ไม่จำกัดอายุ</span></div></article>`;
+      const stack = asList(p.stack || p.projectStack);
+      return `<article class="jt-role-card"><div class="jt-role-card-head"><h3>${escapeHtml(p.name || 'ตำแหน่งทีมงาน')}</h3><span class="jt-role-status">${status}</span></div><p>${escapeHtml(p.description || 'ร่วมพัฒนาโปรเจกต์กับทีม')}</p><div class="jt-role-meta"><span>👥 ${quota}</span><span>🎯 ${escapeHtml(getPositionAgeRequirementText(p).replace('🎯 ', '') || 'ไม่จำกัดอายุ')}</span></div>${stack.length ? `<div class="jt-detail-block"><h4>🧰 Stack ที่ใช้</h4><div class="jt-stack-list">${stack.map((item) => `<span>${escapeHtml(item)}</span>`).join('')}</div></div>` : ''}${p.responsibilities || p.requirements || p.preferred ? `<div class="jt-role-details"><div><h4>หน้าที่และขอบเขต</h4>${renderList(p.responsibilities)}</div><div><h4>คุณสมบัติ</h4>${renderList(p.requirements)}</div><div><h4>พิจารณาเป็นพิเศษ</h4>${renderList(p.preferred)}</div></div>` : ''}</article>`;
       }).join('');
       const projectStatus = project.projectOpen ? '🟢 เปิดรับสมัครอยู่' : '🔴 ปิดรับสมัคร';
-      return `<section class="jt-project-group"><div class="jt-project-group-head"><div><span class="jt-project-kicker">PROJECT / TEAM</span><h3>${escapeHtml(project.projectName || project.projectSlug)}</h3><p>${escapeHtml(project.projectSummary || 'รายละเอียดการรับสมัครของทีมนี้')}</p><div class="jt-project-group-meta"><span>${projectStatus}</span><span>🧩 ${project.roles.length} ตำแหน่ง</span></div></div><a class="btn-secondary jt-project-open-link" href="${projectHref}">เปิดหน้าทีม →</a></div><div class="jt-project-role-grid">${roleCards}</div><a class="jt-project-apply-link" href="${projectHref}">ดูรายละเอียดและสมัครในหน้านี้ →</a></section>`;
+      const image = publicUrl(project.projectImage) || 'assets/photo/bcxlogo2.png';
+      const stack = asList(project.projectStack);
+      return `<section class="jt-project-group"><div class="jt-project-group-head"><div class="jt-project-brand"><img src="${escapeHtml(image)}" alt="${escapeHtml(project.projectName || 'โปรเจกต์')}" loading="lazy" onerror="this.onerror=null;this.src='assets/photo/bcxlogo2.png';"><div><span class="jt-project-kicker">PROJECT / TEAM</span><h3>${escapeHtml(project.projectName || project.projectSlug)}</h3><p>${escapeHtml(project.projectSummary || project.projectIntro || 'รายละเอียดการรับสมัครของทีมนี้')}</p><div class="jt-project-group-meta"><span>${projectStatus}</span><span>🧩 ${project.roles.length} ตำแหน่ง</span></div></div></div><a class="btn-secondary jt-project-open-link" href="${projectHref}">เปิดหน้าทีม →</a></div>${stack.length ? `<div class="jt-project-stack"><strong>Stack หลัก:</strong> ${stack.map((item) => `<span>${escapeHtml(item)}</span>`).join('')}</div>` : ''}<div class="jt-project-role-grid">${roleCards}</div><a class="jt-project-apply-link" href="${projectHref}">ดูรายละเอียดและสมัครในหน้านี้ →</a></section>`;
     }).join('');
+  };
+
+  const publicUrl = (value) => {
+    try {
+      const url = new URL(value, window.location.origin);
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+    } catch {
+      return '';
+    }
+  };
+  const youtubeEmbedUrl = (value) => {
+    const url = publicUrl(value);
+    try {
+      const parsed = new URL(url);
+      return ['www.youtube.com', 'youtube.com', 'youtu.be'].includes(parsed.hostname.toLowerCase()) && parsed.pathname.startsWith('/embed/') ? parsed.href : '';
+    } catch {
+      return '';
+    }
+  };
+  const renderProjectShowcase = (cfg) => {
+    const wrap = $('jtProjectShowcase');
+    if (!wrap) return;
+    if (IS_DIRECTORY_ROUTE) { wrap.hidden = true; wrap.innerHTML = ''; return; }
+    const image = publicUrl(cfg.projectBanner || cfg.projectImage) || 'assets/photo/bcxlogo2.png';
+    const video = youtubeEmbedUrl(cfg.videoUrl);
+    const highlights = asList(cfg.highlights);
+    wrap.hidden = false;
+    const modes = asList(cfg.modes);
+    wrap.innerHTML = `<div class="jt-showcase-copy"><img class="jt-showcase-image" src="${escapeHtml(image)}" alt="${escapeHtml(cfg.title || 'โปรเจกต์')}" onerror="this.onerror=null;this.src='assets/photo/bcxlogo2.png';"><div><span class="jt-project-kicker">PROJECT / TEAM</span><h3>${escapeHtml(cfg.title || cfg.communityName || 'โปรเจกต์')}</h3><p>${escapeHtml(cfg.projectIntro || cfg.subtitle || '')}</p>${modes.length ? `<div class="jt-showcase-modes"><strong>โหมดที่เปิดรับทีม:</strong> ${modes.map((item) => `<span>${escapeHtml(item)}</span>`).join('')}</div>` : ''}${highlights.length ? `<ul class="jt-highlight-list">${highlights.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}</div></div>${video ? `<div class="jt-showcase-video"><iframe src="${escapeHtml(video)}" title="วิดีโอแนะนำ ${escapeHtml(cfg.title || 'โปรเจกต์')}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>` : ''}`;
   };
 
   let formConfig = null;
@@ -472,8 +522,19 @@
     const positions = (cfg.positions || []).filter(p => p.active !== false);
     if ($('jtPositionCount')) $('jtPositionCount').textContent = positions.length;
     if ($('jtRecruitmentOverview')) {
-      $('jtRecruitmentOverview').style.display = IS_DIRECTORY_ROUTE ? '' : 'none';
+      $('jtRecruitmentOverview').style.display = '';
+      const overviewTitle = $('jtOverviewTitle');
+      const overviewText = $('jtOverviewTitle')?.parentElement?.querySelector('p');
+      const overviewLink = document.querySelector('.jt-overview-link');
+      const poster = document.querySelector('.jt-overview-poster-wrap');
+      const filters = document.querySelector('.jt-overview-filters');
+      if (overviewTitle) overviewTitle.textContent = IS_DIRECTORY_ROUTE ? '📣 ตำแหน่งที่เปิดรับและโปรเจกต์ทั้งหมด' : `📣 ตำแหน่งที่เปิดรับ: ${cfg.title || cfg.communityName || 'โปรเจกต์'}`;
+      if (overviewText) overviewText.textContent = IS_DIRECTORY_ROUTE ? 'เลือกทีมและตำแหน่งที่สนใจเพื่ออ่านรายละเอียดการทำงาน Stack และเปิดฟอร์มสมัครเฉพาะของทีมนั้น' : 'อ่านหน้าที่ ขอบเขตงาน Stack ที่ใช้ คุณสมบัติ และสิ่งที่ทีมพิจารณาเป็นพิเศษก่อนสมัคร';
+      if (overviewLink) overviewLink.hidden = !IS_DIRECTORY_ROUTE;
+      if (poster) poster.style.display = IS_DIRECTORY_ROUTE ? '' : 'none';
+      if (filters) filters.style.display = IS_DIRECTORY_ROUTE ? '' : 'none';
     }
+    renderProjectShowcase(cfg);
     renderRoleDirectory(cfg);
 
     // Benefits

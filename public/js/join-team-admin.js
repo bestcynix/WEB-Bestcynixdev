@@ -42,15 +42,16 @@
   const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[char]));
+  const parseList = (value) => String(value || '').split(/[\n,]/).map((item) => item.trim()).filter(Boolean).slice(0, 30);
 
   // Project/URL registry. This is deliberately separate from joinTeamForms so
   // editing a public route never overwrites old applications or contracts.
   const DEFAULT_PROJECTS = [
-    { id: 'mc-skyline', slug: 'mc-skyline', title: 'Mc-Skyline.online', summary: 'ทีม Minecraft: เว็บ บอท ปลั๊กอิน แผนที่ ระบบไอเทม เควสต์ โมเดล และ resource pack', communityName: 'Mc-Skyline.online', communityUrl: 'https://discord.gg/5eNFMMk3ak', websiteUrl: 'https://mc-skyline.online', isOpen: true, visible: true, displayOrder: 10 },
-    { id: 'discord-bot', slug: 'discord-bot', title: 'Discord Bot', summary: 'ทีมพัฒนาบอท Discord, API, ระบบอัตโนมัติ และเครื่องมือดูแลชุมชน', communityName: 'Discord Bot', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: '', isOpen: true, visible: true, displayOrder: 20 },
-    { id: 'discord-server', slug: 'discord-server', title: 'Discord Server', summary: 'ทีมดูแลกฎ สิทธิ์ ระบบ และกิจกรรมของเซิร์ฟเวอร์ Discord', communityName: 'Discord Server', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: '', isOpen: true, visible: true, displayOrder: 30 },
-    { id: 'dev-web', slug: 'dev-web', title: 'Web Development', summary: 'ทีมสร้างเว็บไซต์ เว็บแอป ระบบหลังบ้าน และระบบคลาวด์', communityName: 'Web Development', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app', isOpen: true, visible: true, displayOrder: 40 },
-    { id: 'teamdev', slug: 'teamdev', title: 'ทีมพัฒนา BestCyniX Dev', summary: 'เปิดรับทีมงานตามความสามารถ ให้ระบุความถนัดและตำแหน่งที่ต้องการรับผิดชอบ 1–3', communityName: 'ทีมพัฒนา BestCyniX Dev', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app', isOpen: true, visible: true, displayOrder: 50 }
+    { id: 'mc-skyline', slug: 'mc-skyline', title: 'Mc-Skyline.online', summary: 'ทีม Minecraft: เว็บ บอท ปลั๊กอิน แผนที่ ระบบไอเทม เควสต์ โมเดล และ resource pack', communityName: 'Mc-Skyline.online', communityUrl: 'https://discord.gg/5eNFMMk3ak', websiteUrl: 'https://mc-skyline.online', projectImage: 'assets/photo/mc-skyline.png', projectBanner: 'assets/photo/mc-skyline-recruitment.png', videoUrl: 'https://www.youtube.com/embed/gfn-GvBM9rs?si=kvbYqxLpHb_gIqI1', stack: ['Java', 'Paper / Spigot', 'Bukkit API', 'MySQL', 'Linux', 'Docker', 'Git'], isOpen: true, visible: true, displayOrder: 10 },
+    { id: 'discord-bot', slug: 'discord-bot', title: 'Discord Bot', summary: 'ทีมพัฒนาบอท Discord, API, ระบบอัตโนมัติ และเครื่องมือดูแลชุมชน', communityName: 'Discord Bot', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: '', projectImage: 'assets/photo/skylinebot-discord.png', stack: ['Node.js', 'JavaScript / TypeScript', 'discord.js', 'REST API', 'Database', 'Docker', 'Git'], isOpen: true, visible: true, displayOrder: 20 },
+    { id: 'discord-server', slug: 'discord-server', title: 'Discord Server', summary: 'ทีมดูแลกฎ สิทธิ์ ระบบ และกิจกรรมของเซิร์ฟเวอร์ Discord', communityName: 'Discord Server', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: '', projectImage: 'assets/photo/ServerMinecraft2021.png', stack: ['Discord', 'Roles & Permissions', 'AutoMod', 'Bots', 'Community Management'], isOpen: true, visible: true, displayOrder: 30 },
+    { id: 'dev-web', slug: 'dev-web', title: 'Web Development', summary: 'ทีมสร้างเว็บไซต์ เว็บแอป ระบบหลังบ้าน และระบบคลาวด์', communityName: 'Web Development', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app', projectImage: 'assets/photo/bestcynixprodev.png', stack: ['HTML', 'CSS', 'JavaScript / TypeScript', 'React / Vue', 'Node.js', 'Firebase', 'Git'], isOpen: true, visible: true, displayOrder: 40 },
+    { id: 'teamdev', slug: 'teamdev', title: 'ทีมพัฒนา BestCyniX Dev', summary: 'เปิดรับทีมงานตามความสามารถ ให้ระบุความถนัดและตำแหน่งที่ต้องการรับผิดชอบ 1–3', communityName: 'ทีมพัฒนา BestCyniX Dev', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app', projectImage: 'assets/photo/bcxlogo2.png', stack: ['Git', 'Discord', 'Documentation', 'Project Management'], isOpen: true, visible: true, displayOrder: 50 }
   ];
   let projectRegistry = [];
 
@@ -64,6 +65,12 @@
       communityName: (card.querySelector('[data-field="communityName"]')?.value || '').trim(),
       communityUrl: (card.querySelector('[data-field="communityUrl"]')?.value || '').trim(),
       websiteUrl: (card.querySelector('[data-field="websiteUrl"]')?.value || '').trim(),
+      projectImage: (card.querySelector('[data-field="projectImage"]')?.value || '').trim(),
+      projectBanner: (card.querySelector('[data-field="projectBanner"]')?.value || '').trim(),
+      videoUrl: (card.querySelector('[data-field="videoUrl"]')?.value || '').trim(),
+      projectIntro: (card.querySelector('[data-field="projectIntro"]')?.value || '').trim(),
+      highlights: parseList(card.querySelector('[data-field="highlights"]')?.value),
+      stack: parseList(card.querySelector('[data-field="stack"]')?.value),
       displayOrder: Math.max(0, Math.min(10000, parseInt(card.querySelector('[data-field="displayOrder"]')?.value, 10) || 0)),
       isOpen: Boolean(card.querySelector('[data-field="isOpen"]')?.checked),
       visible: Boolean(card.querySelector('[data-field="visible"]')?.checked)
@@ -86,9 +93,15 @@
           <label>URL slug<input class="jt-input" data-field="slug" value="${escapeHtml(project.slug || '')}" placeholder="เช่น discord-bot" /></label>
           <label>ชื่อทีม/โปรเจกต์<input class="jt-input" data-field="title" value="${escapeHtml(project.title || '')}" placeholder="ชื่อที่แสดงบนหน้าเว็บ" /></label>
           <label style="grid-column:1/-1;">คำอธิบาย<input class="jt-input" data-field="summary" value="${escapeHtml(project.summary || '')}" placeholder="รายละเอียดสั้น ๆ ของทีม" /></label>
+          <label style="grid-column:1/-1;">คำแนะนำโปรเจกต์<textarea class="jt-input" data-field="projectIntro" rows="2" placeholder="เกริ่นนำของทีมในหน้ารายละเอียด">${escapeHtml(project.projectIntro || '')}</textarea></label>
           <label>ชื่อชุมชน<input class="jt-input" data-field="communityName" value="${escapeHtml(project.communityName || '')}" placeholder="ชื่อ Discord/ชุมชน" /></label>
           <label>ลิงก์ชุมชน<input class="jt-input" data-field="communityUrl" value="${escapeHtml(project.communityUrl || '')}" placeholder="https://discord.gg/..." /></label>
           <label>URL เว็บไซต์<input class="jt-input" data-field="websiteUrl" value="${escapeHtml(project.websiteUrl || '')}" placeholder="https://..." /></label>
+          <label>รูปทีม (URL/asset)<input class="jt-input" data-field="projectImage" value="${escapeHtml(project.projectImage || '')}" placeholder="assets/photo/team.png หรือ https://..." /></label>
+          <label>ภาพแบนเนอร์รับสมัคร<input class="jt-input" data-field="projectBanner" value="${escapeHtml(project.projectBanner || '')}" placeholder="assets/photo/banner.png หรือ https://..." /></label>
+          <label style="grid-column:1/-1;">YouTube Embed URL<input class="jt-input" data-field="videoUrl" value="${escapeHtml(project.videoUrl || '')}" placeholder="https://www.youtube.com/embed/..." /></label>
+          <label style="grid-column:1/-1;">Stack หลัก <small>(คั่นด้วย comma หรือขึ้นบรรทัดใหม่)</small><textarea class="jt-input" data-field="stack" rows="2" placeholder="Java, Paper, MySQL">${escapeHtml((project.stack || []).join(', '))}</textarea></label>
+          <label style="grid-column:1/-1;">จุดเด่นของโปรเจกต์ <small>(คั่นด้วย comma หรือขึ้นบรรทัดใหม่)</small><textarea class="jt-input" data-field="highlights" rows="2" placeholder="ระบบเด่น, สิ่งที่กำลังสร้าง">${escapeHtml((project.highlights || []).join('\n'))}</textarea></label>
           <label>ลำดับแสดง<input class="jt-input" data-field="displayOrder" type="number" min="0" max="10000" value="${Number(project.displayOrder || 0)}" /></label>
         </div>
         <div class="project-registry-actions">
@@ -127,7 +140,7 @@
   const saveProjectRecord = async (record, oldId = record.id) => {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(record.slug)) throw new Error('URL slug ใช้ได้เฉพาะ a-z, 0-9 และขีดกลาง เช่น discord-bot');
     if (!record.title || record.title.length > 200) throw new Error('กรุณากรอกชื่อทีม/โปรเจกต์ไม่เกิน 200 ตัวอักษร');
-    if (record.summary.length > 1000 || record.communityName.length > 120 || record.communityUrl.length > 1000 || record.websiteUrl.length > 1000) throw new Error('ข้อมูลบางช่องยาวเกินกำหนด');
+    if (record.summary.length > 1000 || record.projectIntro.length > 2000 || record.communityName.length > 120 || record.communityUrl.length > 1000 || record.websiteUrl.length > 1000 || record.projectImage.length > 1000 || record.projectBanner.length > 1000 || record.videoUrl.length > 1000) throw new Error('ข้อมูลบางช่องยาวเกินกำหนด');
     const payload = { ...record, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: currentUser?.uid || '' };
     const targetRef = db.collection(PROJECTS_COL).doc(record.slug);
     await targetRef.set(payload, { merge: true });
@@ -157,7 +170,7 @@
   };
 
   const addProjectDraft = () => {
-    projectRegistry = [{ id: 'new', slug: 'new-project', title: 'โปรเจกต์ใหม่', summary: '', communityName: '', communityUrl: '', websiteUrl: '', displayOrder: 100, isOpen: false, visible: true }, ...projectRegistry];
+    projectRegistry = [{ id: 'new', slug: 'new-project', title: 'โปรเจกต์ใหม่', summary: '', projectIntro: '', projectImage: '', projectBanner: '', videoUrl: '', highlights: [], stack: [], communityName: '', communityUrl: '', websiteUrl: '', displayOrder: 100, isOpen: false, visible: true }, ...projectRegistry];
     renderProjectRegistry();
     document.querySelector('.admin-tab-btn[data-tab="projects"]')?.click();
   };
@@ -802,6 +815,30 @@
           </div>
         </div>
 
+        <div class="jt-form-group">
+          <label style="font-size:0.78rem;">คำอธิบายตำแหน่ง</label>
+          <textarea class="jt-input pos-description" data-idx="${i}" rows="2" placeholder="ตำแหน่งนี้รับผิดชอบงานอะไร">${escapeHtml(pos.description || '')}</textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.8rem;">
+          <div class="jt-form-group">
+            <label style="font-size:0.78rem;">Stack ที่ใช้ <small>(คั่นด้วย comma หรือขึ้นบรรทัดใหม่)</small></label>
+            <textarea class="jt-input pos-stack" data-idx="${i}" rows="4" placeholder="Java&#10;Paper / Spigot&#10;MySQL">${escapeHtml((pos.stack || []).join('\n'))}</textarea>
+          </div>
+          <div class="jt-form-group">
+            <label style="font-size:0.78rem;">หน้าที่และขอบเขต <small>(หนึ่งรายการต่อบรรทัด)</small></label>
+            <textarea class="jt-input pos-responsibilities" data-idx="${i}" rows="4" placeholder="พัฒนาระบบตามสเปก&#10;ทดสอบและแก้บั๊ก">${escapeHtml((pos.responsibilities || []).join('\n'))}</textarea>
+          </div>
+          <div class="jt-form-group">
+            <label style="font-size:0.78rem;">คุณสมบัติ <small>(หนึ่งรายการต่อบรรทัด)</small></label>
+            <textarea class="jt-input pos-requirements" data-idx="${i}" rows="4" placeholder="มีพื้นฐานที่เกี่ยวข้อง&#10;ทำงานเป็นทีมได้">${escapeHtml((pos.requirements || []).join('\n'))}</textarea>
+          </div>
+          <div class="jt-form-group">
+            <label style="font-size:0.78rem;">พิจารณาเป็นพิเศษ <small>(หนึ่งรายการต่อบรรทัด)</small></label>
+            <textarea class="jt-input pos-preferred" data-idx="${i}" rows="4" placeholder="มี portfolio&#10;เคยใช้เครื่องมือเฉพาะทาง">${escapeHtml((pos.preferred || []).join('\n'))}</textarea>
+          </div>
+        </div>
+
         <!-- Age restriction settings -->
         <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.8rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.8rem;font-size:.82rem;">
           <span style="font-weight:700;color:var(--accent);">🎂 เกณฑ์อายุ:</span>
@@ -862,6 +899,11 @@
     positions[idx] = {
       ...positions[idx],
       name: document.querySelector(`.pos-name[data-idx="${idx}"]`)?.value || positions[idx].name || 'ตำแหน่ง',
+      description: document.querySelector(`.pos-description[data-idx="${idx}"]`)?.value.trim() || '',
+      stack: parseList(document.querySelector(`.pos-stack[data-idx="${idx}"]`)?.value),
+      responsibilities: parseList(document.querySelector(`.pos-responsibilities[data-idx="${idx}"]`)?.value),
+      requirements: parseList(document.querySelector(`.pos-requirements[data-idx="${idx}"]`)?.value),
+      preferred: parseList(document.querySelector(`.pos-preferred[data-idx="${idx}"]`)?.value),
       maxSlots: parseInt(document.querySelector(`.pos-slots[data-idx="${idx}"]`)?.value) || 1,
       active: document.querySelector(`.pos-active[data-idx="${idx}"]`)?.checked !== false,
       ageRule: rule,
@@ -889,7 +931,7 @@
   };
 
   $('btnAddPosition')?.addEventListener('click', () => {
-    positions.push({ id: `pos_${Date.now()}`, name: '', maxSlots: 1, active: true, ageRule: 'unlimited', minAge: 15, maxAge: 35 });
+    positions.push({ id: `pos_${Date.now()}`, name: '', description: '', stack: [], responsibilities: [], requirements: [], preferred: [], maxSlots: 1, active: true, ageRule: 'unlimited', minAge: 15, maxAge: 35 });
     editingPositionIndex = positions.length - 1;
     renderPositionsList(positions);
   });

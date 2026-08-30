@@ -17,6 +17,10 @@
         }
       },
       {
+        "source": "/join-team/mc-skyline",
+        "destination": "/join-team.html"
+      },
+      {
         "source": "/join-team/discord-bot",
         "destination": "/join-team.html"
       },

@@ -5251,10 +5251,38 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-role-card p { color:var(--muted); font-size:.82rem; line-height:1.6; margin:0 0 .65rem; }
 .jt-role-meta { display:flex; flex-wrap:wrap; gap:.4rem; font-size:.75rem; color:#d8efff; }
 .jt-role-meta span { padding:.2rem .45rem; border-radius:6px; background:rgba(50,255,201,.08); border:1px solid rgba(50,255,201,.18); }
+.jt-project-brand { display:flex; align-items:flex-start; gap:.8rem; min-width:0; }
+.jt-project-brand > div { min-width:0; }
+.jt-project-brand img { width:64px; height:64px; flex:0 0 64px; object-fit:cover; border-radius:14px; border:1px solid rgba(50,255,201,.35); background:#061426; }
+.jt-role-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; }
+.jt-role-card-head h3 { min-width:0; }
+.jt-role-status { color:#9fead7; font-size:.68rem; white-space:nowrap; }
+.jt-detail-block { margin-top:.8rem; padding-top:.7rem; border-top:1px solid rgba(255,255,255,.08); }
+.jt-detail-block h4, .jt-role-details h4 { color:#dffdf6; font-size:.78rem; margin:0 0 .35rem; }
+.jt-stack-list, .jt-project-stack { display:flex; flex-wrap:wrap; gap:.35rem; }
+.jt-stack-list span, .jt-project-stack span { color:#b9fff0; background:rgba(50,255,201,.09); border:1px solid rgba(50,255,201,.18); border-radius:999px; padding:.18rem .45rem; font-size:.7rem; }
+.jt-role-details { display:grid; gap:.65rem; margin-top:.75rem; }
+.jt-detail-list { margin:0; padding-left:1.05rem; color:#c4d9ec; font-size:.76rem; line-height:1.55; }
+.jt-detail-empty { margin:0; color:var(--muted); font-size:.75rem; }
+.jt-project-stack { align-items:center; margin-top:.85rem; color:#dffdf6; font-size:.75rem; }
+.jt-project-stack strong { margin-right:.15rem; }
+.jt-project-showcase { display:grid; grid-template-columns:minmax(0, 1fr) minmax(280px, .95fr); gap:1rem; align-items:center; margin:1rem 0 1.15rem; padding:1rem; border:1px solid rgba(50,255,201,.2); border-radius:16px; background:rgba(2,10,22,.55); }
+.jt-showcase-copy { display:flex; align-items:flex-start; gap:.85rem; min-width:0; }
+.jt-showcase-copy > div { min-width:0; }
+.jt-showcase-image { width:112px; height:112px; flex:0 0 112px; object-fit:cover; border-radius:16px; border:1px solid rgba(50,255,201,.35); }
+.jt-showcase-copy h3 { color:#fff; margin:.25rem 0 .4rem; font-size:1.1rem; }
+.jt-showcase-copy p { color:var(--muted); margin:0; font-size:.84rem; line-height:1.7; }
+.jt-highlight-list { margin:.65rem 0 0; padding-left:1.1rem; color:#d5fff5; font-size:.78rem; line-height:1.65; }
+.jt-showcase-modes { display:flex; flex-wrap:wrap; align-items:center; gap:.4rem; margin-top:.7rem; color:#d9e7f6; font-size:.78rem; }
+.jt-showcase-modes span { padding:.25rem .55rem; border:1px solid rgba(50,255,201,.24); border-radius:999px; color:#8fffe2; background:rgba(50,255,201,.07); }
+.jt-showcase-video { position:relative; overflow:hidden; aspect-ratio:16/9; border-radius:12px; background:#02060d; }
+.jt-showcase-video iframe { width:100%; height:100%; border:0; display:block; }
 @media (max-width: 640px) {
   .jt-overview-poster-wrap, .jt-overview-filters { grid-template-columns:1fr; }
   .jt-overview-poster-wrap img { max-height:220px; }
   .jt-overview-link { width:100%; }
+  .jt-project-showcase { grid-template-columns:1fr; }
+  .jt-showcase-image { width:84px; height:84px; flex-basis:84px; }
 }
 
 /* Recruitment directory/detail separation and mobile overflow guard. */

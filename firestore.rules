@@ -461,7 +461,7 @@ service cloud.firestore {
 
     function isValidRecruitmentProject(projectId) {
       let data = request.resource.data;
-      return data.keys().hasOnly(['id', 'slug', 'title', 'summary', 'communityName', 'communityUrl', 'websiteUrl', 'isOpen', 'visible', 'displayOrder', 'updatedAt', 'updatedBy'])
+      return data.keys().hasOnly(['id', 'slug', 'title', 'summary', 'communityName', 'communityUrl', 'websiteUrl', 'projectImage', 'projectBanner', 'videoUrl', 'projectIntro', 'highlights', 'stack', 'isOpen', 'visible', 'displayOrder', 'updatedAt', 'updatedBy'])
         && data.id == projectId
         && data.slug == projectId
         && data.slug.matches('^[a-z0-9]+(?:-[a-z0-9]+)*$')
@@ -471,6 +471,12 @@ service cloud.firestore {
         && validText(data.communityName, 120)
         && validText(data.communityUrl, 1000)
         && validText(data.websiteUrl, 1000)
+        && (!data.keys().hasAny(['projectImage']) || (validText(data.projectImage, 1000) && (data.projectImage == '' || validUrl(data.projectImage) || data.projectImage.matches('^assets/[A-Za-z0-9_./#-]+$'))))
+        && (!data.keys().hasAny(['projectBanner']) || (validText(data.projectBanner, 1000) && (data.projectBanner == '' || validUrl(data.projectBanner) || data.projectBanner.matches('^assets/[A-Za-z0-9_./#-]+$'))))
+        && (!data.keys().hasAny(['videoUrl']) || (validText(data.videoUrl, 1000) && (data.videoUrl == '' || validUrl(data.videoUrl))))
+        && (!data.keys().hasAny(['projectIntro']) || validText(data.projectIntro, 2000))
+        && (!data.keys().hasAny(['highlights']) || (data.highlights is list && data.highlights.size() <= 10))
+        && (!data.keys().hasAny(['stack']) || (data.stack is list && data.stack.size() <= 30))
         && data.isOpen is bool
         && data.visible is bool
         && data.displayOrder is int
