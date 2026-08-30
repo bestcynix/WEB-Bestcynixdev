@@ -9,7 +9,10 @@
   const safeUrl = (value) => { try { const u = new URL(value, window.location.origin); return ['http:', 'https:'].includes(u.protocol) ? u.href : ''; } catch { return ''; } };
   const timestamp = () => firebase.firestore.FieldValue.serverTimestamp();
   const adminEmails = new Set(['bestcynix@gmail.com', 'admin@email.com']);
-  const state = { user: null, admin: false, groups: [], group: null, role: 'member', members: [], messages: [], meetings: [], reply: null, unsubs: [], messageInitialized: false, messageFilter: 'all', editingMessageId: null, call: { meeting: null, localStream: null, peers: new Map(), participantNames: new Map(), participantsUnsub: null, signalsUnsub: null, participantRef: null } };
+  const MAX_MESSAGE_FILES = 10;
+  const MAX_MESSAGE_FILE_BYTES = 25 * 1024 * 1024;
+  const MAX_MESSAGE_TOTAL_BYTES = 50 * 1024 * 1024;
+  const state = { user: null, admin: false, groups: [], group: null, role: 'member', members: [], messages: [], meetings: [], reply: null, unsubs: [], messageInitialized: false, messageFilter: 'all', editingMessageId: null, messageFiles: [], messagePreviewUrls: [], call: { meeting: null, localStream: null, peers: new Map(), participantNames: new Map(), participantsUnsub: null, signalsUnsub: null, participantRef: null } };
 
   function stopListeners() { state.unsubs.splice(0).forEach((fn) => { try { fn(); } catch {} }); }
   function setAuthState(message, kind = 'info') { const el = $('twAuthState'); if (el) { el.textContent = message; el.className = `tw-state tw-state-${kind}`; el.hidden = !message; } }
@@ -23,6 +26,7 @@
     if (code === 'storage/network-request-failed') return 'อัปโหลดไม่สำเร็จเพราะเครือข่ายขัดข้อง กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
     return error?.message || 'อัปโหลดไฟล์ไม่สำเร็จ';
   }
+  function isStorageQuotaError(error) { const code = String(error?.code || ''); return code === 'storage/quota-exceeded' || code.endsWith('/quota-exceeded'); }
   function isManager() { return state.admin || ['owner', 'admin', 'lead'].includes(state.role); }
   function displayName(user = state.user) { return user?.displayName || user?.email?.split('@')[0] || 'สมาชิก'; }
   function formatTime(value) { const date = value?.toDate ? value.toDate() : (value ? new Date(value) : null); return date && !Number.isNaN(date.getTime()) ? date.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : 'กำลังบันทึก…'; }
@@ -40,6 +44,80 @@
     const ref = storage.ref(`${path}/${Date.now()}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-${safeName}`);
     const uploaded = await ref.put(file, { contentType: file.type });
     return { url: await uploaded.ref.getDownloadURL(), name: file.name, type: file.type, size: file.size };
+  }
+
+  function clearSelectedMessageFiles() {
+    state.messagePreviewUrls.splice(0).forEach((url) => URL.revokeObjectURL(url));
+    state.messageFiles = [];
+    const input = $('twAttachment');
+    if (input) input.value = '';
+    const preview = $('twAttachmentPreview');
+    if (preview) { preview.hidden = true; preview.innerHTML = ''; }
+    if ($('twClearAttachments')) $('twClearAttachments').hidden = true;
+    if ($('twAttachmentName')) $('twAttachmentName').textContent = '';
+  }
+
+  function renderMessageAttachmentPreview() {
+    const preview = $('twAttachmentPreview');
+    if (!preview) return;
+    state.messagePreviewUrls.splice(0).forEach((url) => URL.revokeObjectURL(url));
+    if (!state.messageFiles.length) { preview.hidden = true; preview.innerHTML = ''; if ($('twAttachmentName')) $('twAttachmentName').textContent = ''; if ($('twClearAttachments')) $('twClearAttachments').hidden = true; return; }
+    const cards = state.messageFiles.map((file, index) => {
+      const url = URL.createObjectURL(file);
+      state.messagePreviewUrls.push(url);
+      const media = file.type.startsWith('video/') ? `<video src="${esc(url)}" muted playsinline preload="metadata"></video>` : `<img src="${esc(url)}" alt="${esc(file.name)}">`;
+      return `<div class="tw-attachment-preview-item">${media}<button type="button" class="tw-attachment-remove" data-remove-attachment="${index}" aria-label="ยกเลิกไฟล์ ${esc(file.name)}">✕</button><span>${esc(file.name)}</span></div>`;
+    }).join('');
+    preview.innerHTML = cards;
+    preview.hidden = false;
+    if ($('twClearAttachments')) $('twClearAttachments').hidden = false;
+    if ($('twAttachmentName')) $('twAttachmentName').textContent = `เลือกแล้ว ${state.messageFiles.length} ไฟล์`;
+  }
+
+  function selectMessageFiles(files) {
+    const selected = Array.from(files || []);
+    if (selected.length > MAX_MESSAGE_FILES) throw new Error(`เลือกไฟล์ได้ไม่เกิน ${MAX_MESSAGE_FILES} ไฟล์ต่อข้อความ`);
+    if (selected.some((file) => file.size > MAX_MESSAGE_FILE_BYTES || !(file.type.startsWith('image/') || file.type.startsWith('video/')))) throw new Error('รองรับเฉพาะรูป/วิดีโอ โดยแต่ละไฟล์ต้องไม่เกิน 25 MB');
+    if (selected.reduce((total, file) => total + file.size, 0) > MAX_MESSAGE_TOTAL_BYTES) throw new Error('ไฟล์รวมต่อข้อความต้องไม่เกิน 50 MB');
+    state.messageFiles = selected;
+    renderMessageAttachmentPreview();
+  }
+
+  function removeSelectedMessageFile(index) {
+    if (!Number.isInteger(index) || index < 0 || index >= state.messageFiles.length) return;
+    state.messageFiles.splice(index, 1);
+    renderMessageAttachmentPreview();
+  }
+
+  async function uploadMessageFiles(files) {
+    const uploads = [];
+    for (const file of files) {
+      const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+      const ref = storage.ref(`team-attachments/${state.group.id}/${Date.now()}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-${safeName}`);
+      try {
+        const uploaded = await ref.put(file, { contentType: file.type });
+        uploads.push({ url: await uploaded.ref.getDownloadURL(), name: file.name, type: file.type, size: file.size });
+      } catch (error) {
+        error.uploaded = uploads;
+        throw error;
+      }
+    }
+    return uploads;
+  }
+
+  function messageAttachments(message) {
+    if (Array.isArray(message.attachments) && message.attachments.length) return message.attachments;
+    return message.attachmentUrl ? [{ url: message.attachmentUrl, name: message.attachmentName, type: message.attachmentType }] : [];
+  }
+
+  function renderMessageMedia(message) {
+    if (message.revokedAt) return '';
+    return messageAttachments(message).map((file) => {
+      const url = safeUrl(file.url);
+      if (!url) return '<div class="tw-attachment-unavailable">ไฟล์แนบไม่พร้อมใช้งาน</div>';
+      const label = file.name || 'ไฟล์แนบ';
+      return String(file.type || '').startsWith('video/') ? `<video class="tw-message-media" controls preload="metadata" data-tw-attachment-media src="${esc(url)}"></video>` : `<img class="tw-message-media" loading="lazy" data-tw-attachment-media src="${esc(url)}" alt="${esc(label)}">`;
+    }).join('');
   }
 
   function renderGroups() {
@@ -79,9 +157,23 @@
     state.unsubs.push(unsubscribe);
   }
   function renderMessages() {
-    const query = ($('twMessageSearch')?.value || '').toLowerCase(); const rows = state.messages.filter((m) => (state.messageFilter !== 'unread' || !messageIsRead(m)) && `${m.text || ''} ${m.attachmentName || ''} ${m.senderName || ''}`.toLowerCase().includes(query)); const box = $('twMessages');
+    const query = ($('twMessageSearch')?.value || '').toLowerCase();
+    const rows = state.messages.filter((m) => (state.messageFilter !== 'unread' || !messageIsRead(m)) && `${m.text || ''} ${m.attachmentName || ''} ${Array.isArray(m.attachments) ? m.attachments.map((file) => file.name || '').join(' ') : ''} ${m.senderName || ''}`.toLowerCase().includes(query));
+    const box = $('twMessages');
     if (!rows.length) { box.innerHTML = '<div class="tw-empty">ยังไม่มีข้อความในช่วงที่ค้นหา</div>'; return; }
-    box.innerHTML = rows.map((m) => { const mine = m.senderUid === state.user.uid; const read = messageIsRead(m); const revoked = Boolean(m.revokedAt); const receiptNames = readReceiptNames(m); const media = revoked ? '' : safeUrl(m.attachmentUrl); const mediaHtml = media ? (String(m.attachmentType || '').startsWith('video/') ? `<video class="tw-message-media" controls src="${esc(media)}"></video>` : `<img class="tw-message-media" loading="lazy" src="${esc(media)}" alt="${esc(m.attachmentName || 'ไฟล์แนบ')}">`) : ''; const reply = m.replyTo ? `<div class="tw-reply-preview">ตอบกลับ ${esc(m.replyTo.senderName || '')}: ${esc(m.replyTo.text || '')}</div>` : ''; const statusLabel = mine ? 'ส่งแล้ว' : (read ? 'อ่านแล้ว' : 'ยังไม่อ่าน'); const statusClass = mine ? 'is-sent' : (read ? 'is-read' : 'is-unread'); const readAction = mine || revoked ? '' : `<button type="button" data-read-id="${esc(m.id)}" data-read-value="${read ? 'false' : 'true'}">${read ? 'ทำเป็นยังไม่อ่าน' : 'ทำเป็นอ่านแล้ว'}</button>`; const ownerActions = mine && !revoked ? `<button type="button" data-edit-id="${esc(m.id)}">✏️ แก้ไขข้อความ</button><button type="button" data-revoke-id="${esc(m.id)}">↩️ ยกเลิกข้อความ</button>` : ''; const managerActions = isManager() ? `<button type="button" data-pin-id="${esc(m.id)}">📌 ${m.pinned ? 'ยกเลิกปักหมุด' : 'ปักหมุด'}</button>` : ''; const deleteAction = mine || isManager() ? `<button type="button" data-delete-id="${esc(m.id)}">🗑️ ลบข้อความ</button>` : ''; const menu = `<div class="tw-message-menu"><button type="button" class="tw-message-menu-trigger" data-message-menu="${esc(m.id)}" aria-label="ตัวเลือกข้อความ" aria-haspopup="menu" aria-expanded="false">⋯</button><div class="tw-message-menu-list" data-message-id="${esc(m.id)}" role="menu" hidden><button type="button" data-reply-id="${esc(m.id)}">↩️ ตอบกลับ</button>${readAction}<button type="button" data-receipts-id="${esc(m.id)}">👁️ อ่านแล้ว ${receiptNames.length} คน</button>${ownerActions}${managerActions}${deleteAction}</div></div>`; const body = revoked ? '<em class="tw-revoked-message">ยกเลิกข้อความแล้ว</em>' : esc(m.text || ''); return `<article class="tw-message ${mine ? 'is-mine' : ''} ${read ? 'is-read' : 'is-unread'} ${revoked ? 'is-revoked' : ''}">${menu}<div class="tw-message-meta"><span class="tw-online-dot ${m.senderOnline ? 'is-online' : ''}"></span><strong>${esc(m.senderName || 'สมาชิก')}</strong><span>${esc(formatTime(m.createdAt))}</span>${m.editedAt && !revoked ? '<span class="tw-edited-label">แก้ไขแล้ว</span>' : ''}${m.pinned ? '<span>📌</span>' : ''}<span class="tw-read-state ${statusClass}">${revoked ? 'ยกเลิกแล้ว' : statusLabel}</span></div>${reply}<div class="tw-message-body">${body}</div>${mediaHtml}<button type="button" class="tw-message-receipt" data-receipts-id="${esc(m.id)}">👁️ อ่านแล้ว ${receiptNames.length} คน</button></article>`; }).join(''); box.scrollTop = box.scrollHeight;
+    box.innerHTML = rows.map((m) => {
+      const mine = m.senderUid === state.user.uid; const read = messageIsRead(m); const revoked = Boolean(m.revokedAt); const receiptNames = readReceiptNames(m);
+      const reply = m.replyTo ? `<div class="tw-reply-preview">ตอบกลับ ${esc(m.replyTo.senderName || '')}: ${esc(m.replyTo.text || '')}</div>` : '';
+      const statusLabel = mine ? 'ส่งแล้ว' : (read ? 'อ่านแล้ว' : 'ยังไม่อ่าน'); const statusClass = mine ? 'is-sent' : (read ? 'is-read' : 'is-unread');
+      const readAction = mine || revoked ? '' : `<button type="button" data-read-id="${esc(m.id)}" data-read-value="${read ? 'false' : 'true'}">${read ? 'ทำเป็นยังไม่อ่าน' : 'ทำเป็นอ่านแล้ว'}</button>`;
+      const ownerActions = mine && !revoked ? `<button type="button" data-edit-id="${esc(m.id)}">✏️ แก้ไขข้อความ</button><button type="button" data-revoke-id="${esc(m.id)}">↩️ ยกเลิกข้อความ</button>` : '';
+      const managerActions = isManager() ? `<button type="button" data-pin-id="${esc(m.id)}">📌 ${m.pinned ? 'ยกเลิกปักหมุด' : 'ปักหมุด'}</button>` : '';
+      const deleteAction = mine || isManager() ? `<button type="button" data-delete-id="${esc(m.id)}">🗑️ ลบข้อความ</button>` : '';
+      const menu = `<div class="tw-message-menu"><button type="button" class="tw-message-menu-trigger" data-message-menu="${esc(m.id)}" aria-label="ตัวเลือกข้อความ" aria-haspopup="menu" aria-expanded="false">⋯</button><div class="tw-message-menu-list" data-message-id="${esc(m.id)}" role="menu" hidden><button type="button" data-reply-id="${esc(m.id)}">↩️ ตอบกลับ</button>${readAction}<button type="button" data-receipts-id="${esc(m.id)}">👁️ อ่านแล้ว ${receiptNames.length} คน</button>${ownerActions}${managerActions}${deleteAction}</div></div>`;
+      const body = revoked ? '<em class="tw-revoked-message">ยกเลิกข้อความแล้ว</em>' : esc(m.text || '');
+      return `<article class="tw-message ${mine ? 'is-mine' : ''} ${read ? 'is-read' : 'is-unread'} ${revoked ? 'is-revoked' : ''}">${menu}<div class="tw-message-meta"><span class="tw-online-dot ${m.senderOnline ? 'is-online' : ''}"></span><strong>${esc(m.senderName || 'สมาชิก')}</strong><span>${esc(formatTime(m.createdAt))}</span>${m.editedAt && !revoked ? '<span class="tw-edited-label">แก้ไขแล้ว</span>' : ''}${m.pinned ? '<span>📌</span>' : ''}<span class="tw-read-state ${statusClass}">${revoked ? 'ยกเลิกแล้ว' : statusLabel}</span></div>${reply}<div class="tw-message-body">${body}</div>${renderMessageMedia(m)}<button type="button" class="tw-message-receipt" data-receipts-id="${esc(m.id)}">👁️ อ่านแล้ว ${receiptNames.length} คน</button></article>`;
+    }).join('');
+    box.scrollTop = box.scrollHeight;
   }
 
   function showMessageEditModal(message) { openModal('แก้ไขข้อความ', `<label class="tw-field">ข้อความ<textarea id="twModalEditText" rows="4" maxlength="2500" required>${esc(message.text || '')}</textarea></label>`, 'บันทึกการแก้ไข'); $('twModalForm').dataset.action = 'edit-message'; $('twModalForm').dataset.messageId = message.id; }
@@ -96,11 +188,31 @@
   }
 
   async function sendMessage(event) {
-    event.preventDefault(); if (!state.group || !state.user) return; const text = $('twMessageText').value.trim(); const input = $('twAttachment'); const file = input.files[0]; if (!text && !file) return;
+    event.preventDefault();
+    if (!state.group || !state.user) return;
+    const text = $('twMessageText').value.trim();
+    const files = state.messageFiles.slice();
+    if (!text && !files.length) return;
     const button = $('twMessageForm').querySelector('button[type="submit"]'); button.disabled = true;
-    try { let attachmentUrl = null; let attachmentType = null; let attachmentName = null; if (file) { if (file.size > 25 * 1024 * 1024 || !(file.type.startsWith('image/') || file.type.startsWith('video/'))) throw new Error('รองรับเฉพาะรูป/วิดีโอขนาดไม่เกิน 25 MB'); const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-'); const ref = storage.ref(`team-attachments/${state.group.id}/${Date.now()}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-${safeName}`); const uploaded = await ref.put(file, { contentType: file.type }); attachmentUrl = await uploaded.ref.getDownloadURL(); attachmentType = file.type; attachmentName = file.name; }
-      await db.collection(`teamGroups/${state.group.id}/messages`).add({ senderUid: state.user.uid, senderName: displayName(), senderPhoto: state.user.photoURL || null, senderOnline: true, text, attachmentUrl, attachmentType, attachmentName, replyTo: state.reply ? { messageId: state.reply.id, senderName: state.reply.senderName || '', text: String(state.reply.text || '').slice(0, 300) } : null, pinned: false, readBy: {}, createdAt: timestamp() }); $('twMessageText').value = ''; input.value = ''; $('twAttachmentName').textContent = ''; cancelReply();
-    } catch (error) { flash(file ? storageErrorMessage(error) : (error.message || 'ส่งข้อความไม่สำเร็จ'), 'error'); } finally { button.disabled = false; }
+    try {
+      let attachments = [];
+      let uploadWarning = '';
+      if (files.length) {
+        try {
+          attachments = await uploadMessageFiles(files);
+        } catch (error) {
+          if (!text || !isStorageQuotaError(error)) throw error;
+          attachments = error.uploaded || [];
+          uploadWarning = storageErrorMessage(error);
+        }
+      }
+      const first = attachments[0] || {};
+      await db.collection(`teamGroups/${state.group.id}/messages`).add({ senderUid: state.user.uid, senderName: displayName(), senderPhoto: state.user.photoURL || null, senderOnline: true, text, attachments, attachmentUrl: first.url || null, attachmentType: first.type || null, attachmentName: first.name || null, replyTo: state.reply ? { messageId: state.reply.id, senderName: state.reply.senderName || '', text: String(state.reply.text || '').slice(0, 300) } : null, pinned: false, readBy: {}, createdAt: timestamp() });
+      $('twMessageText').value = ''; clearSelectedMessageFiles(); cancelReply();
+      if (uploadWarning) flash(`ส่งข้อความแล้ว แต่ไม่ได้แนบรูป: ${uploadWarning}`, 'error');
+    } catch (error) {
+      flash(files.length ? storageErrorMessage(error) : (error.message || 'ส่งข้อความไม่สำเร็จ'), 'error');
+    } finally { button.disabled = false; }
   }
   function cancelReply() { state.reply = null; $('twReplyPreview').hidden = true; $('twCancelReply').hidden = true; }
 
@@ -135,9 +247,12 @@
   async function handleModalSubmit(event) { event.preventDefault(); try { const action = $('twModalForm').dataset.action; if (action === 'create-group' || action === 'edit-group') await createOrUpdateGroup(); if (action === 'add-document') await addDocument(); if (action === 'add-meeting') await addMeeting(); if (action === 'edit-message') { const text = modalValue('twModalEditText'); if (!text) throw new Error('ข้อความต้องไม่ว่าง'); await db.doc(`teamGroups/${state.group.id}/messages/${$('twModalForm').dataset.messageId}`).update({ text, editedAt: timestamp(), updatedAt: timestamp() }); closeModal(); } if (action === 'web-meeting') { cleanupWebMeeting(); closeModal(); } if (action === 'close-modal') closeModal(); } catch (error) { flash(storageErrorMessage(error), 'error'); } }
   async function updatePresence(online) { if (!state.user || !state.group) return; await db.doc(`teamGroups/${state.group.id}/members/${state.user.uid}`).update({ online, lastSeen: timestamp() }).catch(() => {}); }
 
+  $('twMessages').addEventListener('error', (event) => { if (!event.target.matches('.tw-message-media')) return; const fallback = document.createElement('div'); fallback.className = 'tw-attachment-unavailable'; fallback.textContent = 'ไฟล์แนบไม่พร้อมใช้งาน'; event.target.replaceWith(fallback); }, true);
+
   document.addEventListener('click', async (event) => {
     const groupButton = event.target.closest('[data-group-id]'); if (groupButton) return selectGroup(groupButton.dataset.groupId);
     const tab = event.target.closest('[data-tab]'); if (tab) return setTab(tab.dataset.tab);
+    const removeAttachment = event.target.closest('[data-remove-attachment]'); if (removeAttachment) { removeSelectedMessageFile(Number(removeAttachment.dataset.removeAttachment)); return; }
     const menuTrigger = event.target.closest('[data-message-menu]'); if (menuTrigger) { const id = menuTrigger.dataset.messageMenu; const menu = document.querySelector(`.tw-message-menu-list[data-message-id="${CSS.escape(id)}"]`); const isOpen = menu && !menu.hidden; closeMessageMenus(isOpen ? '' : id); if (menu) { menu.hidden = isOpen; menuTrigger.setAttribute('aria-expanded', String(!isOpen)); } return; }
     if (!event.target.closest('.tw-message-menu')) closeMessageMenus();
     const menuItem = event.target.closest('.tw-message-menu-list button'); if (menuItem) closeMessageMenus();
@@ -157,7 +272,7 @@
     const deleteDoc = event.target.closest('[data-delete-doc]'); if (deleteDoc) { const confirmed = window.bcxConfirm ? await window.bcxConfirm('ลบเอกสาร', 'ต้องการลบรายการเอกสารนี้หรือไม่?') : window.confirm('ต้องการลบรายการเอกสารนี้หรือไม่?'); if (!confirmed) return; await db.doc(`teamGroups/${state.group.id}/documents/${deleteDoc.dataset.deleteDoc}`).delete(); loadDocuments(); return; }
     const deleteMeeting = event.target.closest('[data-delete-meeting]'); if (deleteMeeting) { const confirmed = window.bcxConfirm ? await window.bcxConfirm('ลบนัดหมาย', 'ต้องการลบนัดหมายนี้หรือไม่?') : window.confirm('ต้องการลบนัดหมายนี้หรือไม่?'); if (!confirmed) return; await db.doc(`teamGroups/${state.group.id}/meetings/${deleteMeeting.dataset.deleteMeeting}`).delete(); loadMeetings(); }
   });
-  $('twGroupSearch').addEventListener('input', renderGroups); $('twMessageSearch').addEventListener('input', renderMessages); $('twMessageForm').addEventListener('submit', sendMessage); $('twCancelReply').addEventListener('click', cancelReply); $('twAttachment').addEventListener('change', () => { $('twAttachmentName').textContent = $('twAttachment').files[0]?.name || ''; }); $('twMarkAllRead').addEventListener('click', () => markAllMessagesRead().catch((e) => flash(e.message, 'error'))); $('twShowUnread').addEventListener('click', () => { state.messageFilter = state.messageFilter === 'unread' ? 'all' : 'unread'; $('twShowUnread').classList.toggle('is-active', state.messageFilter === 'unread'); $('twShowUnread').textContent = state.messageFilter === 'unread' ? 'แสดงทั้งหมด' : 'เฉพาะยังไม่อ่าน'; renderMessages(); }); $('twModalForm').addEventListener('submit', handleModalSubmit); $('twModal').addEventListener('close', cleanupWebMeeting); $('twCreateGroup').addEventListener('click', showCreateModal); $('twEditGroup').addEventListener('click', showGroupModal); $('twAddDocument').addEventListener('click', showDocumentModal); $('twAddMeeting').addEventListener('click', showMeetingModal); $('twCopyGroupLink').addEventListener('click', () => copyGroupLink().catch((e) => flash(e.message, 'error'))); $('twCopyInvite').addEventListener('click', () => copyInvite().catch((e) => flash(e.message, 'error'))); $('twJoinInvite').addEventListener('click', () => { const id = new URLSearchParams(location.search).get('invite'); if (id) joinInvite(id).catch((e) => flash(e.message, 'error')); }); $('twNotifyPermission').addEventListener('click', async () => { if (!('Notification' in window)) return flash('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน', 'error'); const result = await Notification.requestPermission(); flash(result === 'granted' ? 'เปิดการแจ้งเตือนบนอุปกรณ์นี้แล้ว' : 'ยังไม่ได้อนุญาตการแจ้งเตือน', result === 'granted' ? 'info' : 'error'); }); document.addEventListener('change', (event) => { if (event.target.id === 'twModalMeetingProvider') syncMeetingProviderFields(); });
+  $('twGroupSearch').addEventListener('input', renderGroups); $('twMessageSearch').addEventListener('input', renderMessages); $('twMessageForm').addEventListener('submit', sendMessage); $('twCancelReply').addEventListener('click', cancelReply); $('twClearAttachments').addEventListener('click', clearSelectedMessageFiles); $('twAttachment').addEventListener('change', (event) => { try { selectMessageFiles(event.target.files); } catch (error) { event.target.value = ''; flash(error.message, 'error'); } }); $('twMarkAllRead').addEventListener('click', () => markAllMessagesRead().catch((e) => flash(e.message, 'error'))); $('twShowUnread').addEventListener('click', () => { state.messageFilter = state.messageFilter === 'unread' ? 'all' : 'unread'; $('twShowUnread').classList.toggle('is-active', state.messageFilter === 'unread'); $('twShowUnread').textContent = state.messageFilter === 'unread' ? 'แสดงทั้งหมด' : 'เฉพาะยังไม่อ่าน'; renderMessages(); }); $('twModalForm').addEventListener('submit', handleModalSubmit); $('twModal').addEventListener('close', cleanupWebMeeting); $('twCreateGroup').addEventListener('click', showCreateModal); $('twEditGroup').addEventListener('click', showGroupModal); $('twAddDocument').addEventListener('click', showDocumentModal); $('twAddMeeting').addEventListener('click', showMeetingModal); $('twCopyGroupLink').addEventListener('click', () => copyGroupLink().catch((e) => flash(e.message, 'error'))); $('twCopyInvite').addEventListener('click', () => copyInvite().catch((e) => flash(e.message, 'error'))); $('twJoinInvite').addEventListener('click', () => { const id = new URLSearchParams(location.search).get('invite'); if (id) joinInvite(id).catch((e) => flash(e.message, 'error')); }); $('twNotifyPermission').addEventListener('click', async () => { if (!('Notification' in window)) return flash('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน', 'error'); const result = await Notification.requestPermission(); flash(result === 'granted' ? 'เปิดการแจ้งเตือนบนอุปกรณ์นี้แล้ว' : 'ยังไม่ได้อนุญาตการแจ้งเตือน', result === 'granted' ? 'info' : 'error'); }); document.addEventListener('change', (event) => { if (event.target.id === 'twModalMeetingProvider') syncMeetingProviderFields(); });
 
   auth.onAuthStateChanged(async (user) => { stopListeners(); cleanupWebMeeting(); state.user = user; state.group = null; state.meetings = []; state.messageFilter = 'all'; if (!user) { setAuthState('กรุณาเข้าสู่ระบบก่อนใช้พื้นที่ทำงานทีม', 'error'); $('twCreateGroup').hidden = true; return; } state.admin = Boolean(user.emailVerified && adminEmails.has((user.email || '').toLowerCase())); try { const token = await user.getIdTokenResult(); state.admin = state.admin || token.claims.admin === true; } catch {} $('twCreateGroup').hidden = !state.admin; setAuthState(`เข้าสู่ระบบแล้ว: ${displayName(user)}`, 'info'); const inviteId = new URLSearchParams(location.search).get('invite'); if (inviteId) { $('twInviteBanner').hidden = false; $('twInviteBanner').innerHTML = `🔗 พบลิงก์เชิญเข้ากลุ่ม <button id="twInviteAction" class="tw-btn tw-btn-primary" type="button">ตรวจสอบและเข้าร่วม</button>`; $('twInviteAction').addEventListener('click', () => joinInvite(inviteId).catch((e) => flash(e.message, 'error'))); } try { await loadGroups(); if (state.group) updatePresence(true); } catch (error) { flash(`โหลดกลุ่มไม่สำเร็จ: ${error.message}`, 'error'); } });
   window.addEventListener('beforeunload', () => { cleanupWebMeeting(); updatePresence(false); });
