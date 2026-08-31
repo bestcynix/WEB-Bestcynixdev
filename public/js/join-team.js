@@ -1074,6 +1074,7 @@
       // Notification for Admin Team
       await db.collection('joinTeamNotifications').add({
         type: 'submitted',
+        projectSlug: ROUTE_PROJECT_SLUG || null,
         applicationId: applicationRef.id,
         applicantName: `${payload.applicant.nickname} (${payload.applicant.firstName} ${payload.applicant.lastName})`,
         positionName: position.name,

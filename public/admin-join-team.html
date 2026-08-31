@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20260829_2" />
+  <link rel="stylesheet" href="css/style.css?v=20260831_3" />
   <link rel="stylesheet" href="css/responsive-system.css?v=20260828_1" />
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -97,6 +97,10 @@
     .jt-admin-portfolio-links { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.45rem; }
     .jt-admin-portfolio-link { display:inline-flex; align-items:center; gap:.35rem; color:var(--accent); border:1px solid rgba(50,255,201,.25); background:rgba(50,255,201,.07); border-radius:9px; padding:.35rem .6rem; font-size:.78rem; text-decoration:none; overflow-wrap:anywhere; }
     .jt-admin-portfolio-link:hover { background:rgba(50,255,201,.14); }
+    .admin-project-picker { display:inline-flex; align-items:center; gap:.45rem; padding:.28rem .5rem .28rem .7rem; border:1px solid rgba(50,255,201,.25); border-radius:12px; background:rgba(5,20,38,.8); color:var(--muted); font-size:.72rem; font-weight:700; }
+    .admin-project-picker .jt-select { min-width:180px; width:auto; margin:0; padding:.38rem .6rem; font-size:.78rem; color:#fff; background:#08182b; }
+    .admin-project-context { display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; margin:-.55rem 0 1rem; padding:.65rem .85rem; border:1px solid rgba(50,255,201,.18); border-radius:12px; background:linear-gradient(90deg,rgba(50,255,201,.08),rgba(2,132,199,.06)); color:var(--muted); font-size:.8rem; }
+    .admin-project-context strong { color:#fff; }
     @media (max-width: 768px) { .project-registry-buttons { width: 100%; justify-content: flex-start; } }
 
     /* Mobile Responsive Overrides */
@@ -123,6 +127,8 @@
         justify-content: flex-start !important;
         flex-wrap: wrap !important;
       }
+      .admin-project-picker { width:100%; justify-content:space-between; }
+      .admin-project-picker .jt-select { flex:1; min-width:0; }
     }
     .jt-interview-admin-box { border:1px solid rgba(50,255,201,.22); border-radius:12px; padding:.9rem; background:rgba(50,255,201,.05); }
     .jt-interview-admin-head, .jt-interview-admin-actions { display:flex; justify-content:space-between; align-items:center; gap:.7rem; flex-wrap:wrap; }
@@ -249,14 +255,20 @@
         <div class="jt-title-bar-wrap" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;">
           <div>
             <h1 style="font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:.2rem;">ระบบรับสมัครงาน</h1>
-            <p style="font-size:.86rem;color:var(--muted);">จัดการฟอร์ม ตำแหน่ง และใบสมัครทั้งหมด</p>
+            <p id="adminProjectSubtitle" style="font-size:.86rem;color:var(--muted);">จัดการฟอร์ม ตำแหน่ง และใบสมัครของโปรเจกต์นี้</p>
           </div>
           <div class="jt-title-actions" style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+            <label class="admin-project-picker"><span>โปรเจกต์</span><select id="adminProjectSelect" class="jt-select" aria-label="เลือกโปรเจกต์ที่ต้องการจัดการ"></select></label>
             <span id="adminStatusBadge" class="jt-status-badge jt-status-closed">กำลังโหลด...</span>
             <button id="btnToggleOpen" class="jt-admin-btn secondary">⏳ เปลี่ยนสถานะ</button>
             <a id="adminPublicFormLink" href="join-team" target="_blank" class="jt-admin-btn info">🔗 ดูหน้า Public</a>
-            <a href="admin-join-team?project=mc-skyline" class="jt-admin-btn secondary">🎮 ตั้งค่า Mc-Skyline</a>
+            <a id="adminProjectSettingsLink" href="admin-join-team?project=mc-skyline" class="jt-admin-btn secondary">⚙️ ตั้งค่าโปรเจกต์นี้</a>
           </div>
+        </div>
+        <div class="admin-project-context" aria-live="polite">
+          <span>🧭 พื้นที่จัดการ</span>
+          <strong id="adminProjectContextName">กำลังโหลดโปรเจกต์...</strong>
+          <span>ข้อมูลใบสมัคร สัญญา ตำแหน่ง และฟอร์มจะแยกตามโปรเจกต์ที่เลือก</span>
         </div>
 
         <!-- Stats row -->
@@ -394,7 +406,7 @@
         <div id="tab-applications" class="admin-tab-content active">
           <div class="jt-admin-panel" style="margin-bottom:1rem;">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem;">
-              <h3 style="margin:0;border:none;padding:0;">ใบสมัครทั้งหมด</h3>
+              <h3 id="applicationsPanelTitle" style="margin:0;border:none;padding:0;">ใบสมัครของโปรเจกต์นี้</h3>
               <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
                 <select id="appFilterStatus" class="jt-select" style="padding:.4rem .8rem;font-size:.84rem;width:auto;">
                   <option value="">📋 ทุกสถานะ</option>

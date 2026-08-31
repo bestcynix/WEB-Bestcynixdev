@@ -55,6 +55,41 @@
   ];
   let projectRegistry = [];
 
+  const isProjectScoped = FORM_DOC_ID !== 'default';
+  const getScopedApplications = () => isProjectScoped
+    ? allApplications.filter((app) => (app.projectSlug || app.formId || '') === FORM_DOC_ID)
+    : allApplications;
+
+  const renderProjectContext = () => {
+    const select = $('adminProjectSelect');
+    const choices = [{ id: 'default', title: 'ภาพรวมทุกโปรเจกต์' }, ...DEFAULT_PROJECTS, ...projectRegistry]
+      .reduce((map, item) => {
+        const id = item.id || item.slug;
+        if (id && !map.some((choice) => choice.id === id)) map.push({ id, title: item.title || id });
+        return map;
+      }, []);
+    if (select) {
+      select.innerHTML = choices.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.title)}</option>`).join('');
+      if (choices.some((item) => item.id === FORM_DOC_ID)) select.value = FORM_DOC_ID;
+      else if (FORM_DOC_ID !== 'default') select.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(FORM_DOC_ID)}" selected>โปรเจกต์ปัจจุบัน (${escapeHtml(FORM_DOC_ID)})</option>`);
+      select.onchange = () => {
+        const value = select.value;
+        window.location.href = value === 'default' ? 'admin-join-team' : `admin-join-team?project=${encodeURIComponent(value)}`;
+      };
+    }
+    const current = choices.find((item) => item.id === FORM_DOC_ID);
+    const title = current?.title || (FORM_DOC_ID === 'default' ? 'ภาพรวมทุกโปรเจกต์' : FORM_DOC_ID);
+    if ($('adminProjectContextName')) $('adminProjectContextName').textContent = title;
+    if ($('adminProjectSubtitle')) $('adminProjectSubtitle').textContent = isProjectScoped
+      ? `กำลังจัดการเฉพาะโปรเจกต์ ${title} — ฟอร์ม ตำแหน่ง ใบสมัคร และสัญญาแยกจากทีมอื่น`
+      : 'ภาพรวมทุกโปรเจกต์ — เลือกโปรเจกต์ด้านบนเพื่อจัดการแยกเป็นรายทีม';
+    if ($('applicationsPanelTitle')) $('applicationsPanelTitle').textContent = isProjectScoped ? `ใบสมัครของ ${title}` : 'ใบสมัครจากทุกโปรเจกต์';
+    const publicLink = $('adminPublicFormLink');
+    if (publicLink) publicLink.href = isProjectScoped ? `join-team/${encodeURIComponent(FORM_DOC_ID)}` : 'join-team';
+    const settingsLink = $('adminProjectSettingsLink');
+    if (settingsLink) settingsLink.href = isProjectScoped ? `admin-join-team?project=${encodeURIComponent(FORM_DOC_ID)}` : 'admin-join-team';
+  };
+
   const projectRecordFromCard = (card) => {
     const slug = (card.querySelector('[data-field="slug"]')?.value || '').trim().toLowerCase();
     return {
@@ -119,10 +154,12 @@
   const loadProjectRegistry = () => {
     db.collection(PROJECTS_COL).onSnapshot((snapshot) => {
       projectRegistry = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      renderProjectContext();
       renderProjectRegistry();
     }, (err) => {
       console.warn('Project registry load error:', err);
       projectRegistry = [];
+      renderProjectContext();
       renderProjectRegistry();
       showToast('โหลดทะเบียนโปรเจกต์ไม่สำเร็จ', 'ตรวจสอบ Firestore Rules หรือสิทธิ์ Admin', 'error');
     });
@@ -685,7 +722,7 @@
   const recalculatePositionSlots = async () => {
     if (!formConfig || !formConfig.positions) return;
     const approvedByPos = {};
-    allApplications.forEach(app => {
+    getScopedApplications().forEach(app => {
       if (app.status === 'approved' || app.status === 'contract_signed') {
         const key = app.positionId || app.positionName;
         if (key) approvedByPos[key] = (approvedByPos[key] || 0) + 1;
@@ -1390,6 +1427,7 @@
   const renderContractsRegistry = () => {
     const tbody = $('contractsTableBody');
     if (!tbody) return;
+    const scopedApplications = getScopedApplications();
 
     const filterPos = $('ctrFilterPosition')?.value || '';
     const filterStatus = $('ctrFilterStatus')?.value || '';
@@ -1399,7 +1437,7 @@
     // Populate Position Filter Dropdown if empty
     const posSelect = $('ctrFilterPosition');
     if (posSelect && posSelect.options.length <= 1) {
-      const uniquePositions = Array.from(new Set(allApplications.map(a => a.positionName).filter(Boolean)));
+      const uniquePositions = Array.from(new Set(scopedApplications.map(a => a.positionName).filter(Boolean)));
       uniquePositions.forEach(p => {
         const opt = document.createElement('option');
         opt.value = p;
@@ -1414,8 +1452,8 @@
     let statPending = 0;
     let statVoided = 0;
 
-    const listWithRefs = allApplications.map(app => {
-      const refNo = computeContractRefNo(app, allApplications);
+    const listWithRefs = scopedApplications.map(app => {
+      const refNo = computeContractRefNo(app, scopedApplications);
       const isVoided = Boolean(app.contract && app.contract.voided) || app.status === 'cancelled';
       const isSigned = !isVoided && Boolean(app.contract && app.contract.signed);
       const isPending = !isVoided && !isSigned;
@@ -1584,7 +1622,8 @@
 
   // Export Contracts CSV
   const exportContractsCsv = () => {
-    if (allApplications.length === 0) {
+    const scopedApplications = getScopedApplications();
+    if (scopedApplications.length === 0) {
       showToast('ไม่มีข้อมูลสัญญาสำหรับส่งออก', '', 'warning');
       return;
     }
@@ -1592,9 +1631,9 @@
     let csvContent = '\uFEFF'; // UTF-8 BOM
     csvContent += 'ลำดับ,เลขที่สัญญา,ชื่อ-นามสกุล,ชื่อเล่น,ตำแหน่ง,อีเมล,เบอร์โทร,วันที่ทำสัญญา,สถานะการลงนาม,ผู้เซ็นสัญญา,สถานะยกเลิก\n';
 
-    allApplications.forEach((app, idx) => {
+    scopedApplications.forEach((app, idx) => {
       const a = app.applicant || {};
-      const ref = computeContractRefNo(app, allApplications);
+      const ref = computeContractRefNo(app, scopedApplications);
       const fullName = ((a.firstName || '') + ' ' + (a.lastName || '')).trim() || '-';
       const nick = a.nickname || '-';
       const pos = app.positionName || '-';
@@ -1653,7 +1692,8 @@
         return tB - tA;
       });
       updateStats();
-      renderAppTable(allApplications);
+      renderAppTable(getScopedApplications());
+      renderContractsRegistry();
       recalculatePositionSlots();
     };
 
@@ -1663,10 +1703,11 @@
   };
 
   const updateStats = () => {
-    if ($('statTotal')) $('statTotal').textContent = allApplications.length;
-    if ($('statReviewing')) $('statReviewing').textContent = allApplications.filter(a => a.status === 'reviewing').length;
-    if ($('statApproved')) $('statApproved').textContent = allApplications.filter(a => a.status === 'approved').length;
-    if ($('statRejected')) $('statRejected').textContent = allApplications.filter(a => a.status === 'rejected').length;
+    const scopedApplications = getScopedApplications();
+    if ($('statTotal')) $('statTotal').textContent = scopedApplications.length;
+    if ($('statReviewing')) $('statReviewing').textContent = scopedApplications.filter(a => a.status === 'reviewing').length;
+    if ($('statApproved')) $('statApproved').textContent = scopedApplications.filter(a => a.status === 'approved').length;
+    if ($('statRejected')) $('statRejected').textContent = scopedApplications.filter(a => a.status === 'rejected').length;
   };
 
   const renderAppTable = (list) => {
@@ -2047,7 +2088,10 @@
   const loadNotifications = () => {
     db.collection(NOTIF_COL).orderBy('createdAt', 'desc').limit(50).onSnapshot((snap) => {
       const notifs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const unread = notifs.filter(n => !n.read).length;
+      const scopedNotifs = isProjectScoped
+        ? notifs.filter(n => n.projectSlug === FORM_DOC_ID)
+        : notifs;
+      const unread = scopedNotifs.filter(n => !n.read).length;
 
       const badge = $('notifBadge');
       if (badge) {
@@ -2057,7 +2101,7 @@
 
       const list = $('notifList');
       if (!list) return;
-      if (!notifs.length) {
+      if (!scopedNotifs.length) {
         list.innerHTML = `
           <div style="text-align:center;padding:2.5rem;color:var(--muted);">
             <div style="font-size:2rem;margin-bottom:.5rem;">📭</div>
@@ -2067,7 +2111,7 @@
         `;
         return;
       }
-      list.innerHTML = notifs.map(n => {
+      list.innerHTML = scopedNotifs.map(n => {
         const icon = n.type === 'submitted' ? '🚀' : n.type === 'approved' ? '✅' : '❌';
         const typeLabel = n.type === 'submitted' ? 'ใบสมัครใหม่' : n.type === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ';
         const date = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleString('th-TH') : '';
@@ -2125,7 +2169,9 @@
   $('btnMarkAllRead')?.addEventListener('click', async () => {
     const snap = await db.collection(NOTIF_COL).where('read', '==', false).get();
     const batch = db.batch();
-    snap.docs.forEach(d => batch.update(d.ref, { read: true }));
+    snap.docs
+      .filter(d => !isProjectScoped || d.data().projectSlug === FORM_DOC_ID)
+      .forEach(d => batch.update(d.ref, { read: true }));
     await batch.commit();
     showToast('อ่านทั้งหมดเรียบร้อยแล้ว', '', 'success');
   });
@@ -2133,7 +2179,7 @@
   // ── CSV Export ────────────────────────────────────────────────────────────
   $('btnExportCsv')?.addEventListener('click', () => {
     const rows = [['ID', 'ชื่อเล่น', 'ชื่อ', 'นามสกุล', 'ตำแหน่ง', 'สถานะ', 'อายุ', 'เพศ', 'วันที่สมัคร']];
-    allApplications.forEach(app => {
+    getScopedApplications().forEach(app => {
       const a = app.applicant || {};
       const date = app.createdAt?.toDate ? app.createdAt.toDate().toLocaleDateString('th-TH') : '-';
       rows.push([app.id, a.nickname || '', a.firstName || '', a.lastName || '', app.positionName || '', app.status || '', a.age?.years || '', a.gender || '', date]);
@@ -2147,8 +2193,8 @@
   });
 
   // ── Filter/Search ─────────────────────────────────────────────────────────
-  $('appFilterStatus')?.addEventListener('change', () => renderAppTable(allApplications));
-  $('appSearchInput')?.addEventListener('input', () => renderAppTable(allApplications));
+  $('appFilterStatus')?.addEventListener('change', () => renderAppTable(getScopedApplications()));
+  $('appSearchInput')?.addEventListener('input', () => renderAppTable(getScopedApplications()));
 
   // ── Status mode conditional ───────────────────────────────────────────────
   $('cfgStatusMode')?.addEventListener('change', () => {
@@ -2159,6 +2205,7 @@
   // ── Init Admin Panel ──────────────────────────────────────────────────────
   const initAdminPanel = () => {
     initTabs();
+    renderProjectContext();
     loadFormConfig();
     loadProjectRegistry();
     loadApplications();

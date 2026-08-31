@@ -550,7 +550,8 @@ service cloud.firestore {
       allow create: if request.resource.data.type == 'submitted'
         && validText(request.resource.data.applicationId, 128)
         && validText(request.resource.data.applicantName, 200)
-        && validText(request.resource.data.positionName, 200);
+        && validText(request.resource.data.positionName, 200)
+        && (!('projectSlug' in request.resource.data) || request.resource.data.projectSlug == null || validText(request.resource.data.projectSlug, 100));
     }
 
     // Interview rooms are private per application. Public users cannot list or read them.
