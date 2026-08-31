@@ -1084,6 +1084,7 @@
 
   // ── Init ──────────────────────────────────────────────────────────────────
   const init = () => {
+    document.body.classList.toggle('jt-is-detail', !IS_DIRECTORY_ROUTE);
     // Set max date for DOB input to today (prevent picking future dates)
     const dobInput = $('jtDob');
     const ageDisplay = $('jtAgeDisplay');

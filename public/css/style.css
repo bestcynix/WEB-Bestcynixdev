@@ -5245,7 +5245,7 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-overview-poster-wrap h3 { color:#fff; margin:0 0 .45rem; font-size:1.05rem; }
 .jt-overview-poster-wrap p { color:var(--muted); margin:0; font-size:.87rem; line-height:1.75; }
 .jt-overview-filters { display:grid; grid-template-columns:minmax(0, 1fr) 220px; gap:.75rem; margin-bottom:1rem; }
-.jt-role-directory { display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:.75rem; }
+.jt-role-directory { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:.85rem; }
 .jt-role-card { border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:1rem; background:rgba(5,11,22,.72); }
 .jt-role-card h3 { color:#fff; margin:0 0 .35rem; font-size:1rem; }
 .jt-role-card p { color:var(--muted); font-size:.82rem; line-height:1.6; margin:0 0 .65rem; }
@@ -5299,13 +5299,14 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-project-group-head p { color:var(--muted); margin:0; font-size:.86rem; line-height:1.6; overflow-wrap:anywhere; }
 .jt-project-group-meta { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.65rem; color:#ccecff; font-size:.75rem; }
 .jt-project-group-meta span { border:1px solid rgba(50,255,201,.2); border-radius:999px; padding:.2rem .5rem; background:rgba(50,255,201,.07); }
-.jt-project-role-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:.7rem; margin-top:1rem; }
+.jt-project-role-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:.85rem; margin-top:1rem; }
 .jt-role-card { min-width:0; }
-.jt-role-card h3, .jt-role-card p { overflow-wrap:anywhere; }
+.jt-role-card h3, .jt-role-card p { overflow-wrap:break-word; word-break:normal; }
 .jt-project-open-link { flex:0 0 auto; white-space:nowrap; }
 .jt-project-apply-link { display:inline-flex; margin-top:.9rem; color:var(--accent); font-weight:700; text-decoration:none; font-size:.86rem; }
 .jt-project-group-head { display:grid; grid-template-columns:1fr; }
 .jt-project-open-link { width:100%; justify-content:center; box-sizing:border-box; }
+.jt-is-detail .jt-project-role-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .jt-interview-panel { border:1px solid rgba(50,255,201,.25); border-radius:18px; padding:1.1rem; margin:0 0 1.4rem; background:linear-gradient(135deg,rgba(8,31,50,.94),rgba(5,13,26,.9)); }
 .jt-interview-panel-head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
 .jt-interview-panel-head h2 { margin:.25rem 0; color:#fff; font-size:1.1rem; }
@@ -5320,6 +5321,7 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-toast { position:relative; margin:.5rem; padding:.7rem 1rem; border:1px solid rgba(50,255,201,.35); border-radius:10px; background:#0b1d30; color:#e6f3ff; box-shadow:0 8px 26px rgba(0,0,0,.28); font-size:.82rem; }
 .jt-toast.error { border-color:rgba(248,113,113,.45); color:#fecaca; }
 @media (max-width:640px) {
+  .jt-is-detail .jt-project-role-grid { grid-template-columns:1fr; }
   .jt-project-group-head, .jt-interview-panel-head { display:grid; grid-template-columns:1fr; }
   .jt-project-open-link { width:100%; justify-content:center; }
   .jt-interview-composer { display:grid; grid-template-columns:1fr; }
