@@ -3542,8 +3542,9 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
    JOIN TEAM — Public Form Page
    ========================================================= */
 .jt-hero {
-  padding: 6rem 0 3rem;
+  padding: 3.25rem 0 2rem;
 }
+.jt-page-main { padding-top: 1.5rem !important; }
 .jt-status-badge {
   display: inline-flex;
   align-items: center;
@@ -3845,8 +3846,8 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: clamp(1.15rem, 2.4vw, 1.7rem);
+  margin-bottom: 1.15rem;
 }
 .jt-form-section h3 {
   font-size: 1.1rem;
@@ -3904,6 +3905,25 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
   min-height: 120px;
   line-height: 1.6;
 }
+.jt-form-intro {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1.25rem;
+  margin: .25rem 0 1.15rem;
+  padding:1.25rem 1.35rem;
+  border:1px solid rgba(50,255,201,.25);
+  border-radius:18px;
+  background:linear-gradient(135deg,rgba(9,35,56,.94),rgba(7,16,32,.9));
+  box-shadow:0 14px 30px rgba(0,0,0,.16);
+}
+.jt-form-intro h2 { margin:.25rem 0 .35rem; color:#fff; font-size:clamp(1.1rem,2vw,1.35rem); }
+.jt-form-intro p { margin:0; color:var(--muted); font-size:.84rem; line-height:1.65; }
+.jt-form-steps { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.45rem; }
+.jt-form-steps span { display:inline-flex; align-items:center; gap:.35rem; padding:.38rem .58rem; border-radius:999px; color:#a8bfd4; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); font-size:.72rem; white-space:nowrap; }
+.jt-form-steps span b { display:grid; place-items:center; width:1.35rem; height:1.35rem; border-radius:50%; color:#07111e; background:#7891a8; font-size:.7rem; }
+.jt-form-steps span.is-current { color:#07111e; background:var(--accent); border-color:var(--accent); font-weight:800; }
+.jt-form-steps span.is-current b { background:#07111e; color:var(--accent); }
 /* Weekday Day Buttons with Thai traditional colors */
 .jt-day-grid {
   display: flex;
@@ -5267,6 +5287,7 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-project-stack { align-items:center; margin-top:.85rem; color:#dffdf6; font-size:.75rem; }
 .jt-project-stack strong { margin-right:.15rem; }
 .jt-project-showcase { display:grid; grid-template-columns:minmax(0, 1fr) minmax(280px, .95fr); gap:1rem; align-items:center; margin:1rem 0 1.15rem; padding:1rem; border:1px solid rgba(50,255,201,.2); border-radius:16px; background:rgba(2,10,22,.55); }
+.jt-project-showcase:not(.has-video) { grid-template-columns:1fr; }
 .jt-showcase-copy { display:flex; align-items:flex-start; gap:.85rem; min-width:0; }
 .jt-showcase-copy > div { min-width:0; }
 .jt-showcase-image { width:112px; height:112px; flex:0 0 112px; object-fit:cover; border-radius:16px; border:1px solid rgba(50,255,201,.35); }
@@ -5278,6 +5299,9 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-showcase-video { position:relative; overflow:hidden; aspect-ratio:16/9; border-radius:12px; background:#02060d; }
 .jt-showcase-video iframe { width:100%; height:100%; border:0; display:block; }
 @media (max-width: 640px) {
+  .jt-hero { padding-top: 2.2rem; }
+  .jt-form-intro { align-items:flex-start; flex-direction:column; }
+  .jt-form-steps { justify-content:flex-start; }
   .jt-overview-poster-wrap, .jt-overview-filters { grid-template-columns:1fr; }
   .jt-overview-poster-wrap img { max-height:220px; }
   .jt-overview-link { width:100%; }
@@ -5307,6 +5331,10 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-project-group-head { display:grid; grid-template-columns:1fr; }
 .jt-project-open-link { width:100%; justify-content:center; box-sizing:border-box; }
 .jt-is-detail .jt-project-role-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.jt-detail-roles { margin-top:1.15rem; }
+.jt-detail-roles-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:.8rem; padding:.15rem .1rem; }
+.jt-detail-roles-head h3 { width:100%; color:#fff; font-size:clamp(1.2rem,2.2vw,1.55rem); margin:.15rem 0 0; }
+.jt-detail-roles-head p { color:var(--muted); margin:0; font-size:.86rem; line-height:1.65; }
 .jt-interview-panel { border:1px solid rgba(50,255,201,.25); border-radius:18px; padding:1.1rem; margin:0 0 1.4rem; background:linear-gradient(135deg,rgba(8,31,50,.94),rgba(5,13,26,.9)); }
 .jt-interview-panel-head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
 .jt-interview-panel-head h2 { margin:.25rem 0; color:#fff; font-size:1.1rem; }
