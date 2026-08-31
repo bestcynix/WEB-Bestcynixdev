@@ -793,6 +793,129 @@
     }).join('');
   };
 
+  // ── Application Step Flow ────────────────────────────────────────────────
+  // The form markup stays easy to edit in HTML, while this adapter groups it
+  // into four focused panels for applicants and keeps the existing submit
+  // payload unchanged.
+  let currentFormStep = 1;
+  let formStepFlowReady = false;
+  const initApplicationStepFlow = () => {
+    const form = $('jtForm');
+    if (!form || formStepFlowReady) return;
+
+    const sections = Array.from(form.querySelectorAll(':scope > .jt-form-section'));
+    if (sections.length < 7) return;
+
+    const [personalSection, scheduleSection, socialSection, customSection, portfolioSection, motivationSection, pdpaSection] = sections;
+    const firstSection = personalSection;
+    const positionGroup = $('jtPosition')?.closest('.jt-form-group');
+    const candidateProfile = personalSection.querySelector('.jt-candidate-profile-fields');
+    const submitRow = form.querySelector(':scope > .jt-submit-row');
+
+    const positionSection = document.createElement('section');
+    positionSection.className = 'jt-form-section';
+    positionSection.innerHTML = `
+      <h3>💼 ตำแหน่งและความสามารถ</h3>
+      <p style="font-size:.84rem;color:var(--muted);margin:-.35rem 0 1rem;">เลือกตำแหน่งที่สมัคร และเรียงลำดับความถนัดที่อยากรับผิดชอบให้ทีมพิจารณา</p>
+    `;
+    const positionGrid = document.createElement('div');
+    positionGrid.className = 'jt-form-grid';
+    positionSection.appendChild(positionGrid);
+    if (positionGroup) positionGrid.appendChild(positionGroup);
+    if (candidateProfile) positionGrid.appendChild(candidateProfile);
+
+    const panels = [1, 2, 3, 4].map((step) => {
+      const panel = document.createElement('div');
+      panel.className = 'jt-step-panel';
+      panel.dataset.stepPanel = String(step);
+      panel.setAttribute('aria-label', `ขั้นตอนที่ ${step} จาก 4`);
+      return panel;
+    });
+
+    // Insert before the original first section, then move the original
+    // sections into their step panel. Moving nodes preserves all input IDs,
+    // listeners, and the existing FormData contract.
+    form.insertBefore(panels[0], firstSection);
+    panels.slice(1).forEach((panel) => form.insertBefore(panel, firstSection));
+    panels[0].appendChild(personalSection);
+    panels[1].appendChild(positionSection);
+    if (customSection) panels[1].appendChild(customSection);
+    panels[2].appendChild(scheduleSection);
+    panels[2].appendChild(socialSection);
+    panels[3].appendChild(portfolioSection);
+    panels[3].appendChild(motivationSection);
+    panels[3].appendChild(pdpaSection);
+    if (submitRow) panels[3].appendChild(submitRow);
+
+    const nav = document.createElement('div');
+    nav.className = 'jt-step-actions';
+    nav.innerHTML = `
+      <button type="button" id="jtStepBack" class="btn-secondary">← ย้อนกลับ</button>
+      <span id="jtStepHint" class="jt-step-hint" aria-live="polite"></span>
+      <button type="button" id="jtStepNext" class="btn-primary">ถัดไป →</button>
+    `;
+    form.appendChild(nav);
+
+    const stepLabels = ['โปรไฟล์', 'ตำแหน่ง', 'เวลาทำงาน', 'ส่งใบสมัคร'];
+    const submitMsg = $('jtSubmitMsg');
+    const stepHint = $('jtStepHint');
+    const clearStepMessage = () => {
+      if (submitMsg && submitMsg.classList.contains('error')) {
+        submitMsg.className = 'jt-submit-msg';
+        submitMsg.textContent = '';
+      }
+      if (stepHint) stepHint.classList.remove('error');
+    };
+    const setStepMessage = (message) => {
+      if (stepHint) {
+        stepHint.classList.add('error');
+        stepHint.textContent = `❌ ${message}`;
+      }
+    };
+    const validateCurrentStep = () => {
+      const panel = panels[currentFormStep - 1];
+      if (!panel) return true;
+      if (currentFormStep === 3 && !selectedDays.length) {
+        setStepMessage('กรุณาเลือกวันที่สะดวกทำงานอย่างน้อย 1 วัน');
+        return false;
+      }
+      const controls = Array.from(panel.querySelectorAll('input, select, textarea'))
+        .filter((control) => !control.disabled && control.required);
+      const invalid = controls.find((control) => !control.checkValidity());
+      if (invalid) {
+        invalid.reportValidity();
+        return false;
+      }
+      return true;
+    };
+    const setCurrentFormStep = (step) => {
+      currentFormStep = Math.max(1, Math.min(4, step));
+      panels.forEach((panel, index) => {
+        panel.hidden = index !== currentFormStep - 1;
+      });
+      const stepNodes = Array.from(document.querySelectorAll('.jt-form-steps span'));
+      stepNodes.forEach((node, index) => {
+        node.classList.toggle('is-current', index === currentFormStep - 1);
+        node.classList.toggle('is-complete', index < currentFormStep - 1);
+        node.setAttribute('aria-current', index === currentFormStep - 1 ? 'step' : 'false');
+      });
+      form.dataset.currentStep = String(currentFormStep);
+      const back = $('jtStepBack');
+      const next = $('jtStepNext');
+      if (back) back.hidden = currentFormStep === 1;
+      if (next) next.hidden = currentFormStep === 4;
+      if (stepHint) stepHint.textContent = `ขั้นตอน ${currentFormStep}/4 • ${stepLabels[currentFormStep - 1]}`;
+      clearStepMessage();
+    };
+
+    $('jtStepBack')?.addEventListener('click', () => setCurrentFormStep(currentFormStep - 1));
+    $('jtStepNext')?.addEventListener('click', () => {
+      if (validateCurrentStep()) setCurrentFormStep(currentFormStep + 1);
+    });
+    formStepFlowReady = true;
+    setCurrentFormStep(1);
+  };
+
   // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1240,6 +1363,9 @@
 
     // Social Picker Init
     renderSocialPicker();
+
+    // Turn the long form into four validated steps before attaching submit.
+    initApplicationStepFlow();
 
     // Form submit
     const form = $('jtForm');

@@ -3951,6 +3951,16 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-form-steps span b { display:grid; place-items:center; width:1.35rem; height:1.35rem; border-radius:50%; color:#07111e; background:#7891a8; font-size:.7rem; }
 .jt-form-steps span.is-current { color:#07111e; background:var(--accent); border-color:var(--accent); font-weight:800; }
 .jt-form-steps span.is-current b { background:#07111e; color:var(--accent); }
+.jt-form-steps span.is-complete { color:#d7fff4; border-color:rgba(50,255,201,.45); background:rgba(50,255,201,.1); }
+.jt-form-steps span.is-complete b { color:#07111e; background:#50e3b2; }
+.jt-step-panel[hidden] { display:none !important; }
+.jt-step-actions [hidden] { display:none !important; }
+.jt-step-panel { display:grid; gap:.1rem; }
+.jt-step-actions { display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap; padding:.15rem 0 1.5rem; }
+.jt-step-actions button { min-width:9rem; }
+.jt-step-actions button:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+.jt-step-hint { color:var(--muted); font-size:.82rem; font-weight:700; text-align:center; flex:1; }
+.jt-step-hint.error { color:#f87171; }
 /* Weekday Day Buttons with Thai traditional colors */
 .jt-day-grid {
   display: flex;
