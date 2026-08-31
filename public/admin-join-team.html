@@ -37,6 +37,7 @@
       margin-bottom: 1.5rem;
     }
     .admin-tab-btn {
+      flex: 0 0 auto;
       padding: 0.45rem 1.1rem;
       border-radius: 10px;
       font-size: 0.84rem;
@@ -93,6 +94,20 @@
     .project-registry-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: .8rem; }
     .project-registry-grid label { color: var(--muted); font-size: .78rem; font-weight: 700; }
     .project-registry-grid .jt-input { margin-top: .35rem; width: 100%; }
+    .admin-asset-field { display:grid; gap:.45rem; min-width:0; }
+    .admin-asset-preview { min-height:92px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px dashed rgba(50,255,201,.3); border-radius:12px; background:rgba(2,10,22,.6); color:var(--muted); font-size:.74rem; text-align:center; }
+    .admin-asset-preview img { display:block; width:100%; height:120px; object-fit:cover; }
+    .admin-asset-preview[data-preview="projectImage"] img { width:92px; height:92px; border-radius:12px; object-fit:cover; }
+    .admin-asset-editor { display:grid; gap:.45rem; min-width:0; }
+    .admin-asset-actions { display:flex; gap:.45rem; flex-wrap:wrap; align-items:center; }
+    .admin-asset-actions .jt-admin-btn { position:relative; overflow:hidden; }
+    .admin-asset-actions input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+    .admin-stack-editor { display:grid; gap:.45rem; }
+    .admin-stack-tags { display:flex; flex-wrap:wrap; gap:.35rem; min-height:2rem; }
+    .admin-stack-tag { display:inline-flex; align-items:center; gap:.35rem; padding:.3rem .5rem; border-radius:999px; color:#b9fff0; background:rgba(50,255,201,.09); border:1px solid rgba(50,255,201,.24); font-size:.74rem; }
+    .admin-stack-tag button { border:0; background:transparent; color:#fda4af; cursor:pointer; padding:0; line-height:1; font-size:.95rem; }
+    .admin-stack-add { display:flex; gap:.45rem; min-width:0; }
+    .admin-stack-add .jt-input { flex:1; min-width:0; }
     .project-registry-actions { border-top: 1px solid rgba(255,255,255,.08); padding-top: .85rem; }
     .jt-admin-portfolio-links { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.45rem; }
     .jt-admin-portfolio-link { display:inline-flex; align-items:center; gap:.35rem; color:var(--accent); border:1px solid rgba(50,255,201,.25); background:rgba(50,255,201,.07); border-radius:9px; padding:.35rem .6rem; font-size:.78rem; text-decoration:none; overflow-wrap:anywhere; }
@@ -109,6 +124,7 @@
         overflow-x: auto;
         flex-wrap: nowrap;
         padding-bottom: 0.5rem;
+        justify-content: flex-start;
         -webkit-overflow-scrolling: touch;
       }
       .jt-admin-panel {
@@ -800,7 +816,7 @@
   <script src="js/shared-ui.js?v=20260829_2"></script>
   <script src="js/notifications.js?v=20260826_115"></script>
   <script src="js/audit-logger.js?v=20260826_22"></script>
-  <script src="js/join-team-admin.js?v=20260831_1"></script>
+  <script src="js/join-team-admin.js?v=20260831_2"></script>
   <script src="js/join-team-interview-admin.js?v=20260830_1"></script>
 </body>
 </html>

@@ -49,6 +49,14 @@ service firebase.storage {
       allow read, write: if isAdmin() && isValidImage(10 * 1024 * 1024);
     }
 
+    // Public recruitment artwork. Files are readable by the public pages,
+    // while only verified admins may upload or remove them.
+    match /recruitment-project-assets/{projectSlug}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidImage(10 * 1024 * 1024);
+      allow delete: if isAdmin();
+    }
+
     // Files are public only because the public docs page embeds them.
     // Only verified admins may upload or delete document assets.
     match /document-assets/mc-skyline/{allPaths=**} {

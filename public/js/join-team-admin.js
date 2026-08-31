@@ -43,6 +43,114 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[char]));
   const parseList = (value) => String(value || '').split(/[\n,]/).map((item) => item.trim()).filter(Boolean).slice(0, 30);
+  const safeFileName = (name) => String(name || 'image').replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 90) || 'image';
+  const assetUrl = (value) => {
+    try {
+      const url = new URL(String(value || ''), window.location.origin);
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+    } catch {
+      return '';
+    }
+  };
+  const removeStoredAsset = async (url) => {
+    if (!url || !url.includes('firebasestorage.googleapis.com')) return;
+    try { await firebase.storage().refFromURL(url).delete(); } catch (err) { console.warn('Recruitment asset cleanup skipped:', err); }
+  };
+  const syncStackEditor = (card) => {
+    const hidden = card?.querySelector('[data-field="stack"]');
+    const tags = Array.from(card?.querySelectorAll('.admin-stack-tag') || []).map((tag) => tag.dataset.value || '').filter(Boolean);
+    if (hidden) hidden.value = tags.join('\n');
+  };
+  const renderStackEditor = (card) => {
+    const hidden = card?.querySelector('[data-field="stack"]');
+    const list = card?.querySelector('[data-stack-list]');
+    if (!hidden || !list) return;
+    const values = parseList(hidden.value);
+    list.innerHTML = values.map((value) => '<span class="admin-stack-tag" data-value="' + escapeHtml(value) + '"><span>' + escapeHtml(value) + '</span><button type="button" data-remove-stack="' + escapeHtml(value) + '" aria-label="ลบ ' + escapeHtml(value) + '">×</button></span>').join('');
+    list.querySelectorAll('[data-remove-stack]').forEach((button) => button.addEventListener('click', () => {
+      button.closest('.admin-stack-tag')?.remove();
+      syncStackEditor(card);
+    }));
+  };
+  const addStackValue = (card, rawValue) => {
+    const hidden = card?.querySelector('[data-field="stack"]');
+    if (!hidden) return;
+    const current = parseList(hidden.value);
+    parseList(rawValue).forEach((value) => { if (!current.some((item) => item.toLowerCase() === value.toLowerCase())) current.push(value); });
+    hidden.value = current.slice(0, 30).join('\n');
+    renderStackEditor(card);
+  };
+  const renderAssetPreview = (card, field) => {
+    const preview = card?.querySelector('[data-preview="' + field + '"]');
+    const input = card?.querySelector('[data-field="' + field + '"]');
+    if (!preview || !input) return;
+    const url = assetUrl(input.value);
+    preview.innerHTML = url
+      ? '<img src="' + escapeHtml(url) + '" alt="ตัวอย่าง ' + (field === 'projectImage' ? 'รูปทีม' : 'แบนเนอร์รับสมัคร') + '" loading="lazy" onerror="this.onerror=null;this.closest(\'[data-preview]\').innerHTML=\'<span>ไม่สามารถแสดงภาพนี้ได้</span>\';">'
+      : '<span>ยังไม่มีภาพตัวอย่าง</span>';
+  };
+  const bindProjectCardEditors = (card) => {
+    ['projectImage', 'projectBanner'].forEach((field) => {
+      const input = card.querySelector('[data-field="' + field + '"]');
+      const fileInput = card.querySelector('[data-file-field="' + field + '"]');
+      const clearButton = card.querySelector('[data-clear-asset="' + field + '"]');
+      input?.addEventListener('input', () => renderAssetPreview(card, field));
+      fileInput?.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+        if (!file.type.startsWith('image/') || file.size > 10 * 1024 * 1024) {
+          showToast('ไฟล์ภาพไม่ถูกต้อง', 'รองรับเฉพาะรูปภาพและขนาดไม่เกิน 10MB', 'error');
+          return;
+        }
+        const slug = (card.querySelector('[data-field="slug"]')?.value || 'new-project').trim().toLowerCase() || 'new-project';
+        const oldUrl = input.value.trim();
+        const fileRef = firebase.storage().ref('recruitment-project-assets/' + slug + '/' + Date.now() + '-' + safeFileName(file.name));
+        try {
+          showToast('กำลังอัปโหลดภาพ...', file.name, 'info');
+          const snapshot = await fileRef.put(file, { contentType: file.type, customMetadata: { projectSlug: slug, assetType: field } });
+          input.value = await snapshot.ref.getDownloadURL();
+          input.dataset.storagePath = snapshot.ref.fullPath;
+          renderAssetPreview(card, field);
+          const saved = await saveProjectFromCard(card);
+          if (!saved) throw new Error('บันทึกข้อมูลโปรเจกต์ไม่สำเร็จ จึงยังไม่ลบไฟล์เดิม');
+          if (oldUrl && oldUrl !== input.value) await removeStoredAsset(oldUrl);
+          showToast('อัปโหลดและบันทึกภาพแล้ว', field === 'projectImage' ? 'รูปทีม' : 'ภาพแบนเนอร์รับสมัคร', 'success');
+        } catch (err) {
+          showToast('อัปโหลดภาพไม่สำเร็จ', err.message || 'ตรวจสอบสิทธิ์ Storage และขนาดไฟล์', 'error');
+        }
+      });
+      clearButton?.addEventListener('click', async () => {
+        const oldUrl = input.value.trim();
+        if (!oldUrl) return;
+        input.value = '';
+        delete input.dataset.storagePath;
+        renderAssetPreview(card, field);
+        try {
+          const saved = await saveProjectFromCard(card);
+          if (!saved) throw new Error('บันทึกข้อมูลโปรเจกต์ไม่สำเร็จ');
+          await removeStoredAsset(oldUrl);
+          showToast('ลบภาพออกจากโปรเจกต์แล้ว', field === 'projectImage' ? 'รูปทีม' : 'ภาพแบนเนอร์รับสมัคร', 'success');
+        } catch (err) {
+          input.value = oldUrl;
+          renderAssetPreview(card, field);
+          showToast('ลบภาพไม่สำเร็จ', err.message, 'error');
+        }
+      });
+      renderAssetPreview(card, field);
+    });
+    renderStackEditor(card);
+    const stackInput = card.querySelector('[data-stack-input]');
+    const addButton = card.querySelector('[data-add-stack]');
+    const addFromInput = () => {
+      addStackValue(card, stackInput?.value || '');
+      if (stackInput) stackInput.value = '';
+    };
+    addButton?.addEventListener('click', addFromInput);
+    stackInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addFromInput(); }
+    });
+  };
 
   // Project/URL registry. This is deliberately separate from joinTeamForms so
   // editing a public route never overwrites old applications or contracts.
@@ -54,6 +162,7 @@
     { id: 'teamdev', slug: 'teamdev', title: 'ทีมพัฒนา BestCyniX Dev', summary: 'เปิดรับทีมงานตามความสามารถ ให้ระบุความถนัดและตำแหน่งที่ต้องการรับผิดชอบ 1–3', communityName: 'ทีมพัฒนา BestCyniX Dev', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app', projectImage: 'assets/photo/bcxlogo2.png', stack: ['Git', 'Discord', 'Documentation', 'Project Management'], isOpen: true, visible: true, displayOrder: 50 }
   ];
   let projectRegistry = [];
+  let formConfigsBySlug = {};
 
   const isProjectScoped = FORM_DOC_ID !== 'default';
   const getScopedApplications = () => isProjectScoped
@@ -119,7 +228,10 @@
       wrap.innerHTML = '<div style="padding:1.25rem;color:var(--muted);border:1px dashed rgba(255,255,255,.16);border-radius:12px;text-align:center;">ยังไม่มีทะเบียนโปรเจกต์ กด “โหลดค่าเริ่มต้น 5 ทีม” หรือ “เพิ่มโปรเจกต์”</div>';
       return;
     }
-    const sorted = [...projectRegistry].sort((a, b) => Number(a.displayOrder || 0) - Number(b.displayOrder || 0));
+    const visibleProjects = isProjectScoped
+      ? projectRegistry.filter((project) => (project.id || project.slug) === FORM_DOC_ID)
+      : projectRegistry;
+    const sorted = [...visibleProjects].sort((a, b) => Number(a.displayOrder || 0) - Number(b.displayOrder || 0));
     wrap.innerHTML = sorted.map((project) => {
       const id = escapeHtml(project.id || project.slug || '');
       return `<article class="project-registry-card" data-project-id="${id}">
@@ -132,10 +244,38 @@
           <label>ชื่อชุมชน<input class="jt-input" data-field="communityName" value="${escapeHtml(project.communityName || '')}" placeholder="ชื่อ Discord/ชุมชน" /></label>
           <label>ลิงก์ชุมชน<input class="jt-input" data-field="communityUrl" value="${escapeHtml(project.communityUrl || '')}" placeholder="https://discord.gg/..." /></label>
           <label>URL เว็บไซต์<input class="jt-input" data-field="websiteUrl" value="${escapeHtml(project.websiteUrl || '')}" placeholder="https://..." /></label>
-          <label>รูปทีม (URL/asset)<input class="jt-input" data-field="projectImage" value="${escapeHtml(project.projectImage || '')}" placeholder="assets/photo/team.png หรือ https://..." /></label>
-          <label>ภาพแบนเนอร์รับสมัคร<input class="jt-input" data-field="projectBanner" value="${escapeHtml(project.projectBanner || '')}" placeholder="assets/photo/banner.png หรือ https://..." /></label>
+          <div class="admin-asset-field">
+            <label for="projectImage-${id}">รูปทีม (URL / ไฟล์)</label>
+            <div class="admin-asset-preview" data-preview="projectImage"><span>ยังไม่มีภาพตัวอย่าง</span></div>
+            <div class="admin-asset-editor">
+              <input id="projectImage-${id}" class="jt-input" data-field="projectImage" value="${escapeHtml(project.projectImage || '')}" placeholder="วาง URL หรือ asset เช่น assets/photo/team.png" />
+              <div class="admin-asset-actions">
+                <label class="jt-admin-btn secondary">⬆️ อัปโหลดไฟล์<input type="file" accept="image/*" data-file-field="projectImage" /></label>
+                <button type="button" class="jt-admin-btn danger" data-clear-asset="projectImage">✕ ลบภาพ</button>
+              </div>
+            </div>
+          </div>
+          <div class="admin-asset-field">
+            <label for="projectBanner-${id}">ภาพแบนเนอร์รับสมัคร (URL / ไฟล์)</label>
+            <div class="admin-asset-preview" data-preview="projectBanner"><span>ยังไม่มีภาพตัวอย่าง</span></div>
+            <div class="admin-asset-editor">
+              <input id="projectBanner-${id}" class="jt-input" data-field="projectBanner" value="${escapeHtml(project.projectBanner || '')}" placeholder="วาง URL หรือ asset เช่น assets/photo/banner.png" />
+              <div class="admin-asset-actions">
+                <label class="jt-admin-btn secondary">⬆️ อัปโหลดไฟล์<input type="file" accept="image/*" data-file-field="projectBanner" /></label>
+                <button type="button" class="jt-admin-btn danger" data-clear-asset="projectBanner">✕ ลบภาพ</button>
+              </div>
+            </div>
+          </div>
           <label style="grid-column:1/-1;">YouTube Embed URL<input class="jt-input" data-field="videoUrl" value="${escapeHtml(project.videoUrl || '')}" placeholder="https://www.youtube.com/embed/..." /></label>
-          <label style="grid-column:1/-1;">Stack หลัก <small>(คั่นด้วย comma หรือขึ้นบรรทัดใหม่)</small><textarea class="jt-input" data-field="stack" rows="2" placeholder="Java, Paper, MySQL">${escapeHtml((project.stack || []).join(', '))}</textarea></label>
+          <div class="admin-stack-editor" style="grid-column:1/-1;">
+            <label>Stack หลัก <small>(พิมพ์แล้วกด Enter หรือ comma เพื่อเพิ่ม / กด × เพื่อลบ)</small></label>
+            <div class="admin-stack-tags" data-stack-list></div>
+            <div class="admin-stack-add">
+              <input class="jt-input" data-stack-input placeholder="เช่น Java, Paper, MySQL" />
+              <button type="button" class="jt-admin-btn secondary" data-add-stack>+ เพิ่ม Stack</button>
+            </div>
+            <textarea class="jt-input" data-field="stack" hidden>${escapeHtml((project.stack || []).join('\n'))}</textarea>
+          </div>
           <label style="grid-column:1/-1;">จุดเด่นของโปรเจกต์ <small>(คั่นด้วย comma หรือขึ้นบรรทัดใหม่)</small><textarea class="jt-input" data-field="highlights" rows="2" placeholder="ระบบเด่น, สิ่งที่กำลังสร้าง">${escapeHtml((project.highlights || []).join('\n'))}</textarea></label>
           <label>ลำดับแสดง<input class="jt-input" data-field="displayOrder" type="number" min="0" max="10000" value="${Number(project.displayOrder || 0)}" /></label>
         </div>
@@ -147,21 +287,53 @@
       </article>`;
     }).join('');
 
+    wrap.querySelectorAll('.project-registry-card').forEach(bindProjectCardEditors);
     wrap.querySelectorAll('.btn-save-project').forEach((button) => button.addEventListener('click', () => saveProjectFromCard(button.closest('.project-registry-card'))));
     wrap.querySelectorAll('.btn-hide-project').forEach((button) => button.addEventListener('click', () => toggleProjectVisibility(button.closest('.project-registry-card'))));
   };
 
   const loadProjectRegistry = () => {
-    db.collection(PROJECTS_COL).onSnapshot((snapshot) => {
-      projectRegistry = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const renderProjectData = () => {
+      projectRegistry = projectRegistry.map((project) => {
+        const slug = project.slug || project.id;
+        const form = formConfigsBySlug[slug] || {};
+        return {
+          ...form,
+          ...project,
+          id: project.id || slug,
+          slug,
+          title: project.title || form.title || slug,
+          summary: project.summary || form.subtitle || '',
+          projectIntro: project.projectIntro || form.projectIntro || '',
+          projectImage: project.projectImage || form.projectImage || '',
+          projectBanner: project.projectBanner || form.projectBanner || '',
+          videoUrl: project.videoUrl || form.videoUrl || '',
+          highlights: Array.isArray(project.highlights) && project.highlights.length ? project.highlights : (form.highlights || []),
+          stack: Array.isArray(project.stack) && project.stack.length ? project.stack : (form.stack || []),
+          communityName: project.communityName || form.communityName || '',
+          communityUrl: project.communityUrl || form.communityUrl || '',
+          websiteUrl: project.websiteUrl || form.websiteUrl || ''
+        };
+      });
       renderProjectContext();
       renderProjectRegistry();
+    };
+    db.collection(PROJECTS_COL).onSnapshot((snapshot) => {
+      projectRegistry = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      renderProjectData();
     }, (err) => {
       console.warn('Project registry load error:', err);
       projectRegistry = [];
-      renderProjectContext();
-      renderProjectRegistry();
+      renderProjectData();
       showToast('โหลดทะเบียนโปรเจกต์ไม่สำเร็จ', 'ตรวจสอบ Firestore Rules หรือสิทธิ์ Admin', 'error');
+    });
+    db.collection(FORMS_COL).onSnapshot((snapshot) => {
+      formConfigsBySlug = Object.fromEntries(snapshot.docs.map((doc) => [doc.id, doc.data()]));
+      renderProjectData();
+    }, (err) => {
+      console.warn('Project form data load error:', err);
+      formConfigsBySlug = {};
+      renderProjectData();
     });
     // First admin visit: seed the requested five-team registry once. Existing
     // data is never replaced, and later deletions remain soft-hidden records.
@@ -178,10 +350,40 @@
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(record.slug)) throw new Error('URL slug ใช้ได้เฉพาะ a-z, 0-9 และขีดกลาง เช่น discord-bot');
     if (!record.title || record.title.length > 200) throw new Error('กรุณากรอกชื่อทีม/โปรเจกต์ไม่เกิน 200 ตัวอักษร');
     if (record.summary.length > 1000 || record.projectIntro.length > 2000 || record.communityName.length > 120 || record.communityUrl.length > 1000 || record.websiteUrl.length > 1000 || record.projectImage.length > 1000 || record.projectBanner.length > 1000 || record.videoUrl.length > 1000) throw new Error('ข้อมูลบางช่องยาวเกินกำหนด');
+    if (oldId && oldId !== record.slug && oldId !== 'new') {
+      const existingTarget = await db.collection(FORMS_COL).doc(record.slug).get();
+      if (existingTarget.exists) throw new Error('URL slug นี้มีฟอร์มอยู่แล้ว กรุณาเลือก slug ใหม่');
+    }
     const payload = { ...record, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), updatedBy: currentUser?.uid || '' };
     const targetRef = db.collection(PROJECTS_COL).doc(record.slug);
     await targetRef.set(payload, { merge: true });
-    if (oldId && oldId !== record.slug && oldId !== 'new') await db.collection(PROJECTS_COL).doc(oldId).delete();
+    const formMetadata = {
+      formId: record.slug,
+      projectSlug: record.slug,
+      title: record.title,
+      subtitle: record.summary,
+      communityName: record.communityName,
+      communityUrl: record.communityUrl,
+      websiteUrl: record.websiteUrl,
+      projectImage: record.projectImage,
+      projectBanner: record.projectBanner,
+      videoUrl: record.videoUrl,
+      projectIntro: record.projectIntro,
+      highlights: record.highlights,
+      stack: record.stack,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: currentUser?.uid || ''
+    };
+    const targetFormRef = db.collection(FORMS_COL).doc(record.slug);
+    if (oldId && oldId !== record.slug && oldId !== 'new') {
+      const oldForm = await db.collection(FORMS_COL).doc(oldId).get();
+      if (oldForm.exists) await targetFormRef.set(oldForm.data(), { merge: true });
+      await targetFormRef.set(formMetadata, { merge: true });
+      await db.collection(FORMS_COL).doc(oldId).delete();
+      await db.collection(PROJECTS_COL).doc(oldId).delete();
+    } else {
+      await targetFormRef.set(formMetadata, { merge: true });
+    }
   };
 
   const saveProjectFromCard = async (card) => {
@@ -191,7 +393,8 @@
       const record = projectRecordFromCard(card);
       await saveProjectRecord(record, oldId);
       showToast('บันทึกโปรเจกต์และ URL แล้ว', `/join-team/${record.slug}`, 'success');
-    } catch (err) { showToast('บันทึกโปรเจกต์ไม่สำเร็จ', err.message, 'error'); }
+      return true;
+    } catch (err) { showToast('บันทึกโปรเจกต์ไม่สำเร็จ', err.message, 'error'); return false; }
   };
 
   const toggleProjectVisibility = async (card) => {
