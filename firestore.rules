@@ -100,6 +100,38 @@ service cloud.firestore {
         && file.size is int && file.size >= 0 && file.size <= 26214400;
     }
 
+    function validRecruitmentPortfolioFile(file) {
+      return file is map
+        && file.keys().hasOnly(['name', 'path', 'url', 'contentType', 'size'])
+        && validText(file.name, 180)
+        && validText(file.path, 420)
+        && validUrl(file.url)
+        && validText(file.contentType, 100)
+        && file.size is int && file.size >= 0 && file.size <= 10485760;
+    }
+
+    function validRecruitmentList(list, maxItems, maxLength) {
+      return list is list && list.size() <= maxItems
+        && (list.size() == 0 || validText(list[0], maxLength))
+        && (list.size() <= 1 || validText(list[1], maxLength))
+        && (list.size() <= 2 || validText(list[2], maxLength));
+    }
+
+    function validRecruitmentApplicantDetails() {
+      let applicant = request.resource.data.applicant;
+      return (!('desiredPositions' in applicant) || validRecruitmentList(applicant.desiredPositions, 3, 160))
+        && (!('skills' in applicant) || validRecruitmentList(applicant.skills, 3, 160))
+        && (!('experience' in applicant) || validText(applicant.experience, 4000))
+        && (!('portfolio' in applicant) || (applicant.portfolio is map
+          && applicant.portfolio.keys().hasOnly(['link', 'files'])
+          && (applicant.portfolio.link == null || validUrl(applicant.portfolio.link))
+          && applicant.portfolio.files is list
+          && applicant.portfolio.files.size() <= 3
+          && (applicant.portfolio.files.size() == 0 || validRecruitmentPortfolioFile(applicant.portfolio.files[0]))
+          && (applicant.portfolio.files.size() <= 1 || validRecruitmentPortfolioFile(applicant.portfolio.files[1]))
+          && (applicant.portfolio.files.size() <= 2 || validRecruitmentPortfolioFile(applicant.portfolio.files[2]))));
+    }
+
     function validTeamDocument() {
       let data = request.resource.data;
       return data.keys().hasOnly(['title', 'description', 'url', 'fileName', 'mimeType', 'createdBy', 'createdAt', 'updatedAt'])
@@ -500,6 +532,7 @@ service cloud.firestore {
         // Public recruitment must never receive identity/payment documents.
         && !request.resource.data.keys().hasAny(['nationalId', 'identityDocument', 'bankBook', 'bankAccount', 'taxId', 'taxDocument'])
         && !request.resource.data.applicant.keys().hasAny(['nationalId', 'identityCardNumber', 'identityDocument', 'bankBook', 'bankAccount', 'taxId', 'taxDocument'])
+        && validRecruitmentApplicantDetails()
         && validText(request.resource.data.positionId, 100)
         && validText(request.resource.data.positionName, 200)
         && validText(request.resource.data.contractRefNo, 80)

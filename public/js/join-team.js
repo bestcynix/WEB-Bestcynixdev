@@ -310,6 +310,7 @@
   let selectedDays = [];
   let activeSocials = {};
   let applicantPhotoDataUrl = null;
+  let portfolioFiles = [];
 
   const $ = (id) => document.getElementById(id);
   const show = (el) => { if (el) el.style.display = ''; };
@@ -335,6 +336,21 @@
       toast.classList.remove('is-show');
       setTimeout(() => toast.remove(), 400);
     }, 5000);
+  };
+
+  const portfolioFileSize = (bytes) => bytes < 1024 * 1024
+    ? `${Math.max(1, Math.round(bytes / 1024))} KB`
+    : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+
+  const renderPortfolioPreview = () => {
+    const wrap = $('jtPortfolioPreview');
+    if (!wrap) return;
+    wrap.innerHTML = portfolioFiles.map((file) => {
+      const preview = file.type.startsWith('image/')
+        ? `<img class="jt-portfolio-thumb" src="${escapeHtml(URL.createObjectURL(file))}" alt="ตัวอย่าง ${escapeHtml(file.name)}" />`
+        : '<div class="jt-portfolio-thumb jt-portfolio-file-icon" aria-hidden="true">📄</div>';
+      return `<div class="jt-portfolio-item">${preview}<div style="min-width:0;"><div class="jt-portfolio-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div><div class="jt-portfolio-size">${portfolioFileSize(file.size)}</div></div></div>`;
+    }).join('');
   };
 
   // ── Robust Age Calculation ────────────────────────────────────────────────
@@ -875,7 +891,9 @@
       ['positionId', 'ตำแหน่งที่สมัคร'],
       ['firstName', 'ชื่อ'], ['lastName', 'นามสกุล'], ['nickname', 'ชื่อเล่น'],
       ['dob', 'วันเกิด'], ['gender', 'เพศ'], ['platform', 'อุปกรณ์'],
-      ['hasMic', 'ไมค์'], ['motivation', 'เหตุผลที่อยากร่วมทีม']
+      ['hasMic', 'ไมค์'], ['desiredPosition1', 'ตำแหน่ง/งานที่ต้องการรับผิดชอบอันดับ 1'],
+      ['skill1', 'ความสามารถที่ถนัดอันดับ 1'], ['experience', 'ประสบการณ์และสิ่งที่ทำได้'],
+      ['motivation', 'เหตุผลที่อยากร่วมทีม']
     ];
     for (const [field, label] of requiredFields) {
       if (!get(field)) {
@@ -912,6 +930,19 @@
       submitMsg.className = 'jt-submit-msg error';
       submitMsg.textContent = `❌ ${posAgeCheck.message}`;
       return;
+    }
+
+    const portfolioUrl = get('portfolioUrl');
+    if (portfolioUrl) {
+      try {
+        const parsedPortfolioUrl = new URL(portfolioUrl);
+        if (!['http:', 'https:'].includes(parsedPortfolioUrl.protocol)) throw new Error('invalid protocol');
+      } catch {
+        submitMsg.className = 'jt-submit-msg error';
+        submitMsg.textContent = '❌ ลิงก์ Portfolio ต้องเป็น URL ที่ขึ้นต้นด้วย http:// หรือ https://';
+        $('jtPortfolioUrl')?.focus();
+        return;
+      }
     }
 
     // Photo Upload Validation
@@ -956,6 +987,13 @@
     const applicantUid = authUser ? authUser.uid : null;
     const applicantEmail = (authUser ? authUser.email : null) || socialLinks.email || null;
 
+    if (portfolioFiles.length && !applicantUid) {
+      submitMsg.className = 'jt-submit-msg error';
+      submitMsg.textContent = '❌ กรุณาเข้าสู่ระบบก่อนอัปโหลด Portfolio เพื่อผูกไฟล์กับเจ้าของข้อมูล';
+      $('jtPortfolioInput')?.focus();
+      return;
+    }
+
     // Build Payload
     const payload = {
       formId: FORM_DOC_ID,
@@ -983,6 +1021,10 @@
         availableTimeStart: get('availableTimeStart'),
         availableTimeEnd: get('availableTimeEnd'),
         socialLinks,
+        desiredPositions: [get('desiredPosition1'), get('desiredPosition2'), get('desiredPosition3')].filter(Boolean),
+        skills: [get('skill1'), get('skill2'), get('skill3')].filter(Boolean),
+        experience: get('experience'),
+        portfolio: { link: portfolioUrl || null, files: [] },
         motivation: get('motivation'),
         pdpaConsent: true,
         pdpaConsentAt: new Date().toISOString(),
@@ -1002,14 +1044,37 @@
     submitMsg.className = 'jt-submit-msg info';
     submitMsg.textContent = '';
 
+    let applicationRef = null;
+    const uploadedPortfolioRefs = [];
+    let applicationSaved = false;
     try {
       const db = firebase.firestore();
-      const ref = await db.collection(APPLICATIONS_COL).add(payload);
+      applicationRef = db.collection(APPLICATIONS_COL).doc();
+
+      if (portfolioFiles.length) {
+        const storage = firebase.storage();
+        payload.applicant.portfolio.files = await Promise.all(portfolioFiles.map(async (file, index) => {
+          const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, '_').slice(-120) || `portfolio-${index + 1}`;
+          const contentType = file.type || (/\.pdf$/i.test(file.name) ? 'application/pdf' : 'application/octet-stream');
+          const path = `recruitment-portfolios/${applicantUid}/${applicationRef.id}/${Date.now()}-${index + 1}-${safeName}`;
+          const fileRef = storage.ref(path);
+          uploadedPortfolioRefs.push(fileRef);
+          const snapshot = await fileRef.put(file, {
+            contentType,
+            customMetadata: { uploadedBy: applicantUid, applicationId: applicationRef.id }
+          });
+          const url = await snapshot.ref.getDownloadURL();
+          return { name: file.name, path, url, contentType, size: file.size };
+        }));
+      }
+
+      await applicationRef.set(payload);
+      applicationSaved = true;
 
       // Notification for Admin Team
       await db.collection('joinTeamNotifications').add({
         type: 'submitted',
-        applicationId: ref.id,
+        applicationId: applicationRef.id,
         applicantName: `${payload.applicant.nickname} (${payload.applicant.firstName} ${payload.applicant.lastName})`,
         positionName: position.name,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1021,8 +1086,8 @@
         title: `🚀 ส่งใบสมัครตำแหน่ง "${position.name}" สำเร็จ`,
         message: `ใบสมัครของคุณถูกบันทึกเข้าระบบเรียบร้อยแล้ว (เลขอ้างอิง: ${payload.contractRefNo}) ติดตามสถานะและสัญญาได้ที่นี่`,
         type: 'application_submitted',
-        url: `/contract?id=${ref.id}`,
-        applicationId: ref.id,
+        url: `/contract?id=${applicationRef.id}`,
+        applicationId: applicationRef.id,
         positionName: position.name,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         read: false
@@ -1050,8 +1115,10 @@
               { name: '💻 อุปกรณ์ & OS', value: `${a.platform || '-'} ${a.deviceOS ? `(${a.deviceOS})` : ''}`, inline: true },
               { name: '📅 วัน/เวลาที่สะดวก', value: `${(a.availableDays || []).join(', ') || '-'} [${a.availableTimeStart || ''} - ${a.availableTimeEnd || ''}]`, inline: true },
               { name: '📱 ข้อมูลติดต่อ', value: Object.entries(a.socialLinks || {}).map(([k, v]) => `${k.toUpperCase()}: ${v}`).join(' | ') || '-', inline: false },
+              { name: '🎯 ตำแหน่ง/ความสามารถ', value: `ตำแหน่ง: ${(a.desiredPositions || []).join(' → ') || '-'}\nความสามารถ: ${(a.skills || []).join(' • ') || '-'}`, inline: false },
+              { name: '📁 Portfolio', value: `${a.portfolio?.files?.length || 0} ไฟล์${a.portfolio?.link ? ' + มีลิงก์เพิ่มเติม' : ''}`, inline: true },
               { name: '💡 ความถนัด / แรงจูงใจ', value: (a.motivation || '-').slice(0, 1000), inline: false },
-              { name: '🔗 ลิงก์ตรวจสอบเอกสารสัญญา', value: `[📄 เปิดดูเอกสารสัญญา (Contract)](https://bestcynixdev.web.app/contract?id=${ref.id}) • [⚡ ตรวจใบสมัคร](https://bestcynixdev.web.app/admin-join-team)`, inline: false }
+              { name: '🔗 ลิงก์ตรวจสอบเอกสารสัญญา', value: `[📄 เปิดดูเอกสารสัญญา (Contract)](https://bestcynixdev.web.app/contract?id=${applicationRef.id}) • [⚡ ตรวจใบสมัคร](https://bestcynixdev.web.app/admin-join-team)`, inline: false }
             ],
             footer: { text: '⚡ BestCyniX Dev Recruitment Gateway • Auto Notification', icon_url: 'https://bestcynixdev.web.app/assets/photo/bcxlogo2.png' },
             timestamp: new Date().toISOString()
@@ -1087,7 +1154,7 @@
             <div style="display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1.2rem;background:rgba(50,255,201,.12);border:1px solid var(--accent);border-radius:10px;font-size:.88rem;color:var(--accent);font-weight:700;">
               📋 หมายเลขอ้างอิง: ${payload.contractRefNo}
             </div>
-            <a href="contract?id=${ref.id}" target="_blank" class="btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;background:#0284c7;border-color:#0284c7;">
+            <a href="contract?id=${applicationRef.id}" target="_blank" class="btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;background:#0284c7;border-color:#0284c7;">
               📄 ดูตัวอย่างเอกสารสัญญา
             </a>
           </div>
@@ -1097,6 +1164,9 @@
       showToast('ส่งใบสมัครสำเร็จ! ✅', 'ทีมงานจะพิจารณาและติดต่อกลับโดยเร็ว', 'success');
     } catch (err) {
       console.error('Apply error:', err);
+      if (!applicationSaved && uploadedPortfolioRefs.length) {
+        await Promise.all(uploadedPortfolioRefs.map((fileRef) => fileRef.delete().catch(() => null)));
+      }
       submitBtn.disabled = false;
       submitBtn.textContent = '🚀 ส่งใบสมัคร';
       submitMsg.className = 'jt-submit-msg error';
@@ -1209,6 +1279,32 @@
           img.src = ev.target.result;
         };
         reader.readAsDataURL(file);
+      });
+    }
+
+    // Portfolio files: keep a small, explicit selection and show previews before upload.
+    const portfolioInput = $('jtPortfolioInput');
+    if (portfolioInput) {
+      portfolioInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files || []);
+        const allowed = (file) => file.type.startsWith('image/') || file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+        if (files.length > 3) {
+          showToast('เลือกไฟล์ได้ไม่เกิน 3 ไฟล์', 'กรุณาเลือกใหม่อีกครั้ง', 'error');
+          portfolioInput.value = '';
+          portfolioFiles = [];
+          renderPortfolioPreview();
+          return;
+        }
+        const invalid = files.find((file) => !allowed(file) || file.size > 10 * 1024 * 1024);
+        if (invalid) {
+          showToast('ไฟล์ Portfolio ไม่ถูกต้อง', `${invalid.name} ต้องเป็นรูปภาพ/PDF และมีขนาดไม่เกิน 10MB`, 'error');
+          portfolioInput.value = '';
+          portfolioFiles = [];
+          renderPortfolioPreview();
+          return;
+        }
+        portfolioFiles = files;
+        renderPortfolioPreview();
       });
     }
 

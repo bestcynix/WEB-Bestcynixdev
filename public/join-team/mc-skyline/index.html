@@ -16,11 +16,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/style.css?v=20260831_1" />
+    <link rel="stylesheet" href="/css/style.css?v=20260831_2" />
   <link rel="stylesheet" href="/css/responsive-system.css?v=20260828_1" />
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
   <script>
     const firebaseConfig = {
       projectId: "bestcynixdev",
@@ -300,6 +301,21 @@
                   <option>ไม่มีไมค์</option>
                 </select>
               </div>
+              <div class="jt-form-group jt-candidate-profile-fields" style="grid-column:1/-1;">
+                <div class="jt-candidate-profile-card">
+                  <div class="jt-candidate-profile-head"><div><span class="jt-overview-kicker">CANDIDATE PROFILE</span><h3>🎯 ตำแหน่ง ความสามารถ และประสบการณ์</h3></div><span class="jt-candidate-profile-badge">ช่วยทีมพิจารณาได้ตรงจุด</span></div>
+                  <p class="jt-candidate-profile-help">กรอกตำแหน่งหรือความถนัดที่อยากรับผิดชอบ 1–3 อันดับ และความสามารถที่ทำได้ 1–3 ข้อ หากสมัคร “ทีมงานอื่น ๆ ตามความถนัด” ให้เรียงลำดับงานที่ต้องการชัดเจน</p>
+                  <div class="jt-form-grid jt-profile-detail-grid">
+                    <div class="jt-form-group"><label for="jtDesiredPosition1">ตำแหน่ง/งานที่ต้องการรับผิดชอบ 1 <span class="req">*</span></label><input id="jtDesiredPosition1" name="desiredPosition1" class="jt-input" maxlength="160" required placeholder="เช่น Developer / Builder / Support" /></div>
+                    <div class="jt-form-group"><label for="jtDesiredPosition2">ตำแหน่ง/งานที่ต้องการรับผิดชอบ 2</label><input id="jtDesiredPosition2" name="desiredPosition2" class="jt-input" maxlength="160" placeholder="ถ้ามี" /></div>
+                    <div class="jt-form-group"><label for="jtDesiredPosition3">ตำแหน่ง/งานที่ต้องการรับผิดชอบ 3</label><input id="jtDesiredPosition3" name="desiredPosition3" class="jt-input" maxlength="160" placeholder="ถ้ามี" /></div>
+                    <div class="jt-form-group"><label for="jtSkill1">ความสามารถที่ถนัด 1 <span class="req">*</span></label><input id="jtSkill1" name="skill1" class="jt-input" maxlength="160" required placeholder="เช่น Java, ตัดต่อ, ดูแลชุมชน" /></div>
+                    <div class="jt-form-group"><label for="jtSkill2">ความสามารถที่ถนัด 2</label><input id="jtSkill2" name="skill2" class="jt-input" maxlength="160" placeholder="ถ้ามี" /></div>
+                    <div class="jt-form-group"><label for="jtSkill3">ความสามารถที่ถนัด 3</label><input id="jtSkill3" name="skill3" class="jt-input" maxlength="160" placeholder="ถ้ามี" /></div>
+                    <div class="jt-form-group" style="grid-column:1/-1;"><label for="jtExperience">ประสบการณ์และสิ่งที่ทำได้ <span class="req">*</span></label><textarea id="jtExperience" name="experience" class="jt-textarea" maxlength="4000" required placeholder="เล่าประสบการณ์ที่ผ่านมา งานที่เคยทำ ระยะเวลา และสิ่งที่คุณรับผิดชอบได้"></textarea></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -336,6 +352,7 @@
             <h3>❓ คำถามเพิ่มเติม</h3>
             <div id="jtCustomQuestionsWrap" class="jt-form-grid"></div>
           </div>
+          <div class="jt-form-section"><h3>📁 ตัวอย่างผลงาน / Portfolio</h3><p style="font-size:.84rem;color:var(--muted);margin-bottom:.8rem;">อัปโหลดได้สูงสุด 3 ไฟล์ รูปภาพหรือ PDF ไฟล์ละไม่เกิน 10MB</p><div class="jt-form-grid jt-portfolio-input-grid"><div class="jt-form-group"><label for="jtPortfolioInput">ไฟล์ตัวอย่างผลงาน</label><input type="file" id="jtPortfolioInput" accept="image/*,.pdf,application/pdf" multiple class="jt-input" style="padding:.45rem;font-size:.85rem;" /><small class="jt-field-hint">ไฟล์จะผูกกับบัญชีที่เข้าสู่ระบบเพื่อความปลอดภัย</small></div><div class="jt-form-group"><label for="jtPortfolioUrl">ลิงก์ผลงานเพิ่มเติม (ไม่บังคับ)</label><input type="url" id="jtPortfolioUrl" name="portfolioUrl" class="jt-input" maxlength="1000" placeholder="https://github.com/... หรือ https://drive.google.com/..." /><small class="jt-field-hint">GitHub, Behance, YouTube หรือเว็บไซต์ส่วนตัว</small></div></div><div id="jtPortfolioPreview" class="jt-portfolio-preview" aria-live="polite"></div></div>
 
           <!-- Motivation -->
           <div class="jt-form-section">
@@ -384,6 +401,6 @@
   <script src="/js/shared-ui.js?v=20260829_2"></script>
   <script src="/js/notifications.js?v=20260826_115"></script>
   <script src="/js/join-team-interview.js?v=20260830_1"></script>
-  <script src="/js/join-team.js?v=20260831_1"></script>
+  <script src="/js/join-team.js?v=20260831_2"></script>
 </body>
 </html>

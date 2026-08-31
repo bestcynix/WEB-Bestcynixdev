@@ -104,6 +104,18 @@ service firebase.storage {
       allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
     }
 
+    // Recruitment portfolios are private applicant materials. Applicants can
+    // upload only under their own UID; verified Dev admins can review them.
+    match /recruitment-portfolios/{userId}/{allPaths=**} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow write: if (isAdmin() || (isSignedIn() && request.auth.uid == userId))
+        && request.resource != null
+        && request.resource.size <= 10 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*')
+          || request.resource.contentType == 'application/pdf');
+      allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+    }
+
     match /private-personal/{userId}/payroll/{allPaths=**} {
       allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
       allow write: if isAdmin() && isValidDocumentUpload();

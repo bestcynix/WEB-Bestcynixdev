@@ -2873,6 +2873,33 @@ body.chat-fullscreen-lock .chat-window.fullscreen {
   .pdpa-banner { flex-direction: column; align-items: flex-start; }
 }
 
+/* Candidate profile and portfolio fields */
+.jt-candidate-profile-card {
+  padding: 1.15rem;
+  border: 1px solid rgba(50,255,201,.22);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(9,35,55,.72), rgba(5,15,30,.66));
+}
+.jt-candidate-profile-head { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.jt-candidate-profile-head h3 { margin:.22rem 0 0; color:#fff; font-size:1.05rem; }
+.jt-candidate-profile-badge { color:#061c1b; background:var(--accent); border-radius:999px; padding:.3rem .65rem; font-size:.75rem; font-weight:800; white-space:nowrap; }
+.jt-candidate-profile-help { margin:.65rem 0 1rem; color:var(--muted); font-size:.82rem; line-height:1.7; }
+.jt-profile-detail-grid { gap:.75rem; }
+.jt-profile-detail-grid .jt-form-group { min-width:0; }
+.jt-field-hint { display:block; margin-top:.38rem; color:var(--muted); font-size:.74rem; line-height:1.55; }
+.jt-portfolio-preview { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:.65rem; margin-top:.8rem; }
+.jt-portfolio-preview:empty { display:none; }
+.jt-portfolio-item { display:flex; align-items:center; gap:.65rem; min-width:0; padding:.65rem; border:1px solid rgba(50,255,201,.18); border-radius:12px; background:rgba(5,11,22,.58); }
+.jt-portfolio-thumb { width:54px; height:54px; flex:0 0 54px; border-radius:9px; object-fit:cover; border:1px solid rgba(50,255,201,.3); background:#030810; }
+.jt-portfolio-file-icon { display:flex; align-items:center; justify-content:center; font-size:1.65rem; }
+.jt-portfolio-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#e2e8f0; font-size:.78rem; }
+.jt-portfolio-size { color:var(--muted); font-size:.7rem; margin-top:.18rem; }
+@media (max-width: 640px) {
+  .jt-candidate-profile-card { padding:.85rem; }
+  .jt-profile-detail-grid { grid-template-columns:1fr !important; }
+  .jt-portfolio-input-grid { grid-template-columns:1fr !important; }
+}
+
 /* Keep the fixed chat launcher from covering the drawer CTA on narrow screens. */
 @media (max-width: 560px) {
   /* 100vw includes the scrollbar and can create a horizontal page shift. */

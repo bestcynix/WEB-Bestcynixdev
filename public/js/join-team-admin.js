@@ -1786,6 +1786,18 @@
     const customHtml = Object.entries(app.customAnswers || {}).map(([k, v]) => `
       <div class="jt-detail-field"><div class="jt-detail-label">${k}</div><div class="jt-detail-value">${Array.isArray(v) ? v.join(', ') : v}</div></div>
     `).join('');
+    const desiredPositions = Array.isArray(a.desiredPositions) ? a.desiredPositions.filter(Boolean).slice(0, 3) : [];
+    const skills = Array.isArray(a.skills) ? a.skills.filter(Boolean).slice(0, 3) : [];
+    const portfolio = a.portfolio && typeof a.portfolio === 'object' ? a.portfolio : {};
+    const portfolioFiles = Array.isArray(portfolio.files) ? portfolio.files.filter((file) => file && file.url).slice(0, 3) : [];
+    const portfolioHtml = (portfolio.link || portfolioFiles.length) ? `
+      <div class="jt-detail-field jt-admin-portfolio-detail">
+        <div class="jt-detail-label">📁 ตัวอย่างผลงาน / Portfolio</div>
+        <div class="jt-admin-portfolio-links">
+          ${portfolio.link ? `<a href="${escapeHtml(portfolio.link)}" target="_blank" rel="noopener noreferrer" class="jt-admin-portfolio-link">🔗 เปิดลิงก์ผลงานเพิ่มเติม</a>` : ''}
+          ${portfolioFiles.map((file) => `<a href="${escapeHtml(file.url)}" target="_blank" rel="noopener noreferrer" class="jt-admin-portfolio-link">📄 ${escapeHtml(file.name || 'เปิดไฟล์ผลงาน')}</a>`).join('')}
+        </div>
+      </div>` : '<div class="jt-detail-field"><div class="jt-detail-label">📁 ตัวอย่างผลงาน / Portfolio</div><div class="jt-detail-value">ยังไม่ได้แนบไฟล์หรือลิงก์</div></div>';
 
     const photoCardHtml = a.photoURL ? `
       <div style="display:flex;gap:1.2rem;align-items:center;background:rgba(50,255,201,0.06);border:1px solid rgba(50,255,201,0.25);border-radius:12px;padding:0.9rem;margin-bottom:1rem;">
@@ -1809,6 +1821,12 @@
         <div class="jt-detail-field"><div class="jt-detail-label">อุปกรณ์</div><div class="jt-detail-value">${a.platform || '-'} ${a.platformOther || ''} ${a.deviceOS ? `(${a.deviceOS})` : ''}</div></div>
         <div class="jt-detail-field"><div class="jt-detail-label">ไมค์</div><div class="jt-detail-value">${a.hasMic || '-'}</div></div>
       </div>
+      <div class="jt-detail-grid">
+        <div class="jt-detail-field"><div class="jt-detail-label">🎯 ตำแหน่ง/งานที่ต้องการรับผิดชอบ 1–3</div><div class="jt-detail-value">${desiredPositions.length ? desiredPositions.map((item, index) => `${index + 1}. ${escapeHtml(item)}`).join('<br/>') : '-'}</div></div>
+        <div class="jt-detail-field"><div class="jt-detail-label">🧠 ความสามารถที่ถนัด 1–3</div><div class="jt-detail-value">${skills.length ? skills.map((item, index) => `${index + 1}. ${escapeHtml(item)}`).join('<br/>') : '-'}</div></div>
+      </div>
+      <div class="jt-detail-field"><div class="jt-detail-label">📝 ประสบการณ์และสิ่งที่ทำได้</div><div class="jt-detail-value" style="white-space:pre-wrap;background:rgba(5,11,22,.6);padding:.75rem;border-radius:8px;">${escapeHtml(a.experience || '-')}</div></div>
+      ${portfolioHtml}
       <div class="jt-detail-field"><div class="jt-detail-label">วันที่สะดวกทำงาน</div><div class="jt-detail-value">${(a.availableDays || []).join(', ') || '-'} ${a.availableTimeStart ? `(${a.availableTimeStart}–${a.availableTimeEnd || '?'})` : ''}</div></div>
       ${socialHtml ? `<div class="jt-detail-field"><div class="jt-detail-label">ช่องทาง Social</div><div class="jt-detail-value">${socialHtml}</div></div>` : ''}
       <div class="jt-detail-field"><div class="jt-detail-label">เหตุผลที่อยากร่วมทีม</div><div class="jt-detail-value" style="white-space:pre-wrap;background:rgba(5,11,22,.6);padding:.75rem;border-radius:8px;">${a.motivation || '-'}</div></div>
