@@ -5342,6 +5342,8 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-form-section,
 .jt-closed-showcase { min-width: 0; max-width: 100%; box-sizing: border-box; }
 .jt-project-group { border:1px solid rgba(50,255,201,.18); border-radius:16px; padding:1rem; background:rgba(5,15,30,.62); min-width:0; }
+.jt-project-group { box-shadow:0 18px 50px rgba(0,0,0,.16); transition:border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+.jt-project-group:hover { border-color:rgba(50,255,201,.38); transform:translateY(-2px); box-shadow:0 22px 58px rgba(0,0,0,.24); }
 .jt-project-group + .jt-project-group { margin-top:.9rem; }
 .jt-project-group-head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; min-width:0; }
 .jt-project-group-head > div { min-width:0; }
@@ -5350,8 +5352,10 @@ body:has(#siteNav[data-open="true"]) .live-chat-floating-btn {
 .jt-project-group-head p { color:var(--muted); margin:0; font-size:.86rem; line-height:1.6; overflow-wrap:anywhere; }
 .jt-project-group-meta { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.65rem; color:#ccecff; font-size:.75rem; }
 .jt-project-group-meta span { border:1px solid rgba(50,255,201,.2); border-radius:999px; padding:.2rem .5rem; background:rgba(50,255,201,.07); }
-.jt-project-role-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:.85rem; margin-top:1rem; }
+.jt-project-role-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:.85rem; margin-top:1rem; }
 .jt-role-card { min-width:0; }
+.jt-role-card { box-shadow:inset 0 1px 0 rgba(255,255,255,.03); transition:border-color .2s ease, background .2s ease, transform .2s ease; }
+.jt-role-card:hover { border-color:rgba(50,255,201,.28); background:rgba(8,20,37,.9); transform:translateY(-2px); }
 .jt-role-card h3, .jt-role-card p { overflow-wrap:break-word; word-break:normal; }
 .jt-project-open-link { flex:0 0 auto; white-space:nowrap; }
 .jt-project-apply-link { display:inline-flex; margin-top:.9rem; color:var(--accent); font-weight:700; text-decoration:none; font-size:.86rem; }

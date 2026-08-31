@@ -16,6 +16,7 @@
   const FORMS_COL = 'joinTeamForms';
   const PROJECTS_COL = 'siteRecruitmentProjects';
   let projectRegistry = [];
+  let formConfigsBySlug = {};
 
   // Brand SVG Icons
   const BRAND_ICONS = {
@@ -49,104 +50,32 @@
     return items.length ? `<ul class="jt-detail-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : `<p class="jt-detail-empty">${empty}</p>`;
   };
 
-  const MC_SKYLINE_DEFAULT = {
-    formId: 'mc-skyline',
-    projectSlug: 'mc-skyline',
+  // Recruitment content is stored in Firestore (joinTeamForms/{projectSlug}).
+  // Keep only a small offline shell here; project-specific copy, roles, stacks,
+  // benefits and questions must come from the database and remain editable in Admin.
+  const GENERAL_DEFAULT = {
+    formId: FORM_DOC_ID,
+    projectSlug: ROUTE_PROJECT_SLUG || 'all',
     isOpen: true,
-    title: 'รับสมัครทีม Mc-Skyline.online',
-    subtitle: 'ร่วมสร้างเซิร์ฟเวอร์ Minecraft รุ่นใหม่จากทีมเดิม — ไม่จำกัดอายุหรือเพศ ขอเพียงรักการทำงานและมีเวลาว่างเพียงพอ',
-    communityName: 'Mc-Skyline.online',
-    communityUrl: 'https://discord.gg/5eNFMMk3ak',
-    websiteUrl: 'https://mc-skyline.online',
-    projectImage: 'assets/photo/mc-skyline.png',
-    projectBanner: 'assets/photo/mc-skyline-recruitment.png',
-    videoUrl: 'https://www.youtube.com/embed/gfn-GvBM9rs?si=kvbYqxLpHb_gIqI1',
-    projectIntro: 'จากตำนาน MC-Slashz, Mc-ctc และ Mc-Kileema สู่เซิร์ฟเวอร์ Minecraft ดินแดนลอยฟ้าที่รวม Survival, MMO RPG, Skyblock, Oneblock และ Acid Island ไว้ในโลกเดียว',
-    highlights: ['ระบบเควสต์ เนื้อเรื่อง และมอนสเตอร์บอส', 'ระบบอุณหภูมิและฤดูกาลสำหรับการปลูกพืช', 'ระบบเวทมนตร์ มานา อาชีพ ตลาดโลก Guild และแต่งงาน'],
-    modes: ['Survival', 'Survival MMO RPG', 'Skyblock', 'Oneblock', 'Acid Island'],
-    stack: ['Java', 'Paper / Spigot', 'Bukkit API', 'MySQL', 'Linux', 'Docker', 'Git'],
+    title: 'ร่วมพัฒนาโปรเจกต์กับทีม',
+    subtitle: 'เลือกโปรเจกต์และตำแหน่งที่สนใจเพื่ออ่านรายละเอียดและสมัครร่วมทีม',
+    communityName: 'BestCyniX Dev',
+    communityUrl: 'https://discord.gg/M8k2N3XgYF',
+    websiteUrl: 'https://bestcynixdev.web.app',
+    projectImage: 'assets/photo/bcxlogo2.png',
+    projectBanner: 'assets/photo/bcxlogo2.png',
+    projectIntro: 'กำลังโหลดรายละเอียดโปรเจกต์จากระบบ',
+    highlights: [],
+    stack: [],
     ageRange: {},
     availableDays: ALL_DAYS,
-    positions: [
-      { id: 'mc-dev', name: 'Developer / DevMC', description: 'เขียนและแก้ไขโค้ดปลั๊กอิน ระบบเกม เว็บ และ API ของเซิร์ฟเวอร์', stack: ['Java', 'Paper / Spigot API', 'Bukkit API', 'Maven / Gradle', 'MySQL', 'Git'], responsibilities: ['พัฒนาปลั๊กอินและระบบเกมตามสเปก', 'แก้บั๊ก ปรับประสิทธิภาพ และดูแลความปลอดภัย', 'เชื่อมต่อเว็บ บอท ฐานข้อมูล และระบบหลังบ้าน'], requirements: ['เขียน Java ได้และอ่านโค้ดผู้อื่นได้', 'เข้าใจ event, command, permission และฐานข้อมูล', 'ทำงานผ่าน Git และเขียนคำอธิบายการติดตั้งได้'], preferred: ['เคยใช้ Paper, Spigot, PlaceholderAPI, Vault หรือ LuckPerms', 'มีผลงานปลั๊กอินหรือระบบ Minecraft ให้ทดลอง'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-builder', name: 'Builder', description: 'ออกแบบและสร้างแผนที่ เมือง ดันเจี้ยน และสิ่งปลูกสร้างในเซิร์ฟเวอร์', stack: ['WorldEdit', 'WorldPainter', 'VoxelSniper', 'FAWE', 'Minecraft Building'], responsibilities: ['สร้างพื้นที่ตามธีมและขนาดที่กำหนด', 'ทำงานร่วมกับทีม Quest, Item และ Model', 'ปรับแก้พื้นที่จาก feedback และรักษามาตรฐานงาน'], requirements: ['มีพื้นฐานการสร้างสไตล์ Minecraft และส่งภาพผลงานได้', 'ทำงานตามแบบและกำหนดเวลาได้'], preferred: ['ใช้ WorldEdit/FAWE หรือ WorldPainter เป็น', 'มี portfolio เมือง แผนที่ หรือดันเจี้ยน'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-systems', name: 'System / Item / Quest', description: 'วางระบบ ไอเทม เควสต์ เศรษฐกิจ และคอนเทนต์ภายในเกม', stack: ['MythicMobs', 'ItemsAdder / Oraxen', 'BetonQuest', 'MMOCore', 'PlaceholderAPI', 'YAML'], responsibilities: ['ออกแบบ flow เควสต์ ไอเทม มอนสเตอร์ และรางวัล', 'ตั้งค่า config และทดสอบความสมดุล', 'เขียนเอกสารให้ทีม Dev นำไปต่อยอดได้'], requirements: ['คิดระบบเป็นขั้นตอนและทดสอบ edge case ได้', 'อ่านและแก้ YAML/config ได้'], preferred: ['เคยตั้งค่า MythicMobs, ItemsAdder, Oraxen, MMOItems หรือ Quest plugin'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-modeler', name: 'Modeler', description: 'สร้างโมเดล 3D มอนสเตอร์ ไอเทม และองค์ประกอบสำหรับเกม', stack: ['Blockbench', 'ModelEngine', 'ItemsAdder', 'Oraxen', 'Resource Pack'], responsibilities: ['ทำโมเดลตาม concept และข้อจำกัดของ Minecraft', 'ส่งออกไฟล์พร้อม texture และ metadata', 'ปรับโมเดลให้เหมาะกับ performance'], requirements: ['ใช้ Blockbench ได้และมีตัวอย่างผลงาน', 'เข้าใจ texture และ resource pack เบื้องต้น'], preferred: ['เคยทำ ModelEngine, ItemsAdder หรือ Oraxen'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-resource-pack', name: 'Resource Pack', description: 'จัดทำพื้นผิว เสียง UI และ resource pack ให้เป็นธีมเดียวกัน', stack: ['Blockbench', 'Photoshop / Photopea', 'Aseprite', 'Minecraft Resource Pack', 'Git'], responsibilities: ['วาง art direction และโครงสร้าง resource pack', 'จัดการ texture, font, sound และ namespace', 'ทดสอบการโหลด pack ในหลายอุปกรณ์'], requirements: ['มีพื้นฐานงานภาพหรือเสียงและส่งไฟล์เป็นระบบได้'], preferred: ['เคยทำ pack สำหรับ ItemsAdder, Oraxen หรือ custom model data'], maxSlots: 2, unlimited: false, active: true, ageRule: 'unlimited' },
-      { id: 'mc-other-staff', name: 'ทีมงานอื่น ๆ ตามความถนัด', description: 'ตำแหน่งเพิ่มเติมสำหรับผู้มีความสามารถเฉพาะด้าน เช่น Content, QA, Support หรือ Admin', stack: ['Discord', 'Notion / Docs', 'Git', 'Minecraft'], responsibilities: ['รับผิดชอบงานตามขอบเขตที่ตกลงกับหัวหน้าทีม', 'รายงานความคืบหน้าและปัญหาอย่างเป็นระบบ'], requirements: ['มีเวลาว่างและสื่อสารกับทีมได้สม่ำเสมอ'], preferred: ['มีผลงานหรือประสบการณ์ในตำแหน่งที่สมัคร'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
-    ],
-    benefits: [
-      { icon: '🤝', title: 'ทำงานเป็นทีม', desc: 'ร่วมวางระบบและสร้างผลงานจริงกับทีม Mc-Skyline.online' },
-      { icon: '📜', title: 'ข้อตกลงชัดเจน', desc: 'กำหนดหน้าที่ สิทธิในผลงาน และการยุติความร่วมมือไว้ในเอกสารก่อนเริ่มงาน' },
-      { icon: '💰', title: 'แบ่งผลกำไรตามสัญญา', desc: 'หากโครงการมีกำไร จะแบ่งตามเปอร์เซ็นต์และเงื่อนไขที่คู่สัญญาตกลงเป็นลายลักษณ์อักษร' }
-    ],
+    positions: [],
+    benefits: [],
     customQuestions: []
   };
-
-  const GENERAL_DEFAULT = {
-    formId: 'default', projectSlug: 'all', isOpen: true,
-    title: 'ร่วมพัฒนาโปรเจกต์กับทีม',
-    subtitle: 'เลือกโปรเจกต์และตำแหน่งที่สนใจ แล้วกรอกข้อมูลเพื่อให้ทีมติดต่อกลับ',
-    communityName: 'BestCyniX Dev', communityUrl: 'https://discord.gg/M8k2N3XgYF', websiteUrl: 'https://bestcynixdev.web.app',
-    projectImage: 'assets/photo/bcxlogo2.png',
-    stack: ['Git', 'Discord', 'Documentation', 'Team Collaboration'],
-    ageRange: {}, availableDays: ALL_DAYS,
-    positions: [
-      { id: 'general-dev', name: 'Developer', description: 'พัฒนาเว็บ บอท ระบบหลังบ้าน และเครื่องมือของทีม', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
-      { id: 'general-admin', name: 'Admin', description: 'ดูแลระบบ ชุมชน เอกสาร และการประสานงาน', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
-      { id: 'general-staff', name: 'Staff', description: 'ช่วยงานทีมตามความถนัดและเวลาที่สะดวก', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
-      { id: 'general-specialist', name: 'ทีมงานตามความสามารถ', description: 'ระบุความสามารถและตำแหน่งที่ถนัดในคำถามเพิ่มเติม', maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
-    ],
-    benefits: [
-      { icon: '🧭', title: 'เลือกโปรเจกต์ที่สนใจ', desc: 'สมัคร Mc-Skyline, Discord Bot, Discord Server, Web หรือทีมพัฒนาได้จากหน้าเดียว' },
-      { icon: '🧰', title: 'บอกความสามารถได้เต็มที่', desc: 'ทีมเปิดรับทั้ง Developer, Admin, Staff และความสามารถเฉพาะด้าน' },
-      { icon: '📜', title: 'ข้อตกลงชัดเจน', desc: 'รายละเอียดงาน สิทธิในผลงาน และค่าตอบแทนจะคุยและทำเป็นลายลักษณ์อักษรก่อนเริ่มงาน' }
-    ],
-    customQuestions: [
-      { id: 'project', label: 'โปรเจกต์ที่ต้องการร่วมงาน', type: 'select', required: true, options: ['Mc-Skyline.online', 'Discord Bot', 'Discord Server', 'Web Development', 'ทีมพัฒนา BestCyniX Dev', 'ยังไม่แน่ใจ ขอให้ทีมแนะนำ'] },
-      { id: 'skill1', label: 'ความสามารถที่ถนัดอันดับ 1', type: 'text', required: true, placeholder: 'เช่น JavaScript, Minecraft Builder, Moderation' },
-      { id: 'skill2', label: 'ความสามารถที่ถนัดอันดับ 2', type: 'text', required: false, placeholder: 'ระบุเพิ่มเติม (ถ้ามี)' },
-      { id: 'skill3', label: 'ความสามารถที่ถนัดอันดับ 3', type: 'text', required: false, placeholder: 'ระบุเพิ่มเติม (ถ้ามี)' },
-      { id: 'role1', label: 'ตำแหน่งที่ต้องการรับผิดชอบอันดับ 1', type: 'text', required: true, placeholder: 'เช่น Developer, Admin, Staff' },
-      { id: 'role2', label: 'ตำแหน่งที่ต้องการรับผิดชอบอันดับ 2', type: 'text', required: false, placeholder: 'ระบุเพิ่มเติม (ถ้ามี)' },
-      { id: 'role3', label: 'ตำแหน่งที่ต้องการรับผิดชอบอันดับ 3', type: 'text', required: false, placeholder: 'ระบุเพิ่มเติม (ถ้ามี)' }
-    ]
-  };
-
-  const PROJECT_CONFIGS = {
-    'mc-skyline': MC_SKYLINE_DEFAULT,
-    'discord-bot': { ...GENERAL_DEFAULT, formId: 'discord-bot', projectSlug: 'discord-bot', title: 'รับสมัครทีม Discord Bot', subtitle: 'ร่วมพัฒนาบอท Discord ระบบอัตโนมัติ และเครื่องมือดูแลชุมชน', communityName: 'Discord Bot', projectImage: 'assets/photo/skylinebot-discord.png', projectBanner: 'assets/photo/skylinebot-support.png', projectIntro: 'สร้างบอทที่ทำให้ชุมชนใช้งานง่ายขึ้น ตั้งแต่ระบบต้อนรับ แจ้งเตือน Ticket ไปจนถึงคำสั่งอัตโนมัติและการเชื่อมต่อบริการภายนอก', highlights: ['ออกแบบ command และ event ให้ใช้งานง่าย', 'เชื่อมต่อ API ฐานข้อมูล และระบบแจ้งเตือน', 'ดูแล permission, logging และความเสถียรของบอท'], stack: ['Node.js', 'JavaScript / TypeScript', 'discord.js', 'REST API', 'MongoDB / PostgreSQL', 'Docker', 'Git'], benefits: [
-      { icon: '🤖', title: 'สร้างระบบที่มีผู้ใช้จริง', desc: 'ได้ร่วมพัฒนาบอทและ automation ที่ช่วยให้ชุมชนทำงานได้เร็วขึ้น' },
-      { icon: '🧪', title: 'เรียนรู้ระบบ Production', desc: 'ฝึกจัดการ API, database, logging, error handling และ deployment อย่างเป็นระบบ' },
-      { icon: '📚', title: 'มีเอกสารและการ Review', desc: 'ทำงานผ่าน issue, pull request และคู่มือที่ทีมช่วยกันดูแล' }
-    ], positions: [
-      { id: 'bot-dev', name: 'Bot Developer', description: 'พัฒนาบอท Discord, API และระบบอัตโนมัติ', stack: ['Node.js', 'TypeScript', 'discord.js', 'REST API', 'MongoDB'], responsibilities: ['ออกแบบ command, event และระบบ permission', 'เชื่อม API ภายนอกและฐานข้อมูล', 'ดูแล logging, error handling และ deployment'], requirements: ['เขียน JavaScript/TypeScript ได้', 'เข้าใจ async/await, API และ Git'], preferred: ['เคยทำบอท Discord ที่ใช้งานจริง', 'ใช้ Docker หรือเขียน test ได้'], maxSlots: 2, active: true, ageRule: 'unlimited' },
-      { id: 'bot-admin', name: 'Bot Admin / Config', description: 'ดูแลการตั้งค่า บริหารระบบ และจัดการชุมชน', stack: ['Discord', 'discord.js Config', 'YAML / JSON', 'Moderation Tools'], responsibilities: ['ตั้งค่า command, role, channel และ automation', 'ตรวจสอบ log และประสานงานเมื่อเกิดปัญหา', 'เขียนคู่มือให้ทีมใช้งานระบบได้'], requirements: ['เข้าใจโครงสร้าง Discord และ permission', 'สื่อสารและแก้ปัญหาเฉพาะหน้าได้'], preferred: ['เคยดูแลบอทหรือเซิร์ฟเวอร์ขนาดใหญ่'], maxSlots: 5, active: true, ageRule: 'unlimited' },
-      { id: 'bot-staff', name: 'Bot Support / Staff', description: 'ช่วยดูแลสมาชิกและงานประจำวันของชุมชน', stack: ['Discord', 'Ticket System', 'Google Docs / Notion'], responsibilities: ['ตอบคำถามและจัดการ ticket', 'รวบรวม bug report และส่งต่อ Dev', 'ช่วยตรวจสอบกิจกรรมของบอท'], requirements: ['สุภาพ รับผิดชอบ และออนไลน์ตามเวลาที่ตกลง'], preferred: ['มีประสบการณ์ดูแล community'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
-    ], customQuestions: [] },
-    'discord-server': { ...GENERAL_DEFAULT, formId: 'discord-server', projectSlug: 'discord-server', title: 'รับสมัครทีม Discord Server', subtitle: 'ร่วมดูแลและพัฒนาเซิร์ฟเวอร์ Discord ให้เป็นระเบียบและปลอดภัย', communityName: 'Discord Server', projectImage: 'assets/photo/ServerMinecraft2021.png', projectBanner: 'assets/photo/ServerMinecraft2021.png', projectIntro: 'ดูแลบ้านของคอมมูนิตี้ให้ปลอดภัย เป็นระเบียบ และมีบรรยากาศที่ทุกคนอยากกลับมาใช้งาน พร้อมวางระบบสำหรับสมาชิกและกิจกรรม', highlights: ['ออกแบบหมวดหมู่ ห้องพูดคุย และบทบาทสมาชิก', 'วางกฎ AutoMod และขั้นตอนรับมือเหตุการณ์', 'สร้างกิจกรรมและระบบต้อนรับสมาชิกใหม่'], stack: ['Discord', 'Roles & Permissions', 'AutoMod', 'Bots', 'Community Management'], benefits: [
-      { icon: '🛡️', title: 'สร้างคอมมูนิตี้ที่ปลอดภัย', desc: 'ร่วมวางกฎและระบบดูแลสมาชิกให้ชัดเจนและเป็นธรรม' },
-      { icon: '🎉', title: 'ออกแบบกิจกรรมของชุมชน', desc: 'ได้เสนอไอเดียและช่วยทำให้กิจกรรมบนเซิร์ฟเวอร์น่าสนใจขึ้น' },
-      { icon: '🌱', title: 'เติบโตไปพร้อมทีม', desc: 'พัฒนาทักษะ moderation, communication และการแก้ปัญหาเฉพาะหน้า' }
-    ], positions: [
-      { id: 'server-dev', name: 'Discord Systems Dev', description: 'พัฒนาบอทและระบบเชื่อมต่อสำหรับเซิร์ฟเวอร์', stack: ['discord.js', 'Node.js', 'Webhooks', 'Moderation API'], responsibilities: ['สร้างระบบต้อนรับ ticket log และ automation', 'แก้ไข permission และเชื่อมเว็บกับ Discord'], requirements: ['มีพื้นฐาน Node.js/JavaScript และ Discord API'], preferred: ['เคยดูแลบอทหรือระบบ moderation'], maxSlots: 3, active: true, ageRule: 'unlimited' },
-      { id: 'server-admin', name: 'Server Admin', description: 'ดูแลกฎ การตั้งค่า สิทธิ์ และการจัดการเซิร์ฟเวอร์', stack: ['Discord', 'Roles & Permissions', 'AutoMod', 'Server Insights'], responsibilities: ['วางโครงสร้าง role/channel และ security', 'ดูแลกฎ การประกาศ และการจัดการเหตุการณ์'], requirements: ['เข้าใจ permission hierarchy และรักษาความลับข้อมูลได้'], preferred: ['เคยดูแลเซิร์ฟเวอร์ community'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' },
-      { id: 'server-staff', name: 'Community Staff', description: 'ช่วยดูแลสมาชิก ตอบคำถาม และจัดกิจกรรม', stack: ['Discord', 'Ticket System', 'Event Tools', 'Google Docs'], responsibilities: ['ต้อนรับสมาชิก ดูแล ticket และรายงานปัญหา', 'ช่วยจัดกิจกรรมตามแผนของทีม'], requirements: ['มีมนุษยสัมพันธ์ดี ใจเย็น และทำงานเป็นทีม'], preferred: ['มีประสบการณ์ community moderation'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }
-    ], customQuestions: [] },
-    'dev-web': { ...GENERAL_DEFAULT, formId: 'dev-web', projectSlug: 'dev-web', title: 'รับสมัครทีม Web Development', subtitle: 'ร่วมสร้างเว็บไซต์ เว็บแอป และระบบหลังบ้านกับ BestCyniX Dev', communityName: 'Web Development', projectImage: 'assets/photo/bestcynixprodev.png', projectBanner: 'assets/photo/dev-artwork.png', projectIntro: 'เปลี่ยนไอเดียให้เป็นเว็บไซต์และเว็บแอปที่ใช้งานได้จริง ตั้งแต่หน้า Landing Page ไปจนถึงระบบสมาชิก ฐานข้อมูล และแดชบอร์ดหลังบ้าน', highlights: ['ออกแบบ UI ที่ responsive และเข้าถึงได้', 'ทำงานกับ authentication, database และ real-time data', 'ทดสอบ แก้บั๊ก และ deploy งานให้ดูแลต่อได้'], stack: ['HTML', 'CSS', 'JavaScript / TypeScript', 'React / Vue', 'Node.js', 'Firebase', 'Git'], benefits: [
-      { icon: '💻', title: 'ผลงานขึ้นระบบจริง', desc: 'ได้ฝึกทำงานกับหน้าเว็บและระบบที่มีผู้ใช้จริง พร้อมดูแลตั้งแต่ต้นจน deploy' },
-      { icon: '🎨', title: 'ทำงานทั้ง Design และ Engineering', desc: 'ร่วมคิดประสบการณ์ผู้ใช้ โครงสร้างข้อมูล และคุณภาพของโค้ดไปพร้อมกัน' },
-      { icon: '🚀', title: 'กระบวนการทำงานแบบมืออาชีพ', desc: 'ใช้ Git, issue, review, testing และ checklist เพื่อส่งมอบงานอย่างมีมาตรฐาน' }
-    ], positions: [{ id: 'web-dev', name: 'Web Developer / Full-stack', description: 'พัฒนา Frontend, Backend, Full-stack และระบบคลาวด์', stack: ['HTML/CSS', 'JavaScript / TypeScript', 'React / Vue', 'Node.js', 'Firebase', 'Git'], responsibilities: ['พัฒนา UX/UI ให้ responsive และเข้าถึงได้', 'สร้าง API, authentication และฐานข้อมูล', 'ทดสอบ แก้บั๊ก และ deploy ระบบจริง'], requirements: ['มีพื้นฐาน HTML, CSS, JavaScript และ Git', 'อ่าน requirement และทำงานผ่าน issue/task ได้'], preferred: ['React/Vue, Node.js, Firebase, testing หรือ CI/CD'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }], customQuestions: [] },
-    'teamdev': { ...GENERAL_DEFAULT, formId: 'teamdev', projectSlug: 'teamdev', title: 'รับสมัครทีมพัฒนา BestCyniX Dev', subtitle: 'เปิดรับตำแหน่งตามความสามารถ ไม่จำกัดจำนวน พร้อมระบุความถนัดและตำแหน่งที่ต้องการรับผิดชอบ 1–3', communityName: 'ทีมพัฒนา BestCyniX Dev', projectImage: 'assets/photo/bcxlogo2.png', projectBanner: 'assets/photo/team-recruitment-poster.png', projectIntro: 'ทีมกลางสำหรับคนที่อยากนำความถนัดของตัวเองมาช่วยหลายโปรเจกต์ ทั้งการวางแผน ประสานงาน ทดลองไอเดีย และยกระดับมาตรฐานงานของ BestCyniX Dev', highlights: ['เลือกบทบาทให้เหมาะกับความถนัดและเวลาของตัวเอง', 'ทำงานร่วมกับทีม Minecraft, Discord และ Web', 'มีพื้นที่เสนอไอเดีย ทำเอกสาร และช่วย review งาน'], stack: ['Git', 'Discord', 'Documentation', 'Project Management', 'Notion / Google Docs'], benefits: [
-      { icon: '🧩', title: 'เลือกงานตามความถนัด', desc: 'ระบุความสามารถและตำแหน่งที่อยากรับผิดชอบได้ 1–3 ด้าน' },
-      { icon: '🤝', title: 'ทำงานข้ามโปรเจกต์', desc: 'ได้ร่วมมือกับทีมเฉพาะทางและเรียนรู้ภาพรวมของการพัฒนาโปรเจกต์' },
-      { icon: '📈', title: 'เติบโตจากผลงานจริง', desc: 'สะสมประสบการณ์จากงานที่มีขอบเขตชัดเจน พร้อม feedback และเอกสารอ้างอิง' }
-    ], positions: [{ id: 'teamdev-specialist', name: 'ทีมพัฒนาตามความสามารถ', description: 'ระบุความสามารถเด่นและตำแหน่งที่ต้องการรับผิดชอบ 1–3 ในคำถามเพิ่มเติม', stack: ['ระบุ Stack ตามตำแหน่งที่สมัคร'], responsibilities: ['รับผิดชอบงานตามขอบเขตที่ตกลง', 'รายงานความคืบหน้าและส่งมอบงานตามรอบ', 'ช่วย review และพัฒนามาตรฐานของทีม'], requirements: ['มีความรับผิดชอบ สื่อสารชัดเจน และพร้อมเรียนรู้'], preferred: ['มี portfolio หรือผลงานที่ตรวจสอบได้'], maxSlots: 0, unlimited: true, active: true, ageRule: 'unlimited' }], customQuestions: GENERAL_DEFAULT.customQuestions.slice(1) }
-  };
-
+  const PROJECT_CONFIGS = {};
   const getRouteDefault = () => PROJECT_CONFIGS[ROUTE_PROJECT_SLUG] || GENERAL_DEFAULT;
-  const getProjectRegistryMeta = () => projectRegistry.find((project) => project.slug === ROUTE_PROJECT_SLUG) || null;
+  const getProjectRegistryMeta = () => projectRegistry.find((project) => (project.slug || project.id) === ROUTE_PROJECT_SLUG) || null;
   const mergeRouteConfig = (remote, registryMeta = getProjectRegistryMeta()) => {
     const routeDefault = getRouteDefault();
     const source = remote || {};
@@ -156,11 +85,9 @@
       ...routeDefault,
       ...registry,
       ...source,
-      // Replace the old generic default form on the hub with the multi-project form.
       isOpen: registry.visible === false ? false : (legacyGenericDefault ? true : (registry.isOpen !== undefined ? registry.isOpen : (source.isOpen !== undefined ? source.isOpen : routeDefault.isOpen))),
-      // Do not let an old generic/default CMS title leak into the project page.
       title: registry.title || (source.title && source.title !== 'สมัครร่วมทีม BestCyniX Dev' ? source.title : routeDefault.title),
-      subtitle: source.subtitle && source.subtitle !== 'เป็นส่วนหนึ่งในการพัฒนาโปรเจกต์สุดเจ๋งกับ BestCyniX Dev' ? source.subtitle : routeDefault.subtitle,
+      subtitle: source.subtitle && source.subtitle !== 'เป็นส่วนหนึ่งในการพัฒนาโปรเจกต์สุดเจ๋งกับ BestCyniX Dev' ? source.subtitle : (registry.summary || routeDefault.subtitle),
       positions: legacyGenericDefault ? routeDefault.positions : (Array.isArray(source.positions) && source.positions.length
         ? source.positions.map((position) => ({ ...(routeDefault.positions || []).find((fallback) => fallback.id === position.id || fallback.name === position.name), ...position }))
         : routeDefault.positions),
@@ -176,14 +103,9 @@
     };
   };
 
-  const fallbackProjectRows = () => Object.entries(PROJECT_CONFIGS).map(([slug, project]) => ({
-    slug,
-    project,
-    positions: project.positions || [],
-    isOpen: project.isOpen !== false,
-    visible: true,
-    displayOrder: 100
-  }));
+  // The directory is assembled from Firestore registry + form documents.
+  // There is intentionally no project content fallback in the public bundle.
+  const fallbackProjectRows = () => [];
 
   const getProjectRows = (cfg) => {
     if (ROUTE_PROJECT_SLUG) {
@@ -198,35 +120,42 @@
       }];
     }
 
-    const fallbackRows = fallbackProjectRows().map((row) => ({
-      slug: row.slug,
-      title: row.project.title,
-      summary: row.project.subtitle,
-      communityName: row.project.communityName,
-      communityUrl: row.project.communityUrl,
-      websiteUrl: row.project.websiteUrl,
-      isOpen: row.isOpen,
-      visible: true,
-      displayOrder: row.displayOrder
-    }));
-    // Registry entries override defaults, while missing legacy entries remain
-    // visible so adding one new project never hides the existing teams.
-    const registryBySlug = new Map(projectRegistry.map((project) => [project.slug, project]));
-    const sourceRows = [
-      ...fallbackRows.map((fallback) => registryBySlug.get(fallback.slug) ? { ...fallback, ...registryBySlug.get(fallback.slug) } : fallback),
-      ...projectRegistry.filter((project) => !fallbackRows.some((fallback) => fallback.slug === project.slug))
-    ];
+    const registeredSlugs = new Set(projectRegistry.map((project) => project.slug || project.id).filter(Boolean));
+    const registryRows = projectRegistry.map((project) => ({ ...project, slug: project.slug || project.id }))
+      .filter((project) => project.slug && project.slug !== 'default');
+    const formRows = Object.entries(formConfigsBySlug)
+      .filter(([slug]) => slug !== 'default' && !registeredSlugs.has(slug))
+      .map(([slug, form]) => ({
+        slug,
+        title: form.title || slug,
+        summary: form.subtitle || '',
+        communityName: form.communityName || '',
+        communityUrl: form.communityUrl || '',
+        websiteUrl: form.websiteUrl || '',
+        projectImage: form.projectImage || '',
+        projectBanner: form.projectBanner || '',
+        projectIntro: form.projectIntro || '',
+        highlights: form.highlights || [],
+        stack: form.stack || [],
+        isOpen: form.isOpen !== false,
+        visible: true,
+        displayOrder: 100
+      }));
 
-    return sourceRows
+    return [...registryRows, ...formRows]
       .filter((meta) => meta.visible !== false)
       .sort((a, b) => Number(a.displayOrder || 0) - Number(b.displayOrder || 0))
       .map((meta) => {
-        const base = PROJECT_CONFIGS[meta.slug] || GENERAL_DEFAULT;
-        const project = { ...base, ...meta, title: meta.title || base.title, subtitle: meta.summary || base.subtitle };
-        return { slug: meta.slug, project, positions: project.positions || [], isOpen: meta.isOpen !== false, visible: meta.visible !== false, displayOrder: meta.displayOrder || 0 };
+        const slug = meta.slug;
+        const remote = formConfigsBySlug[slug] || {};
+        const project = {
+          ...mergeRouteConfig(remote, meta),
+          title: meta.title || remote.title || slug,
+          subtitle: remote.subtitle || meta.summary || remote.projectIntro || ''
+        };
+        return { slug, project, positions: project.positions || [], isOpen: meta.isOpen !== false && project.isOpen !== false, visible: meta.visible !== false, displayOrder: meta.displayOrder || 0 };
       });
   };
-
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
   }[char]));
@@ -1316,35 +1245,37 @@
     const form = $('jtForm');
     if (form) form.addEventListener('submit', handleSubmit);
 
-    // Load form config from Firestore
+    // Load all recruitment content from Firestore. The directory needs every
+    // project form; a detail route only uses its own project document.
     if (typeof firebase !== 'undefined' && firebase.apps.length) {
       const db = firebase.firestore();
-      let remoteFormConfig = {};
+      const renderFromDatabase = () => {
+        const currentMeta = getProjectRegistryMeta();
+        const currentConfig = IS_DIRECTORY_ROUTE
+          ? (formConfigsBySlug.default || {})
+          : (formConfigsBySlug[FORM_DOC_ID] || {});
+        applyFormConfig(mergeRouteConfig(currentConfig, currentMeta));
+      };
+
       db.collection(PROJECTS_COL).onSnapshot((snapshot) => {
         projectRegistry = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        const currentMeta = getProjectRegistryMeta();
-        if (formConfig) applyFormConfig(mergeRouteConfig(remoteFormConfig, currentMeta));
-        else renderRoleDirectory(mergeRouteConfig({}, currentMeta));
+        renderFromDatabase();
       }, (err) => {
-        // The registry is an enhancement; the bundled defaults keep the public
-        // recruitment hub usable when Firestore is unavailable.
         console.warn('JoinTeam project registry load error:', err);
         projectRegistry = [];
-        if (formConfig) renderRoleDirectory(formConfig);
+        renderFromDatabase();
       });
-      db.collection(FORMS_COL).doc(FORM_DOC_ID).onSnapshot((doc) => {
-        remoteFormConfig = doc.exists ? doc.data() : {};
-        if (doc.exists) {
-          applyFormConfig(mergeRouteConfig(remoteFormConfig));
-        } else {
-          applyFormConfig(mergeRouteConfig({}));
-        }
+
+      db.collection(FORMS_COL).onSnapshot((snapshot) => {
+        formConfigsBySlug = Object.fromEntries(snapshot.docs.map((doc) => [doc.id, { formId: doc.id, ...doc.data() }]));
+        renderFromDatabase();
       }, (err) => {
-        console.warn('JoinTeam config load error:', err);
-        applyFormConfig(mergeRouteConfig({}));
+        console.warn('JoinTeam forms load error:', err);
+        formConfigsBySlug = {};
+        renderFromDatabase();
       });
     } else {
-      applyFormConfig(mergeRouteConfig({}));
+      applyFormConfig(mergeRouteConfig({}, getProjectRegistryMeta()));
     }
   };
 
